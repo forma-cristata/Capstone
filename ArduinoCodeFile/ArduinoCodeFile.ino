@@ -12,7 +12,7 @@
 #include <WiFiS3.h>
 
 ArduinoLEDMatrix matrix;
-CRGB leds[NUM_LEDS];
+CRGBW leds[NUM_LEDS];
 
 const uint32_t heart[] = {
     0x3184a444,
@@ -140,12 +140,18 @@ void setup_wifi_connection(){
 }
 
 void fast_LED_setup(){
-  FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS); 
+  FastLED.addLeds<NEOPIXEL, DATA_PIN>, GRB>(leds, NUM_LEDS); 
+  FastLED.setBrightness(100);
 }
 
 void fast_LED_Snake(){
   for(int i = 0; i < NUM_LEDS; i++)
   {
+    // Using hex code for RGBW
+    // CRGBW colorRGBW = CRGBW(0xFF, 0x57, 0x33, 0xFF);  // Hex for RGBW (Red: 255, Green: 87, Blue: 51, White: 255)
+    // fillColorRGBW(colorRGBW);  // Fill LEDs with the RGBW color
+    // delay(1000);
+    // fillColor(CRGBW::Red) <-- Maybe insteAD?? not sure of validity
     // leds[i] = CRGB::White; FastLED.show(); delay(30);
     // (i > 0) ? leds[i - 1] : continue;
     Serial.println("LED:" + String(i) + "...ON");
