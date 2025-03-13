@@ -12,7 +12,7 @@
 #include <WiFiS3.h>
 
 ArduinoLEDMatrix matrix;
-CRGBW leds[NUM_LEDS];
+CRGB leds[NUM_LEDS];
 
 const uint32_t heart[] = {
     0x3184a444,
@@ -140,7 +140,7 @@ void setup_wifi_connection(){
 }
 
 void fast_LED_setup(){
-  FastLED.addLeds<NEOPIXEL, DATA_PIN>, GRB>(leds, NUM_LEDS); 
+  FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS); 
   FastLED.setBrightness(100);
 }
 
