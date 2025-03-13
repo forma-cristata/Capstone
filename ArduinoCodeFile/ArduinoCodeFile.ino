@@ -3,45 +3,73 @@
 // Library Manager.
 // To use ArduinoGraphics APIs, please include BEFORE Arduino_LED_Matrix
 
+
+
+/****Inclusions****/
 #include "ArduinoGraphics.h"
 #include "Arduino_LED_Matrix.h"
 #include <FastLED.h>
-
 #include "arduino_secrets.h"
-
 #include <WiFiS3.h>
 
+
+
+/****Declarations****/
 ArduinoLEDMatrix matrix;
 CRGB leds[NUM_LEDS];
 
-const uint32_t heart[] = {
-    0x3184a444,
-    0x44042081,
-    0x100a0040
-};
-const uint32_t heart_smaller[] = {
-  0x1b024,
-  0x82081100,
-  0xa0040000,
-  66
-};
+
+
+/****Constants****/
+const uint32_t heart[] = { 0x3184a444, 0x44042081, 0x100a0040 };
+const uint32_t heart_smaller[] = { 0x1b024, 0x82081100, 0xa0040000, 66 };
+
 char ssid[] = SECRET_SSID_HOME; // your network SSID (name)
 char pass[] = SECRET_PASS_HOME; // your network password (use for WPA, or use as key for WEP)
+
 int status = WL_IDLE_STATUS;     // the WiFi radio's status
 const char* hostname = "Cloe";
 
+
+
+/****Setup****/
+void setup() {
+  LED_matrix_draw_welcome_message();
+  LED_matrix_draw_heart_beat();
+  LED_matrix_draw_heart_beat();
+  LED_matrix_draw_heart_beat();
+
+  setup_wifi_connection();
+  printCurrentNet();
+
+  fast_LED_setup();
+}
+
+/****Loop****/
+void loop(){
+    // printWifiData();
+    // check the network connection once every 10 seconds:
+    fast_LED_Snake();
+}
+
+
+
+/****Functions****/
 void LED_matrix_draw_welcome_message(){
   matrix.begin();
   matrix.beginDraw();
   matrix.stroke(0xFFFFFFFF);
   matrix.textScrollSpeed(50);
-  const char text[] = " ENSCHULDIGUNG ";
+  const char text[] = " ENSCHULDIGUNG! ";
   matrix.textFont(Font_4x6);
   matrix.beginText(0, 1, 0xFFFFFF);
   matrix.println(text);
   matrix.endText(SCROLL_LEFT);
   matrix.endDraw();
 }
+
+
+
 void LED_matrix_draw_heart_beat(){
   matrix.loadFrame(heart_smaller);
   delay(450);
@@ -52,6 +80,8 @@ void LED_matrix_draw_heart_beat(){
   matrix.loadFrame(heart);
   delay(100);
 }
+
+
 
 void printWifiData() {
   // print your board's IP address:
@@ -65,6 +95,8 @@ void printWifiData() {
   Serial.print("MAC address: ");
   printMacAddress(mac);
 }
+
+
 
 void printCurrentNet() {
   // print the SSID of the network you're attached to:
@@ -89,6 +121,8 @@ void printCurrentNet() {
   Serial.println();
 }
 
+
+
 void printMacAddress(byte mac[]) {
   for (int i = 0; i < 6; i++) {
     if (i > 0) {
@@ -101,6 +135,8 @@ void printMacAddress(byte mac[]) {
   }
   Serial.println();
 }
+
+
 
 void setup_wifi_connection(){
   //Initialize serial and wait for port to open:
@@ -139,10 +175,14 @@ void setup_wifi_connection(){
   printWifiData();
 }
 
+
+
 void fast_LED_setup(){
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS); 
   FastLED.setBrightness(100);
 }
+
+
 
 void fast_LED_Snake(){
   for(int i = 0; i < NUM_LEDS; i++)
@@ -158,27 +198,4 @@ void fast_LED_Snake(){
     Serial.println("LED" + (i > 0) ? String(i) : "-1") + "...OFF";
     delay(100);
   }
-}
-
-
-
-
-/*****************SETUP & LOOP******************/
-
-void setup() {
-  LED_matrix_draw_welcome_message();
-  LED_matrix_draw_heart_beat();
-  LED_matrix_draw_heart_beat();
-  LED_matrix_draw_heart_beat();
-
-  setup_wifi_connection();
-  printCurrentNet();
-
-  fast_LED_setup();
-}
-
-void loop(){
-
-    // check the network connection once every 10 seconds:
-  fast_LED_Snake();
 }
