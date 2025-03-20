@@ -17,14 +17,24 @@ void turnOn1()
   leds[1] = CRGB(0, 255, 0); FastLED.show(); // First White
 }
 
+void led_1(int R, int G, int B, int W)
+{
+  leds[0] = CRGB(R, G, B); FastLED.show();
+  leds[1] = CRGB(0, W, 0); FastLED.show();
+}
+
 void turnOn2() 
 {
   //leds[1] = CRGB(0, 0, 255); FastLED.show(); // Second Red
   //leds[1] = CRGB(255, 0, 0); FastLED.show(); // Second Green
   //leds[2] = CRGB(0, 255, 0); FastLED.show(); // Second Blue
   leds[2] = CRGB(255, 0, 0); FastLED.show(); // Second White
-  
+}
 
+void led_2 (int R, int G, int B, int W)
+{
+  leds[1] = CRGB(G, 0, R); FastLED.show();
+  leds[2] = CRGB(W, B, 0); FastLED.show();
 }
 
 void turnOn3()
@@ -33,6 +43,12 @@ void turnOn3()
   //leds[2] = CRGB(0, 0, 255); FastLED.show(); // Third Green
   //leds[3] = CRGB(255, 0, 0); FastLED.show(); // Third Blue
   leds[3] = CRGB(0, 0, 255); FastLED.show(); // Third White
+}
+
+void led_3 (int R, int G, int B, int W)
+{
+  leds[3] = CRGB(B, R, W); FastLED.show(); // Third Red
+  leds[2] = CRGB(0, 0, G); FastLED.show(); // Third Green
 }
 
 void turnOn4()
@@ -44,12 +60,24 @@ void turnOn4()
 
 }
 
+void led_4 (int R, int G, int B, int W)
+{
+  leds[4] = CRGB(R, G, B); FastLED.show(); // Fourth Red
+  leds[5] = CRGB(0, W, 0); FastLED.show(); // Fourth White
+}
+
 void turnOn5() {
   //leds[5] = CRGB(0, 0, 255); FastLED.show(); // Fifth Red
   //leds[5] = CRGB(255, 0, 0); FastLED.show(); // Fifth Green
   //leds[6] = CRGB(0, 255, 0); FastLED.show(); // Fifth Blue
   leds[6] = CRGB(255, 0, 0); FastLED.show(); // Fifth White
 
+}
+
+void led_5 (int R, int G, int B, int W)
+{
+  leds[5] = CRGB(G, 0, R); FastLED.show(); // Fifth Red
+  leds[6] = CRGB(W, B, 0); FastLED.show(); // Fifth Blue
 }
 
 void turnOn6() {
@@ -60,11 +88,24 @@ void turnOn6() {
 
 }
 
+void led_6 (int R, int G, int B, int W)
+{
+  leds[7] = CRGB(B, R, W); FastLED.show(); // Sixth Red
+  leds[6] = CRGB(0, 0, G); FastLED.show(); // Sixth Green
+}
+
 void turnOn7() {
   //leds[8] = CRGB(255, 0, 0); FastLED.show(); // Seventh Red
   //leds[8] = CRGB(0, 255, 0); FastLED.show(); // Seventh Green
   //leds[8] = CRGB(0, 0, 255); FastLED.show(); // Seventh Blue
   leds[9] = CRGB(0, 255, 0); FastLED.show(); // Seventh White
+
+}
+
+void led_7 (int R, int G, int B, int W)
+{
+  leds[8] = CRGB(R, G, B); FastLED.show(); // Seventh Red
+  leds[9] = CRGB(0, W, 0); FastLED.show(); // Seventh White
 
 }
 
@@ -76,12 +117,26 @@ void turnOn8() {
 
 }
 
+void led_8 (int R, int G, int B, int W)
+{
+  leds[9] = CRGB(G, 0, R); FastLED.show(); // Eighth Red
+  leds[10] = CRGB(W, B, 0); FastLED.show(); // Eighth Blue
+}
+
+
+
 void turnOn9() {
   //leds[11] = CRGB(0, 255, 0); FastLED.show(); // Ninth Red
   //leds[10] = CRGB(0, 0, 255); FastLED.show(); // Ninth Green
   //leds[11] = CRGB(255, 0, 0); FastLED.show(); // Ninth Blue
   leds[11] = CRGB(0, 0, 255); FastLED.show(); // Ninth White
 
+}
+
+void led_9 (int R, int G, int B, int W)
+{
+  leds[11] = CRGB(B, R, W); FastLED.show(); // Ninth Red
+  leds[10] = CRGB(0, 0, G); FastLED.show(); // Ninth Green
 }
 
 void turnOn10() {
@@ -92,12 +147,22 @@ void turnOn10() {
 
 }
 
+void led_10(int R, int G, int B, int W) {
+  leds[12] = CRGB(R, G, B); FastLED.show(); // Tenth Red
+  leds[13] = CRGB(0, W, 0); FastLED.show(); // Tenth White
+}
+
 void turnOn11() {
   //leds[13] = CRGB(0, 0, 255); FastLED.show(); // Eleventh Red
   //leds[13] = CRGB(255, 0, 0); FastLED.show(); // Eleventh Green
   //leds[14] = CRGB(0, 255, 0); FastLED.show(); // Eleventh Blue
   leds[14] = CRGB(255, 0, 0); FastLED.show(); // Eleventh White
 
+}
+
+void led_11(int R, int G, int B, int W) {
+  leds[13] = CRGB(G, 0, R); FastLED.show(); // Eleventh Red
+  leds[14] = CRGB(W, B, 0); FastLED.show(); // Eleventh Blue
 }
 
 void turnOn12() {
@@ -108,12 +173,23 @@ void turnOn12() {
 
 }
 
+void led_12 (int R, int G, int B, int W) {
+  leds[15] = CRGB(B, R, W); FastLED.show(); // Twelfth Red
+  leds[14] = CRGB(0, 0, G); FastLED.show(); // Twelfth Green
+}
+
 void turnOn13() {
   //leds[16] = CRGB(255, 0, 0); FastLED.show(); // Thirteenth Red
   //leds[16] = CRGB(0, 255, 0); FastLED.show(); // Thirteenth Green
   //leds[16] = CRGB(0, 0, 255); FastLED.show(); // Thirteenth Blue
   leds[17] = CRGB(0, 255, 0); FastLED.show(); // Thirteenth White
 
+}
+
+void led_13 (int R, int G, int B, int W)
+{
+  leds[16] = CRGB(R, G, B); FastLED.show(); // Thirteenth Red
+  leds[17] = CRGB(0, W, 0); FastLED.show(); // Thirteenth White
 }
 
 void turnOn14() {
@@ -124,6 +200,11 @@ void turnOn14() {
 
 }
 
+void led_14 (int R, int G, int B, int W) {
+  leds[17] = CRGB(G, 0, R); FastLED.show(); // Fourteenth Red
+  leds[18] = CRGB(W, B, 0); FastLED.show(); // Fourteenth Blue
+}
+
 void turnOn15() {
   //leds[19] = CRGB(0, 255, 0); FastLED.show(); // Fifteenth Red
   //leds[18] = CRGB(0, 0, 255); FastLED.show(); // Fifteenth Green
@@ -132,11 +213,21 @@ void turnOn15() {
 
 }
 
+void led_15 (int R, int G, int B, int W) {
+  leds[19] = CRGB(B, R, W); FastLED.show(); // Fifteenth Red
+  leds[18] = CRGB(0, 0, G); FastLED.show(); // Fifteenth Green
+}
+
 void turnOn16() {
   //leds[20] = CRGB(255, 0, 0); FastLED.show(); // Sixteenth Red
   //leds[20] = CRGB(0, 255, 0); FastLED.show(); // Sixteenth Green
   //leds[20] = CRGB(0, 0, 255); FastLED.show(); // Sixteenth Green
   leds[21] = CRGB(0, 255, 0); FastLED.show(); // Sixteenth White
+}
+
+void led_16 (int R, int G, int B, int W) {
+  leds[20] = CRGB(R, G, B); FastLED.show(); // Sixteenth Red
+  leds[21] = CRGB(0, W, 0); FastLED.show(); // Sixteenth White
 }
 
 void turnOff(int led)
