@@ -115,10 +115,14 @@ void turnOn8() {
 
 void led_8 (int R, int G, int B, int W)
 {
-  leds[9] = CRGB(0, 0, 0); FastLED.show(); 
-  leds[9] = CRGB(G, 0, R); FastLED.show(); 
-  leds[10] = CRGB(0, 0, 0); FastLED.show();
-  leds[10] = CRGB(W, B, 0); FastLED.show();
+  leds[9].r = G;
+  FastLED.show();
+  leds[9].b = R;
+  FastLED.show();
+  leds[10].r = W;
+  FastLED.show();
+  leds[10].g = B;
+  FastLED.show();
 }
 
 void turnOn9() {
@@ -130,10 +134,10 @@ void turnOn9() {
 
 void led_9 (int R, int G, int B, int W)
 {
-  leds[11] = CRGB(0, 0, 0); FastLED.show(); 
-  leds[11] = CRGB(B, R, W); FastLED.show(); 
-  leds[10] = CRGB(0, 0, 0); FastLED.show(); 
-  leds[10] = CRGB(0, 0, G); FastLED.show(); 
+    leds[11].g = R; FastLED.show(); // Ninth Red
+    leds[10].b = G; FastLED.show(); // Ninth Green
+    leds[11].r = B; FastLED.show(); // Ninth Blue
+    leds[11].b = W; FastLED.show(); // Ninth White
 }
 
 void turnOn10() {
@@ -248,12 +252,13 @@ void traceOne (int R, int G, int B, int W) {
     delay(100);
 
   while (true) {
-    
-    led_8(0, 0, 0, 0);
-    led_9(0, 0, 0, 0);
-    led_8(R, G, B, W);
     led_9(R, G, B, W);
-    delay(1000);
+    
+    led_8(R, G, B, W);
+
+    
+    delay(1500);
+    
     led_8(0, 0, 0, 0);
     led_9(0, 0, 0, 0);
     turnOn8();
@@ -263,7 +268,7 @@ void traceOne (int R, int G, int B, int W) {
     led_10(0, 0, 0, 0);
     led_7(R, G, B, W);
     led_10(R, G, B, W);
-    delay(1000);
+    delay(1500);
     led_7(0, 0, 0, 0);
     led_10(0, 0, 0, 0);
     turnOn7();
@@ -273,7 +278,7 @@ void traceOne (int R, int G, int B, int W) {
     led_11(0, 0, 0, 0);
     led_6(R, G, B, W);
     led_11(R, G, B, W);
-    delay(1000);
+    delay(1500);
     led_6(0, 0, 0, 0);
     led_11(0, 0, 0, 0);
     turnOn6();
@@ -283,7 +288,7 @@ void traceOne (int R, int G, int B, int W) {
     led_12(0, 0, 0, 0);
     led_5(R, G, B, W);
     led_12(R, G, B, W);
-    delay(1000);
+    delay(1500);
     led_5(0, 0, 0, 0);
     led_12(0, 0, 0, 0);
     turnOn5();
@@ -293,7 +298,7 @@ void traceOne (int R, int G, int B, int W) {
     led_13(0, 0, 0, 0);
     led_4(R, G, B, W);
     led_13(R, G, B, W);
-    delay(1000);
+    delay(1500);
     led_4(0, 0, 0, 0);
     led_13(0, 0, 0, 0);
     turnOn4();
@@ -303,7 +308,7 @@ void traceOne (int R, int G, int B, int W) {
     led_14(0, 0, 0, 0);
     led_3(R, G, B, W);
     led_14(R, G, B, W);
-    delay(1000);
+    delay(1500);
     led_3(0, 0, 0, 0);
     led_14(0, 0, 0, 0);
     turnOn3();
@@ -313,7 +318,7 @@ void traceOne (int R, int G, int B, int W) {
     led_15(0, 0, 0, 0);
     led_2(R, G, B, W);
     led_15(R, G, B, W);
-    delay(1000);
+    delay(1500);
     led_2(0, 0, 0, 0);
     led_15(0, 0, 0, 0);
     turnOn2();
@@ -323,12 +328,12 @@ void traceOne (int R, int G, int B, int W) {
     led_16(0, 0, 0, 0);
     led_1(R, G, B, W);
     led_16(R, G, B, W);
-    delay(1000);
+    delay(1500);
     led_1(0, 0, 0, 0);
     led_16(0, 0, 0, 0);
     turnOn1();
     turnOn16();
-
+    
   }
 
 
