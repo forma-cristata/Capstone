@@ -212,8 +212,324 @@ void traceOne (int R, int G, int B, int W, int R1, int G1, int B1, int W1, int d
 
 }
 
+void func2(int R1, int G1, int B1, int W1, 
+                int R2, int G2, int B2, int W2, 
+                int R3, int G3, int B3, int W3,
+                int R4, int G4, int B4, int W4,
+                int R5, int G5, int B5, int W5,
+                int R6, int G6, int B6, int W6,
+                int R7, int G7, int B7, int W7,
+                int R8, int G8, int B8, int W8,int delayTime) {
+
+
+  delay(delayTime);
+
+  while (true) {
+    led_1(R1, G1, B1, W1); delay(delayTime);
+    led_2(R1, G1, B1, W1); delay(delayTime);
+    led_3(R2, G2, B2, W2); delay(delayTime);
+    led_4(R2, G2, B2, W2); delay(delayTime);
+    led_5(R3, G3, B3, W3); delay(delayTime);
+    led_6(R3, G3, B3, W3); delay(delayTime);
+    led_7(R4, G4, B4, W4); delay(delayTime);
+    led_8(R4, G4, B4, W4); delay(delayTime);
+    led_9(R5, G5, B5, W5); delay(delayTime);
+    led_10(R5, G5, B5, W5); delay(delayTime);
+    led_11(R6, G6, B6, W6); delay(delayTime);
+    led_12(R6, G6, B6, W6); delay(delayTime);
+    led_13(R7, G7, B7, W7); delay(delayTime);
+    led_14(R7, G7, B7, W7); delay(delayTime);
+    led_15(R8, G8, B8, W8); delay(delayTime);
+    led_16(R8, G8, B8, W8); delay(delayTime);
+    led_2(R1, G1, B1, W1); delay(delayTime);
+    led_3(R1, G1, B1, W1); delay(delayTime);
+    led_4(R2, G2, B2, W2); delay(delayTime);
+    led_5(R2, G2, B2, W2); delay(delayTime);
+    led_6(R3, G3, B3, W3); delay(delayTime);
+    led_7(R3, G3, B3, W3); delay(delayTime);
+    led_8(R4, G4, B4, W4); delay(delayTime);
+    led_9(R4, G4, B4, W4); delay(delayTime);
+    led_10(R5, G5, B5, W5); delay(delayTime);
+    led_11(R5, G5, B5, W5); delay(delayTime);
+    led_12(R6, G6, B6, W6); delay(delayTime);
+    led_13(R6, G6, B6, W6); delay(delayTime);
+    led_14(R7, G7, B7, W7); delay(delayTime);
+    led_15(R7, G7, B7, W7); delay(delayTime);
+    led_16(R8, G8, B8, W8); delay(delayTime);
+    led_1(R8, G8, B8, W8); delay(delayTime);
+    led_3(R1, G1, B1, W1); delay(delayTime);
+    led_4(R1, G1, B1, W1); delay(delayTime);
+    led_5(R2, G2, B2, W2); delay(delayTime);
+    led_6(R2, G2, B2, W2); delay(delayTime);
+    led_7(R3, G3, B3, W3); delay(delayTime);
+    led_8(R3, G3, B3, W3); delay(delayTime);
+    led_9(R4, G4, B4, W4); delay(delayTime);
+    led_10(R4, G4, B4, W4); delay(delayTime);
+    led_11(R5, G5, B5, W5); delay(delayTime);
+    led_12(R5, G5, B5, W5); delay(delayTime);
+    led_13(R6, G6, B6, W6); delay(delayTime);
+    led_14(R6, G6, B6, W6); delay(delayTime);
+    led_15(R7, G7, B7, W7); delay(delayTime);
+    led_16(R7, G7, B7, W7); delay(delayTime);
+    led_1(R8, G8, B8, W8); delay(delayTime);
+    led_2(R8, G8, B8, W8); delay(delayTime);
+    led_4(R1, G1, B1, W1); delay(delayTime);
+    led_5(R1, G1, B1, W1); delay(delayTime);
+    led_6(R2, G2, B2, W2); delay(delayTime);
+    led_7(R2, G2, B2, W2); delay(delayTime);
+    led_8(R3, G3, B3, W3); delay(delayTime);
+    led_9(R3, G3, B3, W3); delay(delayTime);
+    led_10(R4, G4, B4, W4); delay(delayTime);
+    led_11(R4, G4, B4, W4); delay(delayTime);
+    led_12(R5, G5, B5, W5); delay(delayTime);
+    led_13(R5, G5, B5, W5); delay(delayTime);
+    led_14(R6, G6, B6, W6); delay(delayTime);
+    led_15(R6, G6, B6, W6); delay(delayTime);
+    led_16(R7, G7, B7, W7); delay(delayTime);
+    led_1(R7, G7, B7, W7); delay(delayTime);
+    led_2(R8, G8, B8, W8); delay(delayTime);
+    led_3(R8, G8, B8, W8); delay(delayTime);
+    led_5(R1, G1, B1, W1); delay(delayTime);
+    led_6(R1, G1, B1, W1); delay(delayTime);
+    led_7(R2, G2, B2, W2); delay(delayTime);
+    led_8(R2, G2, B2, W2); delay(delayTime);
+    led_9(R3, G3, B3, W3); delay(delayTime);
+    led_10(R3, G3, B3, W3); delay(delayTime);
+    led_11(R4, G4, B4, W4); delay(delayTime);
+    led_12(R4, G4, B4, W4); delay(delayTime);
+    led_13(R5, G5, B5, W5); delay(delayTime);
+    led_14(R5, G5, B5, W5); delay(delayTime);
+    led_15(R6, G6, B6, W6); delay(delayTime);
+    led_16(R6, G6, B6, W6); delay(delayTime);
+    led_1(R7, G7, B7, W7); delay(delayTime);
+    led_2(R7, G7, B7, W7); delay(delayTime);
+    led_3(R8, G8, B8, W8); delay(delayTime);
+    led_4(R8, G8, B8, W8); delay(delayTime);
+
+    led_6(R1, G1, B1, W1); delay(delayTime);
+    led_7(R1, G1, B1, W1);delay(delayTime); 
+    led_8(R2, G2, B2, W2);delay(delayTime);
+    led_9(R2, G2, B2, W2);delay(delayTime);
+    led_10(R3, G3, B3, W3);delay(delayTime);
+    led_11(R3, G3, B3, W3);delay(delayTime);
+    led_12(R4, G4, B4, W4);delay(delayTime);
+    led_13(R4, G4, B4, W4);delay(delayTime);
+    led_14(R5, G5, B5, W5);delay(delayTime);
+    led_15(R5, G5, B5, W5);delay(delayTime);
+    led_16(R6, G6, B6, W6);delay(delayTime);
+    led_1(R6, G6, B6, W6);delay(delayTime);
+    led_2(R7, G7, B7, W7);delay(delayTime);
+    led_3(R7, G7, B7, W7);delay(delayTime);
+    led_4(R8, G8, B8, W8);delay(delayTime);
+    led_5(R8, G8, B8, W8);delay(delayTime);
+
+    led_7(R1, G1, B1, W1);delay(delayTime);
+    led_8(R1, G1, B1, W1);delay(delayTime);
+    led_9(R2, G2, B2, W2);delay(delayTime);
+    led_10(R2, G2, B2, W2);delay(delayTime);
+    led_11(R3, G3, B3, W3);delay(delayTime);
+    led_12(R3, G3, B3, W3);delay(delayTime);
+    led_13(R4, G4, B4, W4);delay(delayTime);
+    led_14(R4, G4, B4, W4);delay(delayTime);
+    led_15(R5, G5, B5, W5);delay(delayTime);
+    led_16(R5, G5, B5, W5);delay(delayTime);
+    led_1(R6, G6, B6, W6);delay(delayTime);
+    led_2(R6, G6, B6, W6);delay(delayTime);
+    led_3(R7, G7, B7, W7);delay(delayTime);
+    led_4(R7, G7, B7, W7);delay(delayTime);
+    led_5(R8, G8, B8, W8);delay(delayTime);
+    led_6(R8, G8, B8, W8);delay(delayTime);
+
+    led_8(R1, G1, B1, W1);delay(delayTime);
+    led_9(R1, G1, B1, W1);delay(delayTime);
+    led_10(R2, G2, B2, W2);delay(delayTime);
+    led_11(R2, G2, B2, W2);delay(delayTime);
+    led_12(R3, G3, B3, W3);delay(delayTime);
+    led_13(R3, G3, B3, W3);delay(delayTime);
+    led_14(R4, G4, B4, W4);delay(delayTime);
+    led_15(R4, G4, B4, W4);delay(delayTime);
+    led_16(R5, G5, B5, W5);delay(delayTime);
+    led_1(R5, G5, B5, W5);delay(delayTime);
+    led_2(R6, G6, B6, W6);delay(delayTime);
+    led_3(R6, G6, B6, W6);delay(delayTime);
+    led_4(R7, G7, B7, W7);delay(delayTime);
+    led_5(R7, G7, B7, W7);delay(delayTime);
+    led_6(R8, G8, B8, W8);delay(delayTime);
+    led_7(R8, G8, B8, W8);delay(delayTime);
+
+    
+    led_9(R1, G1, B1, W1);delay(delayTime);
+    led_10(R1, G1, B1, W1);delay(delayTime);
+    led_11(R2, G2, B2, W2);delay(delayTime);
+    led_12(R2, G2, B2, W2);delay(delayTime);
+    led_13(R3, G3, B3, W3);delay(delayTime);
+    led_14(R3, G3, B3, W3);delay(delayTime);
+    led_15(R4, G4, B4, W4);delay(delayTime);
+    led_16(R4, G4, B4, W4);delay(delayTime);
+    led_1(R5, G5, B5, W5);delay(delayTime);
+    led_2(R5, G5, B5, W5);delay(delayTime);
+    led_3(R6, G6, B6, W6);delay(delayTime);
+    led_4(R6, G6, B6, W6);delay(delayTime);
+    led_5(R7, G7, B7, W7);delay(delayTime);
+    led_6(R7, G7, B7, W7);delay(delayTime);
+    led_7(R8, G8, B8, W8);delay(delayTime);
+    led_8(R8, G8, B8, W8);delay(delayTime);
+
+    
+    led_10(R1, G1, B1, W1);delay(delayTime);
+    led_11(R1, G1, B1, W1);delay(delayTime);
+    led_12(R2, G2, B2, W2);delay(delayTime);
+    led_13(R2, G2, B2, W2);delay(delayTime);
+    led_14(R3, G3, B3, W3);delay(delayTime);
+    led_15(R3, G3, B3, W3);delay(delayTime);
+    led_16(R4, G4, B4, W4);delay(delayTime);
+    led_1(R4, G4, B4, W4);delay(delayTime);
+    led_2(R5, G5, B5, W5);delay(delayTime);
+    led_3(R5, G5, B5, W5);delay(delayTime);
+    led_4(R6, G6, B6, W6);delay(delayTime);
+    led_5(R6, G6, B6, W6);delay(delayTime);
+    led_6(R7, G7, B7, W7);delay(delayTime);
+    led_7(R7, G7, B7, W7);delay(delayTime);
+    led_8(R8, G8, B8, W8);delay(delayTime);
+    led_9(R8, G8, B8, W8);delay(delayTime);
+
+     
+    led_11(R1, G1, B1, W1);delay(delayTime);
+    led_12(R1, G1, B1, W1);delay(delayTime);
+    led_13(R2, G2, B2, W2);delay(delayTime);
+    led_14(R2, G2, B2, W2);delay(delayTime);
+    led_15(R3, G3, B3, W3);delay(delayTime);
+    led_16(R3, G3, B3, W3);delay(delayTime);
+    led_1(R4, G4, B4, W4);delay(delayTime);
+    led_2(R4, G4, B4, W4);delay(delayTime);
+    led_3(R5, G5, B5, W5);delay(delayTime);
+    led_4(R5, G5, B5, W5);delay(delayTime);
+    led_5(R6, G6, B6, W6);delay(delayTime);
+    led_6(R6, G6, B6, W6);delay(delayTime);
+    led_7(R7, G7, B7, W7);delay(delayTime);
+    led_8(R7, G7, B7, W7);delay(delayTime);
+    led_9(R8, G8, B8, W8);delay(delayTime);
+    led_10(R8, G8, B8, W8);delay(delayTime);
+
+         
+    led_12(R1, G1, B1, W1);delay(delayTime);
+    led_13(R1, G1, B1, W1);delay(delayTime);
+    led_14(R2, G2, B2, W2);delay(delayTime);
+    led_15(R2, G2, B2, W2);delay(delayTime);
+    led_16(R3, G3, B3, W3);delay(delayTime);
+    led_1(R3, G3, B3, W3);delay(delayTime);
+    led_2(R4, G4, B4, W4);delay(delayTime);
+    led_3(R4, G4, B4, W4);delay(delayTime);
+    led_4(R5, G5, B5, W5);delay(delayTime);
+    led_5(R5, G5, B5, W5);delay(delayTime);
+    led_6(R6, G6, B6, W6);delay(delayTime);
+    led_7(R6, G6, B6, W6);delay(delayTime);
+    led_8(R7, G7, B7, W7);delay(delayTime);
+    led_9(R7, G7, B7, W7);delay(delayTime);
+    led_10(R8, G8, B8, W8);delay(delayTime);
+    led_11(R8, G8, B8, W8);delay(delayTime);
+
+         
+    led_12(R1, G1, B1, W1);delay(delayTime);
+    led_13(R1, G1, B1, W1);delay(delayTime);
+    led_14(R2, G2, B2, W2);delay(delayTime);
+    led_15(R2, G2, B2, W2);delay(delayTime);
+    led_16(R3, G3, B3, W3);delay(delayTime);
+    led_1(R3, G3, B3, W3);delay(delayTime);
+    led_2(R4, G4, B4, W4);delay(delayTime);
+    led_3(R4, G4, B4, W4);delay(delayTime);
+    led_4(R5, G5, B5, W5);delay(delayTime);
+    led_5(R5, G5, B5, W5);delay(delayTime);
+    led_6(R6, G6, B6, W6);delay(delayTime);
+    led_7(R6, G6, B6, W6);delay(delayTime);
+    led_8(R7, G7, B7, W7);delay(delayTime);
+    led_9(R7, G7, B7, W7);delay(delayTime);
+    led_10(R8, G8, B8, W8);delay(delayTime);
+    led_11(R8, G8, B8, W8);delay(delayTime);
+
+             
+    led_13(R1, G1, B1, W1);delay(delayTime);
+    led_14(R1, G1, B1, W1);delay(delayTime);
+    led_15(R2, G2, B2, W2);delay(delayTime);
+    led_16(R2, G2, B2, W2);delay(delayTime);
+    led_1(R3, G3, B3, W3);delay(delayTime);
+    led_2(R3, G3, B3, W3);delay(delayTime);
+    led_3(R4, G4, B4, W4);delay(delayTime);
+    led_4(R4, G4, B4, W4);delay(delayTime);
+    led_5(R5, G5, B5, W5);delay(delayTime);
+    led_6(R5, G5, B5, W5);delay(delayTime);
+    led_7(R6, G6, B6, W6);delay(delayTime);
+    led_8(R6, G6, B6, W6);delay(delayTime);
+    led_9(R7, G7, B7, W7);delay(delayTime);
+    led_10(R7, G7, B7, W7);delay(delayTime);
+    led_11(R8, G8, B8, W8);delay(delayTime);
+    led_12(R8, G8, B8, W8);delay(delayTime);
+
+    
+             
+    led_14(R1, G1, B1, W1);delay(delayTime);
+    led_15(R1, G1, B1, W1);delay(delayTime);
+    led_16(R2, G2, B2, W2);delay(delayTime);
+    led_1(R2, G2, B2, W2);delay(delayTime);
+    led_2(R3, G3, B3, W3);delay(delayTime);
+    led_3(R3, G3, B3, W3);delay(delayTime);
+    led_4(R4, G4, B4, W4);delay(delayTime);
+    led_5(R4, G4, B4, W4);delay(delayTime);
+    led_6(R5, G5, B5, W5);delay(delayTime);
+    led_7(R5, G5, B5, W5);delay(delayTime);
+    led_8(R6, G6, B6, W6);delay(delayTime);
+    led_9(R6, G6, B6, W6);delay(delayTime);
+    led_10(R7, G7, B7, W7);delay(delayTime);
+    led_11(R7, G7, B7, W7);delay(delayTime);
+    led_12(R8, G8, B8, W8);delay(delayTime);
+    led_13(R8, G8, B8, W8);delay(delayTime);
+    
+             
+    led_15(R1, G1, B1, W1);delay(delayTime);
+    led_16(R1, G1, B1, W1);delay(delayTime);
+    led_1(R2, G2, B2, W2);delay(delayTime);
+    led_2(R2, G2, B2, W2);delay(delayTime);
+    led_3(R3, G3, B3, W3);delay(delayTime);
+    led_4(R3, G3, B3, W3);delay(delayTime);
+    led_5(R4, G4, B4, W4);delay(delayTime);
+    led_6(R4, G4, B4, W4);delay(delayTime);
+    led_7(R5, G5, B5, W5);delay(delayTime);
+    led_8(R5, G5, B5, W5);delay(delayTime);
+    led_9(R6, G6, B6, W6);delay(delayTime);
+    led_10(R6, G6, B6, W6);delay(delayTime);
+    led_11(R7, G7, B7, W7);delay(delayTime);
+    led_12(R7, G7, B7, W7);delay(delayTime);
+    led_13(R8, G8, B8, W8);delay(delayTime);
+    led_14(R8, G8, B8, W8);delay(delayTime);
+                 
+    led_16(R1, G1, B1, W1);delay(delayTime);
+    led_1(R1, G1, B1, W1);delay(delayTime);
+    led_2(R2, G2, B2, W2);delay(delayTime);
+    led_3(R2, G2, B2, W2);delay(delayTime);
+    led_4(R3, G3, B3, W3);delay(delayTime);
+    led_5(R3, G3, B3, W3);delay(delayTime);
+    led_6(R4, G4, B4, W4);delay(delayTime);
+    led_7(R4, G4, B4, W4);delay(delayTime);
+    led_8(R5, G5, B5, W5);delay(delayTime);
+    led_9(R5, G5, B5, W5);delay(delayTime);
+    led_10(R6, G6, B6, W6);delay(delayTime);
+    led_11(R6, G6, B6, W6);delay(delayTime);
+    led_12(R7, G7, B7, W7);delay(delayTime);
+    led_13(R7, G7, B7, W7);delay(delayTime);
+    led_14(R8, G8, B8, W8);delay(delayTime);
+    led_15(R8, G8, B8, W8);delay(delayTime);
+  }
+}
+
 
 void loop() {
-  traceOne(255, 0, 255, 1, 255, 0, 0, 0, random(10, 50)); // !10/10 SETTING!
-
+  //traceOne(255, 0, 255, 1, 255, 0, 0, 0, random(10, 50)); // !10/10 SETTING!
+  func2(242, 68, 196, 0, 
+                215, 7, 242, 0, 
+                109, 15, 242, 0,
+                24, 20, 140, 0,
+                200, 185, 12, 0,
+                242, 140, 68, 0,
+                242, 92, 92, 0,
+                242, 46, 118, 0, 5);
 }
