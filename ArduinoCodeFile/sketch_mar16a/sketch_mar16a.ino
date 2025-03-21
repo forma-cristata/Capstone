@@ -324,26 +324,25 @@ void traceOne (int R, int G, int B, int W, int R1, int G1, int B1, int W1, int d
 }
 
 void func(int R[], int G[], int B[], int W[], int delayTime) {
-
-
-  delay(delayTime);
-  int x = 1;
   while (true) {
-    int colorIndex = 0;
-    if(x = 17)
-    {
-      x = 1;
-    }
-    
-    int id = 1;
-    while(true) {
-      
-      setLed((id*2) % 17, R[id%8], G[id%8], B[id%8], W[id%8]); delay(delayTime);
-      setLed((id*2) % 17 + 1, R[id%8], G[id%8], B[id%8], W[id%8]); delay(delayTime);
-      id++;
-    }
-    x++;
-    
+      for (int i = 1; i < 17; i++) {  
+          setLed((i)%17, R[0], G[0], B[0], W[0]); delay(delayTime);
+          setLed((i+1) % 17, R[0], G[0], B[0], W[0]); delay(delayTime);
+          setLed((i+2) % 17, R[1], G[1], B[1], W[1]); delay(delayTime);
+          setLed((i+3) % 17, R[1], G[1], B[1], W[1]); delay(delayTime);
+          setLed((i+4) % 17, R[2], G[2], B[2], W[2]); delay(delayTime);
+          setLed((i+5) % 17, R[2], G[2], B[2], W[2]); delay(delayTime);
+          setLed((i+6) % 17, R[3], G[3], B[3], W[3]); delay(delayTime);
+          setLed((i+7) % 17, R[3], G[3], B[3], W[3]); delay(delayTime);
+          setLed((i+8) % 17, R[4], G[4], B[4], W[4]); delay(delayTime);
+          setLed((i+9) % 17, R[4], G[4], B[4], W[4]); delay(delayTime);
+          setLed((i+10) % 17, R[5], G[5], B[5], W[5]); delay(delayTime);
+          setLed((i+11) % 17, R[5], G[5], B[5], W[5]); delay(delayTime);
+          setLed((i+12) % 17, R[6], G[6], B[6], W[6]); delay(delayTime);
+          setLed((i+13) % 17, R[6], G[6], B[6], W[6]); delay(delayTime);
+          setLed((i+14) % 17, R[7], G[7], B[7], W[7]); delay(delayTime);
+          setLed((i+15) % 17, R[7], G[7], B[7], W[7]); delay(delayTime);
+      }
   }
 }
 
