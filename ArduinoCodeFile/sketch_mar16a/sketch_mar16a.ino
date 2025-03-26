@@ -8,11 +8,11 @@ CRGB leds[NUM_LEDS];
 void setup() {
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
 }
-
+//TODO: Brightness
 void setLed(int L, int R, int G, int B, int W) {
-  switch (L % 3) {
+  switch ((L + 1) % 3) {
     case 1:
-      switch (L) {
+      switch (L + 1) {
         case 1:
           leds[0].r = R;
           FastLED.show();
@@ -76,7 +76,7 @@ void setLed(int L, int R, int G, int B, int W) {
       }
       break;
     case 2:
-      switch (L) {
+      switch (L+1) {
         case 2:
           leds[1].r = G;
           FastLED.show();
@@ -130,7 +130,7 @@ void setLed(int L, int R, int G, int B, int W) {
       }
       break;
     case 0:
-      switch (L) {
+      switch (L+1) {
         case 3:
           leds[3].r = B;
           FastLED.show();
@@ -186,94 +186,173 @@ void setLed(int L, int R, int G, int B, int W) {
   }
 }
 
-// Todo build speed function to track speeds to less ms
-void traceOne(int R[], int G[], int B[], int W[], int delayTime, bool magnetMode) {
+// COMPLETE
+void traceOne(int R[], int G[], int B[], int W[], int delayTime, int focal = -1) {
   for(int i = 0; i < 16; i++)
   {
   setLed(i, R[0], G[0], B[0], W[0]);
   }
 
-  delay(delayTime);
+  if (focal != -1) {
 
-  if (magnetMode) {
     while (true) {
       for (int i = 0; i < 16; i++) {
         for(int j = 0; j < 8; j++){
-        setLed(9+j, R[i], G[i], B[i], W[i]);
-        setLed(8-j, R[i], G[i], B[i], W[i]);
-        delay(delayTime);
-        setLed(9+j, R[0], G[0], B[0], W[0]);
-        setLed(8-j, R[0], G[0], B[0], W[0]);
-      }
+          int position1 = (focal + 1 + j) % 16;
+          int position2 = (16 + focal - j) % 16;
+          setLed(position1, R[i], G[i], B[i], W[i]);
+          setLed(position2, R[i], G[i], B[i], W[i]);
+          delay(delayTime);
+          setLed(position1, R[0], G[0], B[0], W[0]);
+          setLed(position2, R[0], G[0], B[0], W[0]);
+        }
       }
     }
   }
   else{
     while (true) {
-      for (int i = 1; i < 16; i++) {
-        for(int j = 1; j < 17; j++)
+      for (int i = 0; i < 16; i++) {
+        for(int j = 0; j < 16; j++)
         {
           setLed(j, R[i], G[i], B[i], W[i]);
-          delay(delayTime);
+          delay(delayTime*2);
           setLed(j, R[0], G[0], B[0], W[0]);
         }
       }
     }
   }
 }
-
-void func(int R[], int G[], int B[], int W[], int delayTime) {
+//COMPLETE
+void progressive(int R[], int G[], int B[], int W[], int delayTime, int focal = -1) {
   for(int i = 0; i < 16; i++)
   {
-  setLed(i, R[0], G[0], B[0], W[0]);
+    setLed(i, R[0], G[0], B[0], W[0]);
   }
+  if(focal != -1)
+  {
+    while (true) {
+      for (int j = 0; j < 16; j++) {  // Iterate through the color array
+        // Iterate forwards from the focal point
+        for (int i = 0; i < 8; i++) {
+            int ledIndex = (focal + i) % 16;  // Move forward circularly
+            int ledIndex2 = (focal - i + 16) % 16;
+            setLed(ledIndex, R[j], G[j], B[j], W[j]);
+            setLed(ledIndex2, R[j], G[j], B[j], W[j]);
+            delay(delayTime);
 
-  while (true) {
-    for (int i = 1; i < 17; i++) {
-      for (int j = 0; j < 8; j++) {
-        setLed((i + j * 2) % 17, R[j], G[j], B[j], W[j]);
-        delay(delayTime);
-        setLed((i + j * 2 + 1) % 17, R[j], G[j], B[j], W[j]);
-        delay(delayTime);
+            ledIndex = (focal + i + 1) % 16;  // Move forward circularly
+            ledIndex2 = (focal - i - 1 + 16) % 16;
+            setLed(ledIndex, R[j], G[j], B[j], W[j]);
+            setLed(ledIndex2, R[j], G[j], B[j], W[j]);
+            delay(delayTime);
+        }
+      }
+    }
+  }
+  else
+  {
+    while (true) {
+       for (int j = 0; j < 16; j++) {  // Iterate through all LEDs (0-15)
+        for (int i = 0; i < 16; i++) {
+            // Forward iteration from LED 0 to LED 15
+            int ledIndex = (j + i) % 16;  // Move forward circularly
+            int ledIndex2 = (j + i + 1) % 16;  // Move backward circularly
+            setLed(ledIndex, R[j], G[j], B[j], W[j]);  // Set LED colors
+            setLed(ledIndex2, R[j], G[j], B[j], W[j]);  // Set LED colors
+            delay(delayTime * 2);
+
+            // Move one step further in both forward and backward directions
+            ledIndex = (j + i + 1) % 16;  // Move forward circularly
+            ledIndex2 = (j + i + 2) % 16;  // Move backward circularly
+            setLed(ledIndex, R[j], G[j], B[j], W[j]);  // Set LED colors
+            setLed(ledIndex2, R[j], G[j], B[j], W[j]);  // Set LED colors
+            delay(delayTime * 2);
+        }
+    }
+    }
+  }
+}
+// 
+void traceMany(int R[], int G[], int B[], int W[], int delayTime, int focal = -1) {
+  for(int i = 0; i < 16; i++)
+  {
+    setLed(i, R[0], G[0], B[0], W[0]);
+  }
+  if(focal == -1)
+  {
+    while (true) {
+      for (int i = 0; i < 17; i++) {
+        for (int j = 0; j < 8; j++) {
+          int offset = (i + j * 2) % 17;
+          setLed(offset, R[(i + 1) % 8], G[(i + 1) % 16], B[(i + 1) % 16], W[(i + 1) % 16]);
+          delay(delayTime*2);
+
+          offset = (i + j * 2 + 8) % 17;
+          setLed(offset, R[(i + 1) % 8], G[(i + 2) % 16], B[(i + 2) % 16], W[(i + 2) % 16]);
+        }
+      }
+    }
+  }
+  else
+  {
+    while (true) {
+      for (int i = 0; i < 16; i++) {
+        for (int j = 0; j < 8; j++) {
+          int position1 = (focal + 1 + j) % 16;
+          int position2 = (16 + focal - j) % 16;
+          setLed(position1, R[(i + 1) % 16], G[(i + 1) % 16], B[(i + 1) % 16], W[(i + 1) % 16]);
+          delay(delayTime);
+          setLed(position2, R[(i + 1) % 16], G[(i + 2) % 16], B[(i + 2) % 16], W[(i + 2) % 16]);
+        }
       }
     }
   }
 }
 
-void funcx(int R[], int G[], int B[], int W[], int delayTime) {
+void strobeChange(int R[], int G[], int B[], int W[], int delayTime, int focal = -1) {
   for(int i = 0; i < 16; i++)
   {
     setLed(i, R[0], G[0], B[0], W[0]);
   }
-  while (true) {
-    for (int i = 0; i < 17; i++) {
-      for (int j = 0; j < 8; j++) {
-        int offset = (i + j * 2) % 17;
-        setLed(offset, R[(j + 1) % 8], G[(j + 1) % 8], B[(j + 1) % 8], W[(j + 1) % 8]);
-        delay(delayTime);
-
-        offset = (i + j * 2 + 8) % 17;
-        setLed(offset, R[(j + 1) % 8], G[(j + 2) % 8], B[(j + 2) % 8], W[(j + 2) % 8]);
+  if (focal == -1)
+  {
+    while (true) {
+      for (int i = 0; i < 16; i++) {
+        for (int j = 0; j < 8; j++) {
+          int offset = (i + j * 2) % 16;
+          for(int k = 0; k < delayTime*2; k++)
+          {
+            setLed(offset, 0, 0, 0, 0);
+            delay(6);
+            setLed(offset, R[i], G[i], B[i], W[i]);
+            delay(6);
+          }
+          
+          
+        }
       }
     }
   }
-}
-
-void funcy(int R[], int G[], int B[], int W[], int delayTime) {
-  for(int i = 0; i < 16; i++)
+  else 
   {
-    setLed(i, R[0], G[0], B[0], W[0]);
-  }
-  while (true) {
-    for (int i = 0; i < 17; i++) {
-      for (int j = 0; j < 8; j++) {
-        int offset = (i + j * 2) % 17;
-
-        int flicker = random(0, 50);
-
-        setLed(offset, R[j] * flicker / 255, G[j] * flicker / 255, B[j] * flicker / 255, W[j] * flicker / 255);
+    while (true) {
+      for (int i = 0; i < 16; i++) {
+        for (int j = 0; j < 8; j++) {
+          int position1 = (focal + 1 + (i + j * 2) % 16) % 16;
+          int position2 = (16 + focal - (i + j * 2) % 16) % 16;
+          for(int k = 0; k < delayTime*2; k++)
+          {
+            setLed(position1, 0, 0, 0, 0);
+            setLed(position2, 0, 0, 0, 0);
+            delay(6);
+            setLed(position1, R[i], G[i], B[i], W[i]);
+            setLed(position2, R[i], G[i], B[i], W[i]);
+            delay(6);
+          }
+          
+          
+        }
       }
-      delay(delayTime);
     }
   }
 }
@@ -283,7 +362,7 @@ void funcz(int r[], int g[], int b[], int w[], int delayTime) {
 
   // Precompute color values for setLed calls to avoid repeating modulus calculations.
   int color[8][4];  // Store RGBW for each LED pattern.
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < 16; i++) {
     color[i][0] = r[i];  // Store red values
     color[i][1] = g[i];  // Store green values
     color[i][2] = b[i];  // Store blue values
@@ -293,16 +372,19 @@ void funcz(int r[], int g[], int b[], int w[], int delayTime) {
   while (true) {
     bool setNewLedState = false;
 
-    for (int i = 0; i < numLeds; i++) {
+    for (int i = 0; i < numLeds; i++) 
+    {
       if (random(0, 2) == 0) {
         setLed(i, color[i % 8][0], color[i % 8][1], color[i % 8][2], color[i % 8][3]);
-      } else {
+        delay(delayTime); 
+      } 
+      else 
+      {
         // Turn LED off
         setLed(i, 0, 0, 0, 0);
       }
     }
     setNewLedState = true;
-    delay(delayTime); 
   }
 }
 
@@ -460,6 +542,22 @@ void christmas(int r[], int g[], int b[], int w[], int delayTime) {
   }
 }
 
+void stillOne(int r, int g, int b, int w)
+{
+  for(int i = 0; i < 16; i++)
+  {
+    setLed(i, r, g, b, w);
+  }
+}
+
+void stillMany(int r[], int g[], int b[], int w[])
+{
+  for(int i = 0; i < 16; i++)
+  {
+    setLed(i, r[i], g[i], b[i], w[i]);
+  }
+}
+
 
 
 void loop() {
@@ -473,73 +571,61 @@ void loop() {
   int g1[] = { 0, 92, 59, 235, 40, 116, 78, 146 };
   int b1[] = { 64, 15, 235, 185, 153, 10, 119, 245 };
   int w1[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-  // 8
-  int r2[] = { 255, 255, 255, 255, 0, 255, 255, 255 };
-  int g2[] = { 0, 85, 40, 15, 0, 45, 59, 2 };
-  int b2[] = { 0, 1, 0, 2, 239, 3, 0, 0 };
-  int w2[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+  // 16
+  int r2[] = { 255, 255, 255, 255, 0, 255, 255, 255, 255, 255, 255, 255, 0, 255, 255, 255 };
+  int g2[] = { 0, 85, 40, 15, 0, 45, 59, 2, 0, 85, 40, 15, 0, 45, 59, 2 };
+  int b2[] = { 0, 1, 0, 2, 239, 3, 0, 0, 0, 1, 0, 2, 239, 3, 0, 0 };
+  int w2[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
   // 8
   int r3[] = { 139, 204, 0, 25, 139, 0, 48, 184 };
   int g3[] = { 0, 45, 51, 25, 39, 128, 25, 0 };
   int b3[] = { 0, 0, 51, 0, 19, 128, 52, 51 };
   int w3[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-
-  
-
+  // 16
   int r4[] = { 161, 205, 172, 19, 71, 215, 205, 190, 190, 205, 215, 71, 19, 172, 205, 161 };
   int g4[] = { 0, 52, 19, 21, 0, 35, 38, 40, 20, 38, 33, 0, 55, 19, 52, 0 };
   int b4[] = { 0, 0, 42, 52, 35, 0, 15, 82, 82, 35, 0, 65, 75, 10, 0, 12 };
   int w4[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
-
-
-  //funca(r4, g4, b4, w4, 2);
-
-
+  // 16
   int r5[] = { 255, 0, 255, 0, 255, 255, 0, 255, 255, 0, 255, 255, 255, 0, 0, 255 };
   int g5[] = { 0, 255, 0, 255, 255, 0, 0, 255, 255, 255, 0, 0, 255, 255, 255, 0 };
   int b5[] = { 0, 0, 255, 255, 0, 255, 255, 0, 0, 255, 255, 255, 255, 0, 255, 20 };
   int w5[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
-
-
-  //funcb(r5, g5, b5, w5, 1);
-
+  // 16
   int r6[] = { 255, 0, 255, 0, 255, 255, 0, 0, 0, 255, 255, 0, 0, 255, 0, 255 };
   int g6[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
   int b6[] = { 255, 0, 255, 255, 255, 0, 255, 255, 255, 255, 0, 255, 255, 255, 0, 0 };
   int w6[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
-  //funcc(r6, g6, b6, w6, 1);
-
+  // 16
   int r7[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
   int g7[] = { 255, 200, 100, 150, 50, 255, 180, 230, 90, 50, 180, 210, 0, 120, 100, 255 };
   int b7[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
   int w7[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
-  //funcd(r6, g6, b2, w7, 1);
-
+  // 4
   int r8[] = { 33, 255, 0, 16 };
   int g8[] = { 20, 0, 255, 10 };
   int b8[] = { 10, 0, 0, 5 };
   int w8[] = { 0, 0, 0, 0 };
 
-  //christmas(r2, g2, b2, w2, 10); // THIS IS SMOLDER NEVER DELETE IT
+  // DONE
+  //traceOne(r5, g5, b5, w5, random(10, 50));
+  //progressive(r5, g5, b5, w5, 10, 12); 
+  //traceMany(r1, g1, b1, w1, 10);
+  //strobeChange(r4, g4, b4, w4, 1, 8);
 
+  // TESTING
+  funcz(r4, g4, b4, w4, 1);
 
-
-
-  // MAGNETICS
-  //traceOne(r5, g5, b5, w5, random(10, 50), true);  // Magnet mode needs iterator set but yay!
-  //funcx(r1, g1, b1, w1, 100); // Could be magnetic
-  //funcy(r2, g2, b2, w2, 1); // Could be magnetic
-
-  // NON-MAGNETICS
-  func(r, g, b, w, 1); 
+  // INCOMPLETE
 
 
   // STILL
+  //stillOne(255, 0, 255, 0);
+  //stillMany(r4, g4, b4, w4);
 
-
-  //funcz(r3, g3, b3, w3, 1);
+  //funca(r4, g4, b4, w4, 2);
+  //funcb(r5, g5, b5, w5, 1);
+  //funcc(r6, g6, b6, w6, 1);
+  //funcd(r6, g6, b2, w7, 1);
+  //christmas(r2, g2, b2, w2, 10); // THIS IS SMOLDER NEVER DELETE IT
 }
