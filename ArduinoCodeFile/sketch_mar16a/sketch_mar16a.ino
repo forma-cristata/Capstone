@@ -428,22 +428,64 @@ void comfortSongStrobe(int r[], int g[], int b[], int w[], int delayTime, int fo
 }
 
 
-void funca(int r[], int g[], int b[], int w[], int delayTime) {
+void blender(int r[], int g[], int b[], int w[], int delayTime, int focal = -1) {
   int numLeds = 16;
   int numColors = 16;
+  if(focal == -1)
+  {// non-magnet mode
+    while (true) {
+      for (int i = 0; i < numLeds; i++) {
+        int colorIndex = (i + millis() / delayTime) % numColors;
+        setLed(i, r[colorIndex], g[colorIndex], b[colorIndex], w[colorIndex]);
+      }
+      delay(delayTime);
 
-  while (true) {
-    for (int i = 0; i < numLeds; i++) {
-      int colorIndex = (i + millis() / delayTime) % numColors;
-      setLed(i, r[colorIndex], g[colorIndex], b[colorIndex], w[colorIndex]);
+      for (int i = 0; i < numLeds; i++) {
+        int colorIndex = (numColors - (i + millis() / delayTime) % numColors) % numColors;
+        setLed(i, r[colorIndex], g[colorIndex], b[colorIndex], w[colorIndex]);
+      }
+      delay(delayTime);
     }
-    delay(delayTime);
+  }
+  else
+  { // magnet mode
+    while (true) {
+      for (int i = 0; i < numLeds/2; i++) {
+        int led1 = focal - i;
+        int led2 = focal + i;
 
-    for (int i = 0; i < numLeds; i++) {
-      int colorIndex = (numColors - (i + millis() / delayTime) % numColors) % numColors;
-      setLed(i, r[colorIndex], g[colorIndex], b[colorIndex], w[colorIndex]);
+        if(led1 < 0)
+        {
+          led1 = 16 + led1;
+        }
+        if(led2 > 15)
+        {
+          led2 = led2-16;
+        }
+        int colorIndex = (i + millis() / delayTime) % numColors;
+        setLed(led1, r[colorIndex], g[colorIndex], b[colorIndex], w[colorIndex]);
+        setLed(led2, r[colorIndex], g[colorIndex], b[colorIndex], w[colorIndex]);
+      }
+      delay(delayTime);
+
+      for (int i = 0; i < numLeds/2; i++) {
+        int led1 = focal - i;
+        int led2 = focal + i;
+
+        if(led1 < 0)
+        {
+          led1 = 16 + led1;
+        }
+        if(led2 > 15)
+        {
+          led2 = led2-16;
+        }
+        int colorIndex = (numColors - (i + millis() / delayTime) % numColors) % numColors;
+        setLed(led1, r[colorIndex], g[colorIndex], b[colorIndex], w[colorIndex]);
+        setLed(led2, r[colorIndex], g[colorIndex], b[colorIndex], w[colorIndex]);
+      }
+      delay(delayTime);
     }
-    delay(delayTime);
   }
 }
 
@@ -656,18 +698,18 @@ void loop() {
   //traceMany(rr, gr, br, w5, 30, 8);
   //strobeChange(rr, gr, br, w5, 1, 2);
   //comfortSongStrobe(r4, g4, b4, w4, 8, 8);
+  //stillOne(255, 0, 255, 0);
+  //stillMany(r4, g4, b4, w4);
+  //blender(r4, g4, b4, w4, 2, 8);
 
   // TESTING
-  // Next four should be offensive strobes. Edit brightness of base color and max the strobe one
+
 
   // INCOMPLETE
 
 
   // STILL
-  //stillOne(255, 0, 255, 0);
-  //stillMany(r4, g4, b4, w4);
 
-  //funca(r4, g4, b4, w4, 2);
   //funcb(r5, g5, b5, w5, 1);
   //funcc(r6, g6, b6, w6, 1);
   //funcd(r6, g6, b2, w7, 1);
