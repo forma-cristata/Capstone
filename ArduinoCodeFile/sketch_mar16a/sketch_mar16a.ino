@@ -2,11 +2,13 @@
 
 #define NUM_LEDS 22
 #define DATA_PIN 6
+#define SEED 42
 
 CRGB leds[NUM_LEDS];
 
 void setup() {
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
+  randomSeed(SEED);
 }
 //TODO: Brightness
 void setLed(int L, int R, int G, int B, int W) {
@@ -357,34 +359,71 @@ void strobeChange(int R[], int G[], int B[], int W[], int delayTime, int focal =
   }
 }
 
-void funcz(int r[], int g[], int b[], int w[], int delayTime) {
-  int numLeds = 16;
+// this function sucks. It needs changed entirely
+void comfortSongStrobe(int r[], int g[], int b[], int w[], int delayTime, int focal = -1) {
 
-  // Precompute color values for setLed calls to avoid repeating modulus calculations.
-  int color[8][4];  // Store RGBW for each LED pattern.
-  for (int i = 0; i < 16; i++) {
-    color[i][0] = r[i];  // Store red values
-    color[i][1] = g[i];  // Store green values
-    color[i][2] = b[i];  // Store blue values
-    color[i][3] = w[i];  // Store white values
-  }
 
-  while (true) {
-    bool setNewLedState = false;
+  // 1 2 3 2 4 3 2 1 0 1 2 1 3 2 1 0
+  int pattern[] = {1, 2, 3, 2, 4, 3, 2, 1, 0, 1, 2, 1, 3, 2, 1, 0};
+  int pattern2[] = {7, 8, 9, 8, 10, 9, 8, 7, 6, 7, 8, 7, 9, 8, 7, 6};
+  int pattern3[] = {13, 14, 15, 14, 16, 15, 14, 13, 12, 13, 14, 13, 15, 14, 13, 12};
 
-    for (int i = 0; i < numLeds; i++) 
-    {
-      if (random(0, 2) == 0) {
-        setLed(i, color[i % 8][0], color[i % 8][1], color[i % 8][2], color[i % 8][3]);
-        delay(delayTime); 
-      } 
-      else 
+  if(focal == -1)
+  { // Non-magnet mode
+    while(true){
+      for(int x = 0; x < 16; x++)
       {
-        // Turn LED off
-        setLed(i, 0, 0, 0, 0);
+        for(int i = 0; i < delayTime; i++)
+        {
+          setLed(pattern[x], r[x], g[x], b[x], w[x]);
+          setLed(pattern2[x], r[x], g[x], b[x], w[x]);
+          setLed(pattern3[x], r[x], g[x], b[x], w[x]);
+          delay(5);
+          setLed(pattern[x], 0, 0, 0, 0);
+          setLed(pattern2[x], 0, 0, 0, 0);
+          setLed(pattern3[x], 0, 0, 0, 0);
+          delay(5);
+        }
       }
     }
-    setNewLedState = true;
+  }
+  else
+  { // Magnet mode
+    // 2, 3, 4, 3, 5, 4, 3, 2, 1, 2, 3, 2, 4, 3, 2, 1
+    int pattern4[] = {3, 4, 5, 4, 6, 5, 4, 3, 2, 3, 4, 3, 5, 4, 3, 2};
+    while(true){
+        for(int x = 0; x < 16; x++)
+        {
+          for(int i = 0; i < delayTime; i++)
+          {
+            int led1 = pattern4[x] + focal;
+            if(led1 < 0)
+            {
+              led1 = 16 + led1;
+            }
+            else if(led1 > 15)
+            {
+              led1 = led1 - 16;
+            }
+
+            int led2 = focal - pattern4[x];
+            if(led2 < 0)
+            {
+              led1 = 16 + led1;
+            }
+            else if(led2 > 15)
+            {
+              led1 = led1 - 16;
+            }
+            setLed(led1, r[x], g[x], b[x], w[x]);
+            setLed(led2, r[x], g[x], b[x], w[x]);
+            delay(5);
+            setLed(led1, 0, 0, 0, 0);
+            setLed(led2, 0, 0, 0, 0);
+            delay(5);
+          }
+        }
+      }
   }
 }
 
@@ -561,6 +600,9 @@ void stillMany(int r[], int g[], int b[], int w[])
 
 
 void loop() {
+  int rr[] = {random(0, 256), random(0, 256), random(0, 256), random(0, 256), random(0, 256), random(0, 256), random(0, 256), random(0, 256)};
+  int gr[] = {random(0, 256), random(0, 256), random(0, 256), random(0, 256), random(0, 256), random(0, 256), random(0, 256), random(0, 256)};
+  int br[] = {random(0, 256), random(0, 256), random(0, 256), random(0, 256), random(0, 256), random(0, 256), random(0, 256), random(0, 256)};
   // 8
   int r[] = { 242, 215, 209, 245, 250, 242, 242, 242 };
   int g[] = { 68, 7, 15, 50, 0, 40, 92, 46 };
@@ -608,13 +650,15 @@ void loop() {
   int w8[] = { 0, 0, 0, 0 };
 
   // DONE
-  //traceOne(r5, g5, b5, w5, random(10, 50));
-  //progressive(r5, g5, b5, w5, 10, 12); 
-  //traceMany(r1, g1, b1, w1, 10);
-  //strobeChange(r4, g4, b4, w4, 1, 8);
+  //traceOne(rr, g6, b6, w5, random(10, 50));
+  //traceOne(rr, g6, b6, w5, 5, 8);
+  //progressive(rr, gr, br, w5, 7); 
+  //traceMany(rr, gr, br, w5, 30, 8);
+  //strobeChange(rr, gr, br, w5, 1, 2);
+  //comfortSongStrobe(r4, g4, b4, w4, 8, 8);
 
   // TESTING
-  funcz(r4, g4, b4, w4, 1);
+  // Next four should be offensive strobes. Edit brightness of base color and max the strobe one
 
   // INCOMPLETE
 
