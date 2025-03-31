@@ -6,6 +6,11 @@
 
 CRGB leds[NUM_LEDS];
 
+const byte hallPin[] = { A0, A1, A2, A3, A4 };  // AH3503 sensor connected to A0 5volt and ground
+const int offset = 512;                         // calibrate zero
+const float span = 0.3617;                      // calibrate A/D > mT
+float value;
+
 int wr[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 int r1[] = {255, 255, 255, 136, 0, 0, 0, 0, 0, 0, 0, 136, 255, 255, 255, 255};
@@ -31,6 +36,8 @@ int b6[] = { 255, 0, 255, 255, 255, 0, 255, 255, 255, 255, 0, 255, 255, 255, 0, 
 int r7[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 int g7[] = { 255, 200, 100, 150, 50, 255, 180, 230, 90, 50, 180, 210, 0, 120, 100, 255 };
 int b7[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+int focal = -1;
 
 void setup() {
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
@@ -211,6 +218,38 @@ void setLed(int L, int R, int G, int B, int W) {
           break;
       }
       break;
+  }
+}
+
+void magnetCheck() {
+  for (int i = 0; i < 5; i++) {
+    value = (analogRead(hallPin[i]) - offset) * span;
+   
+    if (value > 5) {
+      switch(hallPin[i])
+      {
+        case (18):
+          focal = 3;
+          break;
+        case (17):
+          focal = 6;
+          break;
+        case (16):
+          focal = 8;
+          break;
+        case (15):
+          focal = 11;
+          break;
+        case (14):
+          focal = 15;
+          break;
+      }
+      
+
+      /*Serial.println("Magnet at pin hallPin"); // 18 17 16 15 14
+    Serial.println(hallPin[i]);
+    Serial.println(value);*/
+    }
   }
 }
 
@@ -1004,7 +1043,7 @@ void loop() {
   //stillOne(); // STILL NM
   //stillMany(); // STILL NM
 
-  //traceOne(); // PERFECT NM
+  traceOne(); // PERFECT NM
   //traceOne(r5, g5, b5, wr, 10, p1); // PERFECT 1
   //traceOne(r5, g5, b5, wr, 10, p2); // PERFECT 2
   //traceOne(r5, g5, b5, wr, 10, p3); // PERFECT 3

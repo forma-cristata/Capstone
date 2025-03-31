@@ -198,6 +198,7 @@ void setLed(int L, int R, int G, int B, int W) {
 }
 void christmas(int r[] = r6, int g[] = g4, int b[] = b4, int w[] = wr, int delayTime = 10) {
   int i = 0;
+  magnetCheck();
   if (pin == -1) {
     for (int aa = 0; aa < 2; aa++) {
       delay(delayTime);
@@ -273,7 +274,7 @@ void christmas(int r[] = r6, int g[] = g4, int b[] = b4, int w[] = wr, int delay
   }
 }
 
-void loop() {
+void magnetCheck() {
   for (int i = 0; i < 5; i++) {
     value = (analogRead(hallPin[i]) - offset) * span;
    
@@ -303,6 +304,10 @@ void loop() {
     Serial.println(value);*/
     }
   }
+}
+
+void loop() {
+  
   
   christmas();
   /*
