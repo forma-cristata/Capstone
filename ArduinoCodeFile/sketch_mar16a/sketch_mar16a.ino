@@ -6,6 +6,32 @@
 
 CRGB leds[NUM_LEDS];
 
+int wr[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+int r1[] = {255, 255, 255, 136, 0, 0, 0, 0, 0, 0, 0, 136, 255, 255, 255, 255};
+int g1[] = {0, 136, 255, 255, 255, 255, 255, 255, 255, 136, 0, 0, 0, 0, 0, 0};
+int b1[] = {0, 0, 0, 0, 0, 68, 136, 187, 255, 255, 255, 255, 255, 187, 136, 68};
+
+int r2[] = { 255, 255, 255, 255, 0, 255, 255, 255, 255, 255, 255, 255, 0, 255, 255, 255 };
+int g2[] = { 0, 85, 40, 15, 0, 45, 59, 2, 0, 85, 40, 15, 0, 45, 59, 2 };
+int b2[] = { 0, 1, 0, 2, 239, 3, 0, 0, 0, 1, 0, 2, 239, 3, 0, 0 };
+
+int r4[] = { 161, 205, 172, 19, 71, 215, 205, 190, 190, 205, 215, 71, 19, 172, 205, 161 };
+int g4[] = { 0, 52, 19, 21, 0, 35, 38, 40, 20, 38, 33, 0, 55, 19, 52, 0 };
+int b4[] = { 0, 0, 42, 52, 35, 0, 15, 82, 82, 35, 0, 65, 75, 10, 0, 12 };
+
+int r5[] = { 255, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30 };
+int g5[] = { 0, 75, 25, 27, 75, 45, 50, 27, 75, 27, 36, 5, 75, 27, 75, 50 };
+int b5[] = { 0, 20, 155, 55, 120, 155, 55, 55, 10, 155, 55, 155, 55, 25, 155, 20 };
+
+int r6[] = { 255, 0, 255, 0, 255, 255, 0, 0, 0, 255, 255, 0, 0, 255, 0, 255 };
+int g6[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+int b6[] = { 255, 0, 255, 255, 255, 0, 255, 255, 255, 255, 0, 255, 255, 255, 0, 0 };
+
+int r7[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+int g7[] = { 255, 200, 100, 150, 50, 255, 180, 230, 90, 50, 180, 210, 0, 120, 100, 255 };
+int b7[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
 void setup() {
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
   randomSeed(SEED);
@@ -188,19 +214,19 @@ void setLed(int L, int R, int G, int B, int W) {
   }
 }
 
-void stillOne(int r, int g, int b, int w) {
+void stillOne(int r = 255, int g = 0, int b = 255, int w = 0) {
   for (int i = 0; i < 16; i++) {
     setLed(i, r, g, b, w);
   }
 }
 
-void stillMany(int r[], int g[], int b[], int w[]) {
+void stillMany(int r[] = r1, int g[] = g1, int b[] = b1, int w[] = wr) {
   for (int i = 0; i < 16; i++) {
     setLed(i, r[i], g[i], b[i], w[i]);
   }
 }
 
-void traceOne(int R[], int G[], int B[], int W[], int delayTime, int focal = -1) {
+void traceOne(int R[] = r5, int G[] = g5, int B[] = b5, int W[] = wr, int delayTime = 10, int focal = -1) {
   for (int i = 0; i < 16; i++) {
     setLed(i, R[0], G[0], B[0], W[0]);
   }
@@ -233,7 +259,7 @@ void traceOne(int R[], int G[], int B[], int W[], int delayTime, int focal = -1)
   }
 }
 
-void progressive(int R[], int G[], int B[], int W[], int delayTime, int focal = -1) {
+void progressive(int R[] = r2, int G[] = g2, int B[] = b2, int W[] = wr, int delayTime = 7, int focal = -1) {
   for (int i = 0; i < 16; i++) {
     setLed(i, R[0], G[0], B[0], W[0]);
   }
@@ -279,7 +305,7 @@ void progressive(int R[], int G[], int B[], int W[], int delayTime, int focal = 
   }
 }
 
-void traceMany(int R[], int G[], int B[], int W[], int delayTime, int focal = -1) {
+void traceMany(int R[] = r4, int G[] = g4, int B[] = b4, int W[] = wr, int delayTime = 15, int focal = -1) {
   for (int i = 0; i < 16; i++) {
     setLed(i, R[0], G[0], B[0], W[0]);
   }
@@ -311,7 +337,7 @@ void traceMany(int R[], int G[], int B[], int W[], int delayTime, int focal = -1
   }
 }
 
-void strobeChange(int R[], int G[], int B[], int W[], int delayTime, int focal = -1) {
+void strobeChange(int R[] = r4, int G[] = wr, int B[] = b5, int W[] = wr, int delayTime = 2, int focal = -1) {
   for (int i = 0; i < 16; i++) {
     setLed(i, R[0], G[0], B[0], W[0]);
   }
@@ -350,7 +376,7 @@ void strobeChange(int R[], int G[], int B[], int W[], int delayTime, int focal =
 }
 
 // this function sucks. It needs changed entirely
-void comfortSongStrobe(int r[], int g[], int b[], int w[], int delayTime, int focal = -1) {
+void comfortSongStrobe(int r[] = r6, int g[] = g5, int b[] = b6, int w[] = wr, int delayTime = 3, int focal = -1) {
 
 
   // 1 2 3 2 4 3 2 1 0 1 2 1 3 2 1 0
@@ -404,7 +430,7 @@ void comfortSongStrobe(int r[], int g[], int b[], int w[], int delayTime, int fo
   }
 }
 
-void blender(int r[], int g[], int b[], int w[], int delayTime, int focal = -1) {
+void blender(int r[] = r6, int g[] = g4, int b[] = b2, int w[] = wr, int delayTime = 2, int focal = -1) {
   int numLeds = 16;
   int numColors = 16;
   if (focal == -1) {  // non-magnet mode
@@ -458,7 +484,7 @@ void blender(int r[], int g[], int b[], int w[], int delayTime, int focal = -1) 
   }
 }
 
-void techno(int r[], int g[], int b[], int w[], int delayTime, int focal = -1) {
+void techno(int r[] = r4, int g[] = g5, int b[] = b5, int w[] = wr, int delayTime = 1, int focal = -1) {
   if (focal == -1) {  // Not Magnet Mode
     while (true) {
       for (int i = 0; i < 11; i++) {
@@ -553,12 +579,64 @@ void techno(int r[], int g[], int b[], int w[], int delayTime, int focal = -1) {
             jb++;
           }
         }
+
+        for (int j = 0; j < focal; j++) {
+          if (jb < 16) {
+            int k = j + 1;
+            int l = j + 2;
+            int y = j + 3;
+            int z = j + 4;
+
+            int kb = jb + 1;
+            int lb = jb + 2;
+            int yb = jb + 3;
+            int zb = jb + 4;
+
+            for (int x = 0; x < 2; x++) {
+              setLed(j, r[i], g[i], b[i], w[i]);
+              setLed(jb, r[i], g[i], b[i], w[i]);
+
+              delay(delayTime * 2);
+              setLed(j, 0, 0, 0, 0);
+              setLed(jb, 0, 0, 0, 0);
+
+              setLed(k, r[m], g[m], b[m], w[m]);
+              setLed(kb, r[m], g[m], b[m], w[m]);
+
+              delay(delayTime * 2);
+              setLed(k, 0, 0, 0, 0);
+              setLed(kb, 0, 0, 0, 0);
+
+              setLed(l, r[n], g[n], b[n], w[n]);
+              setLed(lb, r[n], g[n], b[n], w[n]);
+
+              delay(delayTime * 2);
+              setLed(l, 0, 0, 0, 0);
+              setLed(lb, 0, 0, 0, 0);
+
+              setLed(y, r[o], g[o], b[o], w[o]);
+              setLed(yb, r[o], g[o], b[o], w[o]);
+
+              delay(delayTime * 2);
+              setLed(y, 0, 0, 0, 0);
+              setLed(yb, 0, 0, 0, 0);
+
+              setLed(z, r[p], g[p], b[p], w[p]);
+              setLed(zb, r[p], g[p], b[p], w[p]);
+
+              delay(delayTime * 2);
+              setLed(z, 0, 0, 0, 0);
+              setLed(zb, 0, 0, 0, 0);
+            }
+            jb++;
+          }
+        }
       }
     }
   }
 }
 
-void trance(int* R, int* G, int* B, int* W, int delayTime, int focal = -1) {
+void trance(int* R = r1, int* G = g2, int* B = b4, int* W = wr, int delayTime = 1, int focal = -1) {
   int sc1 = 4;
   int sc2 = 2;
   int ls = 3;
@@ -593,8 +671,6 @@ void trance(int* R, int* G, int* B, int* W, int delayTime, int focal = -1) {
       }
     }
   } else {
-    int focal = 7;  // Set the focal point, it can be from 0 to 15
-
     for (int j = 0; j <= 15; j++) {
       // Calculate the distance from the focal point (spread outwards)
       int distance = abs(focal - j);  // Distance from focal point
@@ -630,7 +706,7 @@ void trance(int* R, int* G, int* B, int* W, int delayTime, int focal = -1) {
   }
 }
 
-void mold(int* R, int* G, int* B, int* W, int delayTime, int focal = -1) {
+void mold(int* R = r4, int* G = g4, int* B = b5, int* W = wr, int delayTime = 1, int focal = -1) {
   int strobeCount1 = 2;
   int strobeCount2 = 2;
   int ledsPerGroup = 12;
@@ -742,7 +818,7 @@ void mold(int* R, int* G, int* B, int* W, int delayTime, int focal = -1) {
   }
 }
 
-void funky(int* R, int* G, int* B, int* W, int delayTime, int focal = -1) {
+void funky(int* R = r5, int* G = g5, int* B = b6, int* W = wr, int delayTime = 8, int focal = -1) {
   int strobeCount1 = 4;
   int strobeCount2 = 4;
   int ledsPerGroup = 1;
@@ -830,7 +906,7 @@ void funky(int* R, int* G, int* B, int* W, int delayTime, int focal = -1) {
   }
 }
 
-void christmas(int r[], int g[], int b[], int w[], int delayTime, int focal = -1) {
+void christmas(int r[] = r6, int g[] = g4, int b[] = b4, int w[] = wr, int delayTime = 10, int focal = -1) {
   int i = 0;
   if (focal == -1) {
     while (true) {
@@ -914,56 +990,109 @@ void loop() {
   int rr[] = { random(0, 256), random(0, 256), random(0, 256), random(0, 256), random(0, 256), random(0, 256), random(0, 256), random(0, 256) };
   int gr[] = { random(0, 256), random(0, 256), random(0, 256), random(0, 256), random(0, 256), random(0, 256), random(0, 256), random(0, 256) };
   int br[] = { random(0, 256), random(0, 256), random(0, 256), random(0, 256), random(0, 256), random(0, 256), random(0, 256), random(0, 256) };
-  int wr[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-  // 16 yes
-  int r2[] = { 255, 255, 255, 255, 0, 255, 255, 255, 255, 255, 255, 255, 0, 255, 255, 255 };
-  int g2[] = { 0, 85, 40, 15, 0, 45, 59, 2, 0, 85, 40, 15, 0, 45, 59, 2 };
-  int b2[] = { 0, 1, 0, 2, 239, 3, 0, 0, 0, 1, 0, 2, 239, 3, 0, 0 };
-
-  // 16 yes
-  int r4[] = { 161, 205, 172, 19, 71, 215, 205, 190, 190, 205, 215, 71, 19, 172, 205, 161 };
-  int g4[] = { 0, 52, 19, 21, 0, 35, 38, 40, 20, 38, 33, 0, 55, 19, 52, 0 };
-  int b4[] = { 0, 0, 42, 52, 35, 0, 15, 82, 82, 35, 0, 65, 75, 10, 0, 12 };
-  // 16 yes
-  int r5[] = { 255, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30 };
-  int g5[] = { 0, 75, 25, 27, 75, 45, 50, 27, 75, 27, 36, 5, 75, 27, 75, 50 };
-  int b5[] = { 0, 20, 155, 55, 120, 155, 55, 55, 10, 155, 55, 155, 55, 25, 155, 20 };
-  // 16 yes
-  int r6[] = { 255, 0, 255, 0, 255, 255, 0, 0, 0, 255, 255, 0, 0, 255, 0, 255 };
-  int g6[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-  int b6[] = { 255, 0, 255, 255, 255, 0, 255, 255, 255, 255, 0, 255, 255, 255, 0, 0 };
-  // 16
-  int r7[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-  int g7[] = { 255, 200, 100, 150, 50, 255, 180, 230, 90, 50, 180, 210, 0, 120, 100, 255 };
-  int b7[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
-
-  
   // 3, 6, 8, 11, 14
   // MAGNET POSITIONS ^^
+  int p1 = 3;
+  int p2 = 6;
+  int p3 = 8;
+  int p4 = 11;
+  int p5 = 15;
+
+  /* DONE */
+
+  //stillOne(); // STILL NM
+  //stillMany(); // STILL NM
+
+  //traceOne(); // PERFECT NM
+  //traceOne(r5, g5, b5, wr, 10, p1); // PERFECT 1
+  //traceOne(r5, g5, b5, wr, 10, p2); // PERFECT 2
+  //traceOne(r5, g5, b5, wr, 10, p3); // PERFECT 3
+  //traceOne(r5, g5, b5, wr, 10, p4); // PERFECT 4
+  //traceOne(r5, g5, b5, wr, 10, p5); // PERFECT 5
+  
+  //progressive(); // PERFECT NM
+  //progressive(r2, g2, b2, wr, 7, p1); // PERFECT 1
+  //progressive(r2, g2, b2, wr, 7, p2); // PERFECT 2
+  //progressive(r2, g2, b2, wr, 40, p3); // PERFECT 3
+  //progressive(r2, g2, b2, wr, 7, p4); // PERFECT 4
+  //progressive(r2, g2, b2, wr, 7, p5 - 1); // PERFECT 5
+
+  // TODO CHECK WHILE TRUE LOOPS? CHECK POSITIONING. CHECK EVERY COLOR BITCH
+  // ORGANIZE SETTINGS TO BE WILDLY DIFFERENT OR BLENDING INTO ONE ANOTHER, NO IN BETWEEN
+  // TODO MAKE SURE DELAY FROM MAGNET -> NON-MAGNET IS DOUBLED. NONMAGENT = 2; MAGNET = 1
+  // TODO SWITCH LOOP DIRECTION EVERY SETTING BACK AND FORTH RANDOMLY AT START OF LOOP
+  // TODO MAKE SURE ALL SETS MATCH UP TO A SPECIFIC SONG
+  // TODO TEST DELAY IS EFFECTIVE
 
 
-  // DONE
-  //traceOne(r5, g5, b5, wr, 10); // PERFECT
-  //traceOne(r5, g5, b5, wr, 10, 4); // PERFECT 1st TRI
-  traceOne(r5, g5, b5, wr, 10, 8); // PERFECT 1st TRI
-  //progressive(r2, g2, b2, wr, 7);
-  //traceMany(r4, g4, b4, wr, 30, 8);
-  //strobeChange(r5, g5, b5, wr, 1, 2);
-  //comfortSongStrobe(r6, g6, b6, wr, 8, 8);
-  //stillOne(255, 0, 255, wr[0]);
-  //stillMany(r7, g7, b7, wr);
-  //blender(rr, gr, b2, wr, 2, 8);
-  //techno(rr, g2, b2, wr, 1, 8);
-  //trance(r5, g2, b4, wr, 1, 8);
-  //mold(r4, g4, b5, wr, 1, 8);
-  //funky(r5, g5, b6, wr, 8, 3);
-  //christmas(r6, g6, b7, wr, 10, 8);  // THIS IS SMOLDER NEVER DELETE IT
+  //traceMany(); // PERFECT NM
+  //traceMany(r4, g4, b4, wr, 15, p1); // PERFECT 1
+  //traceMany(r4, g4, b4, wr, 15, p2); // PERFECT 2
+  //traceMany(r4, g4, b4, wr, 15, p3); // PERFECT 3
+  //traceMany(r4, g4, b4, wr, 15, p4); // PERFECT 4
+  //traceMany(r4, g4, b4, wr, 15, p5); // PERFECT 5
+
+  //strobeChange(); // PERFECT NM
+  //strobeChange(r4, wr, b5, wr, 2, p1); // PERFECT 1
+  //strobeChange(r4, wr, b5, wr, 2, p2); // PERFECT 2
+  //strobeChange(r4, wr, b5, wr, 2, p3); // PERFECT 3
+  //strobeChange(r4, wr, b5, wr, 2, p4); // PERFECT 4
+  //strobeChange(r4, wr, b5, wr, 2, p5); // PERFECT 5
+
+  //comfortSongStrobe(); // PERFECT NM
+  //comfortSongStrobe(r6, g5, b6, wr, 3, p1); // PERFECT 1 // TODO FLAWED DOES NOT GO ALL THE WAY TO THE RIGHT
+  //comfortSongStrobe(r6, g5, b6, wr, 3, p2); // PERFECT 2 // ^^
+  //comfortSongStrobe(r6, g5, b6, wr, 3, p3); // PERFECT 3 // ^^
+  //comfortSongStrobe(r6, g5, b6, wr, 3, p4); // PERFECT 4 // ^^
+  //comfortSongStrobe(r6, g5, b6, wr, 3, p5); // PERFECT 5 // All good dude
+  
+  //blender(); // PERFECT NM
+  //blender(r6, g4, b2, wr, 2, p1); // PERFECT 1
+  //blender(r6, g4, b2, wr, 2, p2); // PERFECT 2
+  //blender(r6, g4, b2, wr, 2, p3); // PERFECT 3
+  //blender(r6, g4, b2, wr, 2, p4); // PERFECT 4
+  //blender(r6, g4, b2, wr, 2, p5); // PERFECT 5
+
+  //techno(); // PERFECT NM
+  //techno(r4, g5, b5, wr, 1, p1); // PERFECT 1
+  //techno(r4, g5, b5, wr, 1, p2); // PERFECT 2
+  //techno(r4, g5, b5, wr, 1, p3); // PERFECT 3
+  //techno(r4, g5, b5, wr, 1, p4); // PERFECT 4 // TODO FLAWED
+  //techno(r4, g5, b5, wr, 1, p5); // PERFECT 5 // ^^
+
+  //trance(); // PERFECT NM
+  //trance(r5, g2, b4, wr, 1, p1); // PERFECT 1
+  //trance(r5, g2, b4, wr, 1, p2); // PERFECT 2
+  //trance(r5, g2, b4, wr, 1, p3); // PERFECT 3
+  //trance(r5, g2, b4, wr, 1, p4); // PERFECT 4
+  //trance(r5, g2, b4, wr, 1, p5); // PERFECT 5
+
+  //mold(); // PERFECT NM
+  //mold(r4, g4, b5, wr, 1, p1); // PERFECT 1
+  //mold(r4, g4, b5, wr, 1, p2); // PERFECT 2
+  //mold(r4, g4, b5, wr, 1, p3); // PERFECT 3
+  //mold(r4, g4, b5, wr, 1, p4); // PERFECT 4
+  //mold(r4, g4, b5, wr, 1, p5); // PERFECT 5
+
+  //funky(); // PERFECT NM
+  //funky(r5, g5, b6, wr, 8, p1); // PERFECT 1
+  //funky(r5, g5, b6, wr, 8, p2); // PERFECT 2
+  //funky(r5, g5, b6, wr, 8, p3); // PERFECT 3
+  //funky(r5, g5, b6, wr, 8, p4); // PERFECT 4
+  //funky(r5, g5, b6, wr, 8, p5); // PERFECT 5
+
+  //christmas(); // PERFECT NM
+  //christmas(r6, g4, g4, wr, 10, p1); // PERFECT 1
+  //christmas(r6, g4, g4, wr, 10, p2); // PERFECT 2
+  //christmas(r6, g4, g4, wr, 10, p3); // PERFECT 3
+  //christmas(r6, g4, g4, wr, 10, p4); // PERFECT 4
+  //christmas(r6, g4, g4, wr, 10, p5); // PERFECT 5
 
   // TESTING
-  // something(r7, b7, gr, wr, 1, 1);
-  // somethingElse(rr, g2, b4, wr, 1, 1);
+
 
   // INCOMPLETE
+  //something(r7, b7, gr, wr, 1, 1);
+  // somethingElse(rr, g2, b4, wr, 1, 1);
 }
