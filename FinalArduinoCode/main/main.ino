@@ -1318,16 +1318,13 @@ public:
 private:
     MagnetSensor& magSensor;
 public:
-  void run(int focal = -1) override {
+  void run(int focal = -1) override 
+  {
     int i = 0;
+     
     if (focal == -1) {
-        delay(delayTime);
-        i++;
-
-        i = i % 2;
-
-        for (int xy = 0; xy < 13; xy++) {
-          int originalFocal = focal;
+      while (i < 16) {
+      int originalFocal = focal;
                   magSensor.check();
                   focal = magSensor.getFocal();
                   Serial.println("Focal: " + String(focal));
@@ -1337,6 +1334,11 @@ public:
                       run(focal);
                       return;
                   }
+        delay(delayTime);
+        i++;
+        i = i % 2;
+        for (int xy = 0; xy < 13; xy++) {
+         
           if (i == 0) {
             for (int j = 0; j < 18; j += 2) {
               ledController.setLed(j, pattern.red[xy], pattern.green[xy], pattern.blue[xy], pattern.white[xy]);
@@ -1356,14 +1358,10 @@ public:
             }
           }
         }
+      }
     } else {
-        delay(delayTime);
-        i++;
-
-        i = i % 2;
-
-        for (int xy = 0; xy < 13; xy++) {
-          int originalFocal = focal;
+      while(i < 16) {
+      int originalFocal = focal;
                   magSensor.check();
                   focal = magSensor.getFocal();
                   Serial.println("Focal: " + String(focal));
@@ -1373,6 +1371,12 @@ public:
                       run(focal);
                       return;
                   }
+        delay(delayTime);
+        i++;
+
+        i = i % 2;
+
+        for (int xy = 0; xy < 13; xy++) {
           if (i == 0) {
             for (int j = focal; j < 18; j += 2) {
               ledController.setLed(j, pattern.red[xy], pattern.green[xy], pattern.blue[xy], pattern.white[xy]);
@@ -1407,6 +1411,7 @@ public:
             }
           }
         }
+      }
     }
   }
 };
