@@ -245,9 +245,10 @@ public:
   }
 
   void check() {
+    float highestVal = 0;
     for (int i = 0; i < numPins; i++) {
       float value = (analogRead(hallPins[i]) - offset) * span;
-
+      highestVal = value > highestVal ? value : highestVal;
       if (value > 5) {
         switch (hallPins[i]) {
           case (18): focal = 2; break;
@@ -256,6 +257,10 @@ public:
           case (15): focal = 12; break;
           case (14): focal = 15; break;
         }
+      }
+      else if (highestVal < 5)
+      {
+        focal = -1;
       }
     }
   }
@@ -443,17 +448,26 @@ public:
 
 class ProgressiveEffect : public LightEffect {
 public:
-  ProgressiveEffect(LEDController& controller, ColorPattern colorPattern, int delay)
-    : LightEffect(controller, colorPattern, delay) {
+  ProgressiveEffect(LEDController& controller, ColorPattern colorPattern, int delay, MagnetSensor& sensor)
+    : LightEffect(controller, colorPattern, delay), magSensor(sensor) {
   }
-
+private:
+    MagnetSensor& magSensor;
+public:
   void run(int focal = -1) override {
-    for (int i = 0; i < 16; i++) {
-      ledController.setLed(i, pattern.red[0], pattern.green[0], pattern.blue[0], pattern.white[0]);
-    }
+    
     if (focal != -1) {
-      while (true) {
         for (int j = 0; j < 16; j++) {
+          int originalFocal = focal;
+                  magSensor.check();
+                  focal = magSensor.getFocal();
+                  Serial.println("Focal: " + String(focal));
+
+                  // If focal point changed, restart effect with new value
+                  if (focal != originalFocal) {
+                      run(focal);
+                      return;
+                  }
           for (int i = 0; i < 8; i++) {
             int ledIndex = (focal + i) % 16;
             int ledIndex2 = (focal - i + 16) % 16;
@@ -467,11 +481,19 @@ public:
             ledController.setLed(ledIndex2, pattern.red[j], pattern.green[j], pattern.blue[j], pattern.white[j]);
             delay(delayTime);
           }
-        }
       }
     } else {
-      while (true) {
         for (int j = 0; j < 16; j++) {
+          int originalFocal = focal;
+                  magSensor.check();
+                  focal = magSensor.getFocal();
+                  Serial.println("Focal: " + String(focal));
+
+                  // If focal point changed, restart effect with new value
+                  if (focal != originalFocal) {
+                      run(focal);
+                      return;
+                  }
           for (int i = 0; i < 16; i++) {
             int ledIndex = (j + i) % 16;
             int ledIndex2 = (j + i + 1) % 16;
@@ -487,23 +509,33 @@ public:
           }
         }
       }
-    }
   }
 };
 
 class TraceManyEffect : public LightEffect {
 public:
-  TraceManyEffect(LEDController& controller, ColorPattern colorPattern, int delay)
-    : LightEffect(controller, colorPattern, delay) {
+  TraceManyEffect(LEDController& controller, ColorPattern colorPattern, int delay, MagnetSensor& sensor)
+    : LightEffect(controller, colorPattern, delay), magSensor(sensor) {
   }
-
+private:
+    MagnetSensor& magSensor;
+public:
   void run(int focal = -1) override {
     for (int i = 0; i < 16; i++) {
       ledController.setLed(i, pattern.red[0], pattern.green[0], pattern.blue[0], pattern.white[0]);
     }
     if (focal == -1) {
-      while (true) {
         for (int i = 0; i < 17; i++) {
+          int originalFocal = focal;
+                  magSensor.check();
+                  focal = magSensor.getFocal();
+                  Serial.println("Focal: " + String(focal));
+
+                  // If focal point changed, restart effect with new value
+                  if (focal != originalFocal) {
+                      run(focal);
+                      return;
+                  }
           for (int j = 0; j < 8; j++) {
             int offset = (i + j * 2) % 17;
             ledController.setLed(offset, pattern.red[(i + 1) % 8], pattern.green[(i + 1) % 16], pattern.blue[(i + 1) % 16], pattern.white[(i + 1) % 16]);
@@ -513,10 +545,18 @@ public:
             ledController.setLed(offset, pattern.red[(i + 1) % 8], pattern.green[(i + 2) % 16], pattern.blue[(i + 2) % 16], pattern.white[(i + 2) % 16]);
           }
         }
-      }
     } else {
-      while (true) {
         for (int i = 0; i < 16; i++) {
+          int originalFocal = focal;
+                  magSensor.check();
+                  focal = magSensor.getFocal();
+                  Serial.println("Focal: " + String(focal));
+
+                  // If focal point changed, restart effect with new value
+                  if (focal != originalFocal) {
+                      run(focal);
+                      return;
+                  }
           for (int j = 0; j < 8; j++) {
             int position1 = (focal + 1 + j) % 16;
             int position2 = (16 + focal - j) % 16;
@@ -525,25 +565,36 @@ public:
             ledController.setLed(position2, pattern.red[(i + 1) % 16], pattern.green[(i + 2) % 16], pattern.blue[(i + 2) % 16], pattern.white[(i + 2) % 16]);
           }
         }
-      }
+      
     }
   }
 };
 
 class ComfortSongStrobeEffect : public LightEffect {
 public:
-  ComfortSongStrobeEffect(LEDController& controller, ColorPattern colorPattern, int delay)
-    : LightEffect(controller, colorPattern, delay) {
+  ComfortSongStrobeEffect(LEDController& controller, ColorPattern colorPattern, int delay, MagnetSensor& sensor)
+    : LightEffect(controller, colorPattern, delay), magSensor(sensor) {
   }
-
+private:
+    MagnetSensor& magSensor;
+public:
   void run(int focal = -1) override {
     int patternIndices[] = { 1, 2, 3, 2, 4, 3, 2, 1, 0, 1, 2, 1, 3, 2, 1, 0 };
     int pattern2Indices[] = { 7, 8, 9, 8, 10, 9, 8, 7, 6, 7, 8, 7, 9, 8, 7, 6 };
     int pattern3Indices[] = { 13, 14, 15, 14, 16, 15, 14, 13, 12, 13, 14, 13, 15, 14, 13, 12 };
 
     if (focal == -1) {
-      while (true) {
         for (int x = 0; x < 16; x++) {
+          int originalFocal = focal;
+                  magSensor.check();
+                  focal = magSensor.getFocal();
+                  Serial.println("Focal: " + String(focal));
+
+                  // If focal point changed, restart effect with new value
+                  if (focal != originalFocal) {
+                      run(focal);
+                      return;
+                  }
           for (int i = 0; i < delayTime; i++) {
             ledController.setLed(patternIndices[x], pattern.red[x], pattern.green[x], pattern.blue[x], pattern.white[x]);
             ledController.setLed(pattern2Indices[x], pattern.red[x], pattern.green[x], pattern.blue[x], pattern.white[x]);
@@ -555,11 +606,19 @@ public:
             delay(5);
           }
         }
-      }
     } else {
       int pattern4Indices[] = { 3, 4, 5, 4, 6, 5, 4, 3, 2, 3, 4, 3, 5, 4, 3, 2 };
-      while (true) {
         for (int x = 0; x < 16; x++) {
+          int originalFocal = focal;
+                  magSensor.check();
+                  focal = magSensor.getFocal();
+                  Serial.println("Focal: " + String(focal));
+
+                  // If focal point changed, restart effect with new value
+                  if (focal != originalFocal) {
+                      run(focal);
+                      return;
+                  }
           for (int i = 0; i < delayTime; i++) {
             int led1 = pattern4Indices[x] + focal;
             if (led1 < 0) {
@@ -582,37 +641,65 @@ public:
             delay(5);
           }
         }
-      }
     }
   }
 };
 
 class BlenderEffect : public LightEffect {
 public:
-  BlenderEffect(LEDController& controller, ColorPattern colorPattern, int delay)
-    : LightEffect(controller, colorPattern, delay) {
+  BlenderEffect(LEDController& controller, ColorPattern colorPattern, int delay, MagnetSensor& sensor)
+    : LightEffect(controller, colorPattern, delay), magSensor(sensor) {
   }
-
+private:
+    MagnetSensor& magSensor;
+public:
   void run(int focal = -1) override {
     int numLeds = 16;
     int numColors = 16;
     if (focal == -1) {
-      while (true) {
         for (int i = 0; i < numLeds; i++) {
+          int originalFocal = focal;
+                  magSensor.check();
+                  focal = magSensor.getFocal();
+                  Serial.println("Focal: " + String(focal));
+
+                  // If focal point changed, restart effect with new value
+                  if (focal != originalFocal) {
+                      run(focal);
+                      return;
+                  }
           int colorIndex = (i + millis() / delayTime) % numColors;
           ledController.setLed(i, pattern.red[colorIndex], pattern.green[colorIndex], pattern.blue[colorIndex], pattern.white[colorIndex]);
         }
         delay(delayTime);
 
         for (int i = 0; i < numLeds; i++) {
+          int originalFocal = focal;
+                  magSensor.check();
+                  focal = magSensor.getFocal();
+                  Serial.println("Focal: " + String(focal));
+
+                  // If focal point changed, restart effect with new value
+                  if (focal != originalFocal) {
+                      run(focal);
+                      return;
+                  }
           int colorIndex = (numColors - (i + millis() / delayTime) % numColors) % numColors;
           ledController.setLed(i, pattern.red[colorIndex], pattern.green[colorIndex], pattern.blue[colorIndex], pattern.white[colorIndex]);
         }
         delay(delayTime);
-      }
     } else {
-      while (true) {
         for (int i = 0; i < numLeds / 2; i++) {
+          int originalFocal = focal;
+                  magSensor.check();
+                  focal = magSensor.getFocal();
+                  Serial.println("Focal: " + String(focal));
+
+                  // If focal point changed, restart effect with new value
+                  if (focal != originalFocal) {
+                      run(focal);
+                      return;
+                  }
           int led1 = focal - i;
           int led2 = focal + i;
 
@@ -629,6 +716,16 @@ public:
         delay(delayTime);
 
         for (int i = 0; i < numLeds / 2; i++) {
+          int originalFocal = focal;
+                  magSensor.check();
+                  focal = magSensor.getFocal();
+                  Serial.println("Focal: " + String(focal));
+
+                  // If focal point changed, restart effect with new value
+                  if (focal != originalFocal) {
+                      run(focal);
+                      return;
+                  }
           int led1 = focal - i;
           int led2 = focal + i;
 
@@ -643,21 +740,31 @@ public:
           ledController.setLed(led2, pattern.red[colorIndex], pattern.green[colorIndex], pattern.blue[colorIndex], pattern.white[colorIndex]);
         }
         delay(delayTime);
-      }
     }
   }
 };
 
 class TechnoEffect : public LightEffect {
 public:
-  TechnoEffect(LEDController& controller, ColorPattern colorPattern, int delay)
-    : LightEffect(controller, colorPattern, delay) {
+  TechnoEffect(LEDController& controller, ColorPattern colorPattern, int delay, MagnetSensor& sensor)
+    : LightEffect(controller, colorPattern, delay), magSensor(sensor) {
   }
-
+private:
+    MagnetSensor& magSensor;
+public:
   void run(int focal = -1) override {
     if (focal == -1) {
-      while (true) {
         for (int i = 0; i < 16; i++) {
+          int originalFocal = focal;
+                  magSensor.check();
+                  focal = magSensor.getFocal();
+                  Serial.println("Focal: " + String(focal));
+
+                  // If focal point changed, restart effect with new value
+                  if (focal != originalFocal) {
+                      run(focal);
+                      return;
+                  }
           int m = (i + 1) % 16;
           int n = (i + 2) % 16;
           int o = (i + 3) % 16;
@@ -687,20 +794,18 @@ public:
             }
           }
         }
-      }
     } else {
-      while (true) {
-        /*for (int i = 0; i < 16; i++) {
-          int m = (i + 1) % 16;
-          int n = (i + 2) % 16;
-          int o = (i + 3) % 16;
-          int p = (i + 4) % 16;
-          for (int j = 15; j >= 0; j--) {
-            int k = (j + 1) % 16;
-            int l = (j + 2) % 16;
-            int y = (j + 3) % 16;
-            int z = (j + 4) % 16;*/
         for (int i = 0; i < 16; i++) {
+          int originalFocal = focal;
+                  magSensor.check();
+                  focal = magSensor.getFocal();
+                  Serial.println("Focal: " + String(focal));
+
+                  // If focal point changed, restart effect with new value
+                  if (focal != originalFocal) {
+                      run(focal);
+                      return;
+                  }
           int m = (i + 1) % 16;
           int n = (i + 2) % 16;
           int o = (i + 3) % 16;
@@ -811,22 +916,33 @@ public:
           }
         }
       }
-    }
   }
 };
 
 class TranceEffect : public LightEffect {
 public:
-  TranceEffect(LEDController& controller, ColorPattern colorPattern, int delay)
-    : LightEffect(controller, colorPattern, delay) {
+  TranceEffect(LEDController& controller, ColorPattern colorPattern, int delay, MagnetSensor& sensor)
+    : LightEffect(controller, colorPattern, delay), magSensor(sensor) {
   }
-
+private:
+    MagnetSensor& magSensor;
+public:
   void run(int focal = -1) override {
     int sc1 = 4;  // Fixed the undefined variable 'a'
     int sc2 = 2;
     int ls = 3;
     if (focal == -1) {
       for (int j = 0; j <= 15; j++) {
+        int originalFocal = focal;
+                  magSensor.check();
+                  focal = magSensor.getFocal();
+                  Serial.println("Focal: " + String(focal));
+
+                  // If focal point changed, restart effect with new value
+                  if (focal != originalFocal) {
+                      run(focal);
+                      return;
+                  }
         for (int k = 0; k < sc1; k++) {
           for (int i = 0; i < ls; i++) {
             int li = j + i;
@@ -863,6 +979,16 @@ public:
       }
     } else {
       for (int j = 0; j <= 15; j++) {
+        int originalFocal = focal;
+                  magSensor.check();
+                  focal = magSensor.getFocal();
+                  Serial.println("Focal: " + String(focal));
+
+                  // If focal point changed, restart effect with new value
+                  if (focal != originalFocal) {
+                      run(focal);
+                      return;
+                  }
         // Calculate the distance from the focal point (spread outwards)
         int distance = abs(focal - j);  // Distance from focal point
 
@@ -908,10 +1034,12 @@ public:
 
 class MoldEffect : public LightEffect {
 public:
-  MoldEffect(LEDController& controller, ColorPattern colorPattern, int delay)
-    : LightEffect(controller, colorPattern, delay) {
+  MoldEffect(LEDController& controller, ColorPattern colorPattern, int delay, MagnetSensor& sensor)
+    : LightEffect(controller, colorPattern, delay), magSensor(sensor) {
   }
-
+private:
+    MagnetSensor& magSensor;
+public:
   void run(int focal = -1) override {
     int strobeCount1 = 2;
     int strobeCount2 = 2;
@@ -1027,10 +1155,12 @@ public:
 
 class FunkyEffect : public LightEffect {
 public:
-  FunkyEffect(LEDController& controller, ColorPattern colorPattern, int delay)
-    : LightEffect(controller, colorPattern, delay) {
+  FunkyEffect(LEDController& controller, ColorPattern colorPattern, int delay, MagnetSensor& sensor)
+    : LightEffect(controller, colorPattern, delay), magSensor(sensor) {
   }
-
+private:
+    MagnetSensor& magSensor;
+public:
   void run(int focal = -1) override {
     int strobeCount1 = 4;
     int strobeCount2 = 4;
@@ -1120,10 +1250,12 @@ public:
 
 class ChristmasEffect : public LightEffect {
 public:
-  ChristmasEffect(LEDController& controller, ColorPattern colorPattern, int delay)
-    : LightEffect(controller, colorPattern, delay) {
+  ChristmasEffect(LEDController& controller, ColorPattern colorPattern, int delay, MagnetSensor& sensor)
+    : LightEffect(controller, colorPattern, delay), magSensor(sensor) {
   }
-
+private:
+    MagnetSensor& magSensor;
+public:
   void run(int focal = -1) override {
     int i = 0;
     if (focal == -1) {
@@ -1283,7 +1415,7 @@ public:
 
     switch (effectNumber) {
       case 0:                                                                                        // stillOne
-        setEffect(new StillOneEffect(ledController, pattern1, (delayTime == -1) ? 10 : delayTime));  // TODO no delay time necessary
+        setEffect(new StillOneEffect(ledController, pattern1, (delayTime == -1) ? 10 : delayTime));  // TODO no delay time necessary 
         break;
       case 1:                                                                                         // stillMany
         setEffect(new StillManyEffect(ledController, pattern1, (delayTime == -1) ? 10 : delayTime));  // TODO no delay time necessary
@@ -1292,37 +1424,37 @@ public:
         setEffect(new TraceOneEffect(ledController, pattern5, (delayTime == -1) ? 10 : delayTime, magnetSensor));
         break;
       case 3:  // progressive
-        setEffect(new ProgressiveEffect(ledController, pattern2, (delayTime == -1) ? 7 : delayTime));
+        setEffect(new ProgressiveEffect(ledController, pattern2, (delayTime == -1) ? 7 : delayTime, magnetSensor));
         break;
       case 4:  // traceMany
-        setEffect(new TraceManyEffect(ledController, pattern4, (delayTime == -1) ? 15 : delayTime));
+        setEffect(new TraceManyEffect(ledController, pattern4, (delayTime == -1) ? 15 : delayTime, magnetSensor));
         break;
       case 5:  // strobeChange
         setEffect(new StrobeChangeEffect(ledController, pattern4, (delayTime == -1) ? 2 : delayTime, magnetSensor));
         break;
       case 6:  // comfortSongStrobe
-        setEffect(new ComfortSongStrobeEffect(ledController, pattern1, (delayTime == -1) ? 3 : delayTime));
+        setEffect(new ComfortSongStrobeEffect(ledController, pattern1, (delayTime == -1) ? 3 : delayTime, magnetSensor));
         break;
       case 7:  // blender
-        setEffect(new BlenderEffect(ledController, pattern6, (delayTime == -1) ? 2 : delayTime));
+        setEffect(new BlenderEffect(ledController, pattern6, (delayTime == -1) ? 2 : delayTime, magnetSensor));
         break;
       case 8:  // techno
-        setEffect(new TechnoEffect(ledController, pattern1, (delayTime == -1) ? 1 : delayTime));
+        setEffect(new TechnoEffect(ledController, pattern1, (delayTime == -1) ? 1 : delayTime, magnetSensor));
         break;
       case 9:  // trance
-        setEffect(new TranceEffect(ledController, pattern1, (delayTime == -1) ? 1 : delayTime));
+        setEffect(new TranceEffect(ledController, pattern1, (delayTime == -1) ? 1 : delayTime, magnetSensor));
         break;
       case 10:  // mold
-        setEffect(new MoldEffect(ledController, pattern4, (delayTime == -1) ? 1 : delayTime));
+        setEffect(new MoldEffect(ledController, pattern4, (delayTime == -1) ? 1 : delayTime, magnetSensor));
         break;
       case 11:  // funky
-        setEffect(new FunkyEffect(ledController, pattern5, (delayTime == -1) ? 8 : delayTime));
+        setEffect(new FunkyEffect(ledController, pattern5, (delayTime == -1) ? 8 : delayTime, magnetSensor));
         break;
       case 12:  // christmas
-        setEffect(new ChristmasEffect(ledController, pattern6, (delayTime == -1) ? 10 : delayTime));
+        setEffect(new ChristmasEffect(ledController, pattern6, (delayTime == -1) ? 10 : delayTime, magnetSensor));
         break;
       default:
-        setEffect(new StillOneEffect(ledController, pattern1, (delayTime == -1) ? 10 : delayTime));  // No delay time needed TODO
+        setEffect(new StillOneEffect(ledController, pattern1, (delayTime == -1) ? 10 : delayTime, magnetSensor));  // No delay time needed TODO
         break;
     }
   }
@@ -1335,7 +1467,7 @@ void setup() {
   Serial.begin(9600);
   while (!Serial) { delay(100); } // Serial needs time to initialize
   lightApp.setup();  // Understood path
-  lightApp.selectEffect(8); // 5 is good, testing 2
+  lightApp.selectEffect(5); // 5 is good, testing 2
   // 7 is weirdly unsettling.
 }
 
