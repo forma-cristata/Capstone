@@ -1045,8 +1045,17 @@ public:
     int strobeCount2 = 2;
     int ledsPerGroup = 12;
     if (focal == -1) {
-      while (true) {
         for (int startIdx = 15; startIdx >= 0; startIdx--) {
+          int originalFocal = focal;
+                  magSensor.check();
+                  focal = magSensor.getFocal();
+                  Serial.println("Focal: " + String(focal));
+
+                  // If focal point changed, restart effect with new value
+                  if (focal != originalFocal) {
+                      run(focal);
+                      return;
+                  }
           for (int strobe = 0; strobe < strobeCount1; strobe++) {
             for (int i = 0; i < ledsPerGroup; i++) {
               int ledIndex = startIdx + i;
@@ -1076,6 +1085,16 @@ public:
           }
         }
         for (int startIdx = 0; startIdx <= 15; startIdx++) {
+          int originalFocal = focal;
+                  magSensor.check();
+                  focal = magSensor.getFocal();
+                  Serial.println("Focal: " + String(focal));
+
+                  // If focal point changed, restart effect with new value
+                  if (focal != originalFocal) {
+                      run(focal);
+                      return;
+                  }
           for (int strobe = 0; strobe < strobeCount1; strobe++) {
             for (int i = 0; i < ledsPerGroup; i++) {
               int ledIndex = startIdx + i;
@@ -1104,10 +1123,18 @@ public:
             }
           }
         }
-      }
     } else {
-      while (true) {
         for (int startIdx = 15; startIdx >= focal; startIdx--) {
+          int originalFocal = focal;
+                  magSensor.check();
+                  focal = magSensor.getFocal();
+                  Serial.println("Focal: " + String(focal));
+
+                  // If focal point changed, restart effect with new value
+                  if (focal != originalFocal) {
+                      run(focal);
+                      return;
+                  }
           for (int startIdx = focal; startIdx <= 15; startIdx++) {
             for (int strobe = 0; strobe < strobeCount1; strobe++) {
               for (int i = 0; i < ledsPerGroup; i++) {
@@ -1149,7 +1176,6 @@ public:
           }
         }
       }
-    }
   }
 };
 
@@ -1167,10 +1193,19 @@ public:
     int ledsPerGroup = 1;
 
     if (focal == -1) {
-      while (true) {
         delay(delayTime / 4);
 
         for (int strobe = 0; strobe < strobeCount1; strobe++) {
+          int originalFocal = focal;
+                  magSensor.check();
+                  focal = magSensor.getFocal();
+                  Serial.println("Focal: " + String(focal));
+
+                  // If focal point changed, restart effect with new value
+                  if (focal != originalFocal) {
+                      run(focal);
+                      return;
+                  }
           for (int i = 0; i < ledsPerGroup; i++) {
             int ledIndex = random(0, 16);
             delay(delayTime / 12);
@@ -1186,6 +1221,16 @@ public:
         }
 
         for (int strobe = 0; strobe < strobeCount2; strobe++) {
+          int originalFocal = focal;
+                  magSensor.check();
+                  focal = magSensor.getFocal();
+                  Serial.println("Focal: " + String(focal));
+
+                  // If focal point changed, restart effect with new value
+                  if (focal != originalFocal) {
+                      run(focal);
+                      return;
+                  }
           for (int i = 0; i < ledsPerGroup; i++) {
             delay(delayTime / 12);
 
@@ -1201,10 +1246,18 @@ public:
             ledController.setLed(ledIndex + 1, 0, 0, 0, 0);
           }
         }
-      }
     } else {
-      while (true) {
         for (int strobe = focal; strobe < strobeCount1; strobe++) {
+          int originalFocal = focal;
+                  magSensor.check();
+                  focal = magSensor.getFocal();
+                  Serial.println("Focal: " + String(focal));
+
+                  // If focal point changed, restart effect with new value
+                  if (focal != originalFocal) {
+                      run(focal);
+                      return;
+                  }
           for (int i = 0; i < ledsPerGroup; i++) {
             int ledIndex = random(0, 16);
             int ledIndex2 = random(0, 16);
@@ -1224,6 +1277,16 @@ public:
         }
 
         for (int strobe = focal + 1; strobe >= 0; strobe--) {
+          int originalFocal = focal;
+                  magSensor.check();
+                  focal = magSensor.getFocal();
+                  Serial.println("Focal: " + String(focal));
+
+                  // If focal point changed, restart effect with new value
+                  if (focal != originalFocal) {
+                      run(focal);
+                      return;
+                  }
           for (int i = 0; i < ledsPerGroup; i++) {
             delay(delayTime / 12);
 
@@ -1244,11 +1307,10 @@ public:
           }
         }
       }
-    }
   }
 };
 
-class ChristmasEffect : public LightEffect {
+class ChristmasEffect : public LightEffect { // This effect is not working.
 public:
   ChristmasEffect(LEDController& controller, ColorPattern colorPattern, int delay, MagnetSensor& sensor)
     : LightEffect(controller, colorPattern, delay), magSensor(sensor) {
@@ -1259,13 +1321,22 @@ public:
   void run(int focal = -1) override {
     int i = 0;
     if (focal == -1) {
-      while (true) {
         delay(delayTime);
         i++;
 
         i = i % 2;
 
         for (int xy = 0; xy < 13; xy++) {
+          int originalFocal = focal;
+                  magSensor.check();
+                  focal = magSensor.getFocal();
+                  Serial.println("Focal: " + String(focal));
+
+                  // If focal point changed, restart effect with new value
+                  if (focal != originalFocal) {
+                      run(focal);
+                      return;
+                  }
           if (i == 0) {
             for (int j = 0; j < 18; j += 2) {
               ledController.setLed(j, pattern.red[xy], pattern.green[xy], pattern.blue[xy], pattern.white[xy]);
@@ -1285,15 +1356,23 @@ public:
             }
           }
         }
-      }
     } else {
-      while (true) {
         delay(delayTime);
         i++;
 
         i = i % 2;
 
         for (int xy = 0; xy < 13; xy++) {
+          int originalFocal = focal;
+                  magSensor.check();
+                  focal = magSensor.getFocal();
+                  Serial.println("Focal: " + String(focal));
+
+                  // If focal point changed, restart effect with new value
+                  if (focal != originalFocal) {
+                      run(focal);
+                      return;
+                  }
           if (i == 0) {
             for (int j = focal; j < 18; j += 2) {
               ledController.setLed(j, pattern.red[xy], pattern.green[xy], pattern.blue[xy], pattern.white[xy]);
@@ -1328,7 +1407,6 @@ public:
             }
           }
         }
-      }
     }
   }
 };
@@ -1454,7 +1532,7 @@ public:
         setEffect(new ChristmasEffect(ledController, pattern6, (delayTime == -1) ? 10 : delayTime, magnetSensor));
         break;
       default:
-        setEffect(new StillOneEffect(ledController, pattern1, (delayTime == -1) ? 10 : delayTime, magnetSensor));  // No delay time needed TODO
+        setEffect(new StillOneEffect(ledController, pattern1, (delayTime == -1) ? 10 : delayTime));  // No delay time needed TODO
         break;
     }
   }
@@ -1467,7 +1545,7 @@ void setup() {
   Serial.begin(9600);
   while (!Serial) { delay(100); } // Serial needs time to initialize
   lightApp.setup();  // Understood path
-  lightApp.selectEffect(5); // 5 is good, testing 2
+  lightApp.selectEffect(12); // 5 is good, testing 2
   // 7 is weirdly unsettling.
 }
 
