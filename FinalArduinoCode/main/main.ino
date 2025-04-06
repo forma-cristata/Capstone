@@ -3,6 +3,8 @@
 #define NUM_LEDS 22
 #define DATA_PIN 6
 #define SEED 42
+#define LIGHT_COUNT 16
+#define COLOR_COUNT 16
 
 class LEDController;
 class ColorPattern;
@@ -248,9 +250,12 @@ public:
 	void check() {
 		float highestVal = 0;
 		for (int i = 0; i < numPins; i++) {
-			float value = (analogRead(hallPins[i]) - offset) * span;
+			float value = abs((analogRead(hallPins[i]) - offset) * span);
+      Serial.println("Pin" + String(hallPins[i]));
+      Serial.println("Value" + String(value));
+
 			highestVal = value > highestVal ? value : highestVal;
-			if (value > 5) {
+			if (value > 7) {
 				switch (hallPins[i]) {
 				case (18): focal = 2; break;
 				case (17): focal = 5; break;
@@ -259,7 +264,7 @@ public:
 				case (14): focal = 15; break;
 				}
 			}
-			else if (highestVal < 5)
+			else if (highestVal < 7)
 			{
 				focal = -1;
 			}
@@ -299,7 +304,7 @@ public:
 	}
 
 	void run(int focal = -1) override {
-		for (int i = 0; i < 16; i++) {
+		for (int i = 0; i < LIGHT_COUNT; i++) {
 			ledController.setLed(i, pattern.red[0], pattern.green[0], pattern.blue[0], pattern.white[0]);
 		}
 	}
@@ -312,8 +317,8 @@ public:
 	}
 
 	void run(int focal = -1) override {
-		for (int i = 0; i < 16; i++) {
-			ledController.setLed(i, pattern.red[i], pattern.green[i], pattern.blue[i], pattern.white[i]);
+		for (int i = 0; i < LIGHT_COUNT; i++) {
+			ledController.setLed(i, pattern.red[i % COLOR_COUNT], pattern.green[i%COLOR_COUNT], pattern.blue[i%COLOR_COUNT], pattern.white[i%COLOR_COUNT]);
 		}
 	}
 };
@@ -332,7 +337,7 @@ private:
 public:
 	void run(int focal = -1) override {
 		if (focal == -1) {
-			for (int i = 0; i < 16; i++) {
+			for (int i = 0; i < COLOR_COUNT; i++) {
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
@@ -343,9 +348,9 @@ public:
 					run(focal);
 					return;
 				}
-				for (int j = 0; j < 8; j++) {
+				for (int j = 0; j < LIGHT_COUNT / 2; j++) {
 
-					int offset = (i + j * 2) % 16;
+					int offset = (i + j * 2) % LIGHT_COUNT;
 					for (int k = 0; k < delayTime * 2; k++) {
 						// Check magnets more frequently
 
@@ -359,7 +364,7 @@ public:
 			}
 		}
 		else {
-			for (int i = 0; i < 16; i++) {
+			for (int i = 0; i < COLOR_COUNT; i++) {
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
@@ -370,9 +375,9 @@ public:
 					run(focal);
 					return;
 				}
-				for (int j = 0; j < 8; j++) {
-					int position1 = (focal + 1 + (i + j * 2) % 16) % 16;
-					int position2 = (16 + focal - (i + j * 2) % 16) % 16;
+				for (int j = 0; j < LIGHT_COUNT / 2; j++) {
+					int position1 = (focal + 1 + (i + j * 2) % LIGHT_COUNT) % LIGHT_COUNT;
+					int position2 = (16 + focal - (i + j * 2) % LIGHT_COUNT) % LIGHT_COUNT;
 					for (int k = 0; k < delayTime * 2; k++) {
 						ledController.setLed(position1, 0, 0, 0, 0);
 						ledController.setLed(position2, 0, 0, 0, 0);
@@ -399,12 +404,12 @@ private:
 public:
 
 	void run(int focal = -1) override {
-		for (int i = 0; i < 16; i++) {
+		for (int i = 0; i < LIGHT_COUNT; i++) {
 			ledController.setLed(i, pattern.red[0], pattern.green[0], pattern.blue[0], pattern.white[0]);
 		}
 
 		if (focal != -1) {
-			for (int i = 1; i < 16; i++) {
+			for (int i = 1; i < COLOR_COUNT; i++) {
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
@@ -415,9 +420,9 @@ public:
 					run(focal);
 					return;
 				}
-				for (int j = 0; j < 8; j++) {
-					int position1 = (focal + 1 + j) % 16;
-					int position2 = (16 + focal - j) % 16;
+				for (int j = 0; j < LIGHT_COUNT / 2; j++) {
+					int position1 = (focal + 1 + j) % LIGHT_COUNT;
+					int position2 = (16 + focal - j) % LIGHT_COUNT;
 					ledController.setLed(position1, pattern.red[i], pattern.green[i], pattern.blue[i], pattern.white[i]);
 					ledController.setLed(position2, pattern.red[i], pattern.green[i], pattern.blue[i], pattern.white[i]);
 					delay(delayTime);
@@ -427,7 +432,7 @@ public:
 			}
 		}
 		else {
-			for (int i = 0; i < 16; i++) {
+			for (int i = 0; i < COLOR_COUNT; i++) {
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
@@ -438,7 +443,7 @@ public:
 					run(focal);
 					return;
 				}
-				for (int j = 0; j < 16; j++) {
+				for (int j = 0; j < LIGHT_COUNT; j++) {
 					ledController.setLed(j, pattern.red[i], pattern.green[i], pattern.blue[i], pattern.white[i]);
 					delay(delayTime * 2);
 					ledController.setLed(j, pattern.red[0], pattern.green[0], pattern.blue[0], pattern.white[0]);
@@ -460,7 +465,7 @@ public:
 	void run(int focal = -1) override {
 
 		if (focal != -1) {
-			for (int j = 0; j < 16; j++) {
+			for (int j = 0; j < COLOR_COUNT; j++) {
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
@@ -471,15 +476,15 @@ public:
 					run(focal);
 					return;
 				}
-				for (int i = 0; i < 8; i++) {
-					int ledIndex = (focal + i) % 16;
-					int ledIndex2 = (focal - i + 16) % 16;
+				for (int i = 0; i < LIGHT_COUNT / 2; i++) {
+					int ledIndex = (focal + i) % LIGHT_COUNT;
+					int ledIndex2 = (focal - i + 16) % LIGHT_COUNT;
 					ledController.setLed(ledIndex, pattern.red[j], pattern.green[j], pattern.blue[j], pattern.white[j]);
 					ledController.setLed(ledIndex2, pattern.red[j], pattern.green[j], pattern.blue[j], pattern.white[j]);
 					delay(delayTime);
 
-					ledIndex = (focal + i + 1) % 16;
-					ledIndex2 = (focal - i - 1 + 16) % 16;
+					ledIndex = (focal + i + 1) % LIGHT_COUNT;
+					ledIndex2 = (focal - i - 1 + 16) % LIGHT_COUNT;
 					ledController.setLed(ledIndex, pattern.red[j], pattern.green[j], pattern.blue[j], pattern.white[j]);
 					ledController.setLed(ledIndex2, pattern.red[j], pattern.green[j], pattern.blue[j], pattern.white[j]);
 					delay(delayTime);
@@ -487,7 +492,7 @@ public:
 			}
 		}
 		else {
-			for (int j = 0; j < 16; j++) {
+			for (int j = 0; j < COLOR_COUNT; j++) {
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
@@ -498,15 +503,15 @@ public:
 					run(focal);
 					return;
 				}
-				for (int i = 0; i < 16; i++) {
-					int ledIndex = (j + i) % 16;
-					int ledIndex2 = (j + i + 1) % 16;
+				for (int i = 0; i < LIGHT_COUNT; i++) {
+					int ledIndex = (j + i) % LIGHT_COUNT;
+					int ledIndex2 = (j + i + 1) % LIGHT_COUNT;
 					ledController.setLed(ledIndex, pattern.red[j], pattern.green[j], pattern.blue[j], pattern.white[j]);
 					ledController.setLed(ledIndex2, pattern.red[j], pattern.green[j], pattern.blue[j], pattern.white[j]);
 					delay(delayTime * 2);
 
-					ledIndex = (j + i + 1) % 16;
-					ledIndex2 = (j + i + 2) % 16;
+					ledIndex = (j + i + 1) % LIGHT_COUNT;
+					ledIndex2 = (j + i + 2) % LIGHT_COUNT;
 					ledController.setLed(ledIndex, pattern.red[j], pattern.green[j], pattern.blue[j], pattern.white[j]);
 					ledController.setLed(ledIndex2, pattern.red[j], pattern.green[j], pattern.blue[j], pattern.white[j]);
 					delay(delayTime * 2);
@@ -525,11 +530,11 @@ private:
 	MagnetSensor& magSensor;
 public:
 	void run(int focal = -1) override {
-		for (int i = 0; i < 16; i++) {
+		for (int i = 0; i < LIGHT_COUNT; i++) {
 			ledController.setLed(i, pattern.red[0], pattern.green[0], pattern.blue[0], pattern.white[0]);
 		}
 		if (focal == -1) {
-			for (int i = 0; i < 17; i++) {
+			for (int i = 0; i < LIGHT_COUNT; i++) {
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
@@ -540,18 +545,18 @@ public:
 					run(focal);
 					return;
 				}
-				for (int j = 0; j < 8; j++) {
-					int offset = (i + j * 2) % 17;
-					ledController.setLed(offset, pattern.red[(i + 1) % 8], pattern.green[(i + 1) % 16], pattern.blue[(i + 1) % 16], pattern.white[(i + 1) % 16]);
+				for (int j = 0; j < LIGHT_COUNT / 2; j++) {
+					int offset = (i + j * 2) % LIGHT_COUNT;
+					ledController.setLed(offset, pattern.red[(i + 1) % (COLOR_COUNT/2)], pattern.green[(i + 1) % COLOR_COUNT], pattern.blue[(i + 1) % COLOR_COUNT], pattern.white[(i + 1) % COLOR_COUNT]);
 					delay(delayTime * 2);
 
-					offset = (i + j * 2 + 8) % 17;
-					ledController.setLed(offset, pattern.red[(i + 1) % 8], pattern.green[(i + 2) % 16], pattern.blue[(i + 2) % 16], pattern.white[(i + 2) % 16]);
+					offset = (i + j * 2 + 8) % LIGHT_COUNT;
+					ledController.setLed(offset, pattern.red[(i + 1) % (COLOR_COUNT/2)], pattern.green[(i + 2) % COLOR_COUNT], pattern.blue[(i + 2) % COLOR_COUNT], pattern.white[(i + 2) % COLOR_COUNT]);
 				}
 			}
 		}
 		else {
-			for (int i = 0; i < 16; i++) {
+			for (int i = 0; i < COLOR_COUNT; i++) {
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
@@ -562,12 +567,12 @@ public:
 					run(focal);
 					return;
 				}
-				for (int j = 0; j < 8; j++) {
-					int position1 = (focal + 1 + j) % 16;
-					int position2 = (16 + focal - j) % 16;
-					ledController.setLed(position1, pattern.red[(i + 1) % 16], pattern.green[(i + 1) % 16], pattern.blue[(i + 1) % 16], pattern.white[(i + 1) % 16]);
+				for (int j = 0; j < LIGHT_COUNT / 2; j++) {
+					int position1 = (focal + 1 + j) % LIGHT_COUNT;
+					int position2 = (LIGHT_COUNT + focal - j) % LIGHT_COUNT;
+					ledController.setLed(position1, pattern.red[(i + 1) % COLOR_COUNT], pattern.green[(i + 1) % COLOR_COUNT], pattern.blue[(i + 1) % COLOR_COUNT], pattern.white[(i + 1) % COLOR_COUNT]);
 					delay(delayTime);
-					ledController.setLed(position2, pattern.red[(i + 1) % 16], pattern.green[(i + 2) % 16], pattern.blue[(i + 2) % 16], pattern.white[(i + 2) % 16]);
+					ledController.setLed(position2, pattern.red[(i + 1) % COLOR_COUNT], pattern.green[(i + 2) % COLOR_COUNT], pattern.blue[(i + 2) % COLOR_COUNT], pattern.white[(i + 2) % COLOR_COUNT]);
 				}
 			}
 
@@ -589,7 +594,7 @@ public:
 		int pattern3Indices[] = { 13, 14, 15, 14, 16, 15, 14, 13, 12, 13, 14, 13, 15, 14, 13, 12 };
 
 		if (focal == -1) {
-			for (int x = 0; x < 16; x++) {
+			for (int x = 0; x < COLOR_COUNT; x++) {
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
@@ -614,7 +619,7 @@ public:
 		}
 		else {
 			int pattern4Indices[] = { 3, 4, 5, 4, 6, 5, 4, 3, 2, 3, 4, 3, 5, 4, 3, 2 };
-			for (int x = 0; x < 16; x++) {
+			for (int x = 0; x < COLOR_COUNT; x++) {
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
@@ -628,18 +633,18 @@ public:
 				for (int i = 0; i < delayTime; i++) {
 					int led1 = pattern4Indices[x] + focal;
 					if (led1 < 0) {
-						led1 = 16 + led1;
+						led1 = LIGHT_COUNT + led1;
 					}
 					else if (led1 > 15) {
-						led1 = led1 - 16;
+						led1 = led1 - LIGHT_COUNT;
 					}
 
 					int led2 = focal - pattern4Indices[x];
 					if (led2 < 0) {
-						led2 = 16 + led2;
+						led2 = LIGHT_COUNT + led2;
 					}
 					else if (led2 > 15) {
-						led2 = led2 - 16;
+						led2 = led2 - LIGHT_COUNT;
 					}
 					ledController.setLed(led1, pattern.red[x], pattern.green[x], pattern.blue[x], pattern.white[x]);
 					ledController.setLed(led2, pattern.red[x], pattern.green[x], pattern.blue[x], pattern.white[x]);
@@ -662,10 +667,8 @@ private:
 	MagnetSensor& magSensor;
 public:
 	void run(int focal = -1) override {
-		int numLeds = 16;
-		int numColors = 16;
 		if (focal == -1) {
-			for (int i = 0; i < numLeds; i++) {
+			for (int i = 0; i < LIGHT_COUNT; i++) {
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
@@ -676,12 +679,12 @@ public:
 					run(focal);
 					return;
 				}
-				int colorIndex = (i + millis() / delayTime) % numColors;
+				int colorIndex = (i + millis() / delayTime) % COLOR_COUNT;
 				ledController.setLed(i, pattern.red[colorIndex], pattern.green[colorIndex], pattern.blue[colorIndex], pattern.white[colorIndex]);
 			}
 			delay(delayTime);
 
-			for (int i = 0; i < numLeds; i++) {
+			for (int i = 0; i < LIGHT_COUNT; i++) {
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
@@ -692,13 +695,13 @@ public:
 					run(focal);
 					return;
 				}
-				int colorIndex = (numColors - (i + millis() / delayTime) % numColors) % numColors;
+				int colorIndex = (COLOR_COUNT - (i + millis() / delayTime) % COLOR_COUNT) % COLOR_COUNT;
 				ledController.setLed(i, pattern.red[colorIndex], pattern.green[colorIndex], pattern.blue[colorIndex], pattern.white[colorIndex]);
 			}
 			delay(delayTime);
 		}
 		else {
-			for (int i = 0; i < numLeds / 2; i++) {
+			for (int i = 0; i < LIGHT_COUNT / 2; i++) {
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
@@ -713,18 +716,18 @@ public:
 				int led2 = focal + i;
 
 				if (led1 < 0) {
-					led1 = 16 + led1;
+					led1 = LIGHT_COUNT + led1;
 				}
-				if (led2 > 15) {
-					led2 = led2 - 16;
+				if (led2 > (LIGHT_COUNT-1)) {
+					led2 = led2 - LIGHT_COUNT;
 				}
-				int colorIndex = (i + millis() / delayTime) % numColors;
+				int colorIndex = (i + millis() / delayTime) % COLOR_COUNT;
 				ledController.setLed(led1, pattern.red[colorIndex], pattern.green[colorIndex], pattern.blue[colorIndex], pattern.white[colorIndex]);
 				ledController.setLed(led2, pattern.red[colorIndex], pattern.green[colorIndex], pattern.blue[colorIndex], pattern.white[colorIndex]);
 			}
 			delay(delayTime);
 
-			for (int i = 0; i < numLeds / 2; i++) {
+			for (int i = 0; i < LIGHT_COUNT / 2; i++) {
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
@@ -739,12 +742,12 @@ public:
 				int led2 = focal + i;
 
 				if (led1 < 0) {
-					led1 = 16 + led1;
+					led1 = LIGHT_COUNT + led1;
 				}
-				if (led2 > 15) {
-					led2 = led2 - 16;
+				if (led2 > (LIGHT_COUNT-1)) {
+					led2 = led2 - LIGHT_COUNT;
 				}
-				int colorIndex = (numColors - (i + millis() / delayTime) % numColors) % numColors;
+				int colorIndex = (COLOR_COUNT - (i + millis() / delayTime) % COLOR_COUNT) % COLOR_COUNT;
 				ledController.setLed(led1, pattern.red[colorIndex], pattern.green[colorIndex], pattern.blue[colorIndex], pattern.white[colorIndex]);
 				ledController.setLed(led2, pattern.red[colorIndex], pattern.green[colorIndex], pattern.blue[colorIndex], pattern.white[colorIndex]);
 			}
@@ -763,7 +766,7 @@ private:
 public:
 	void run(int focal = -1) override {
 		if (focal == -1) {
-			for (int i = 0; i < 16; i++) {
+			for (int i = 0; i < COLOR_COUNT; i++) {
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
@@ -774,15 +777,15 @@ public:
 					run(focal);
 					return;
 				}
-				int m = (i + 1) % 16;
-				int n = (i + 2) % 16;
-				int o = (i + 3) % 16;
-				int p = (i + 4) % 16;
+				int m = (i + 1) % COLOR_COUNT;
+				int n = (i + 2) % COLOR_COUNT;
+				int o = (i + 3) % COLOR_COUNT;
+				int p = (i + 4) % COLOR_COUNT;
 				for (int j = 15; j >= 0; j--) {
-					int k = (j + 1) % 16;
-					int l = (j + 2) % 16;
-					int y = (j + 3) % 16;
-					int z = (j + 4) % 16;
+					int k = (j + 1) % LIGHT_COUNT;
+					int l = (j + 2) % LIGHT_COUNT;
+					int y = (j + 3) % LIGHT_COUNT;
+					int z = (j + 4) % LIGHT_COUNT;
 
 					for (int x = 0; x < 2; x++) {
 						ledController.setLed(j, pattern.red[i], pattern.green[i], pattern.blue[i], pattern.white[i]);
@@ -805,7 +808,7 @@ public:
 			}
 		}
 		else {
-			for (int i = 0; i < 16; i++) {
+			for (int i = 0; i < COLOR_COUNT; i++) {
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
@@ -816,10 +819,10 @@ public:
 					run(focal);
 					return;
 				}
-				int m = (i + 1) % 16;
-				int n = (i + 2) % 16;
-				int o = (i + 3) % 16;
-				int p = (i + 4) % 16;
+				int m = (i + 1) % COLOR_COUNT;
+				int n = (i + 2) % COLOR_COUNT;
+				int o = (i + 3) % COLOR_COUNT;
+				int p = (i + 4) % COLOR_COUNT;
 				int jb = focal;
 				for (int j = focal; j >= 0; j--) {
 					if (jb < 16) {
@@ -942,7 +945,7 @@ public:
 		int sc2 = 2;
 		int ls = 3;
 		if (focal == -1) {
-			for (int j = 0; j <= 15; j++) {
+			for (int j = 0; j < LIGHT_COUNT; j++) {
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
@@ -956,14 +959,14 @@ public:
 				for (int k = 0; k < sc1; k++) {
 					for (int i = 0; i < ls; i++) {
 						int li = j + i;
-						if (li < 16) {  // Add bound check
-							ledController.setLed(li + 1, pattern.red[li], pattern.green[li], pattern.blue[li], pattern.white[li]);
+						if (li < LIGHT_COUNT) {  // Add bound check
+							ledController.setLed(li + 1, pattern.red[li % COLOR_COUNT], pattern.green[li % COLOR_COUNT], pattern.blue[li % COLOR_COUNT], pattern.white[li % COLOR_COUNT]);
 						}
 					}
 					delay(delayTime);
 					for (int i = 0; i < ls; i++) {
 						int ledIndex = j + i;
-						if (ledIndex < 16) {  // Add bound check
+						if (ledIndex < LIGHT_COUNT) {  // Add bound check
 							ledController.setLed(ledIndex + 1, 0, 0, 0, 0);
 						}
 					}
@@ -973,14 +976,14 @@ public:
 				for (int strobe = 0; strobe < sc2; strobe++) {
 					for (int i = 0; i < ls; i++) {
 						int ledIndex = j + i;
-						if (ledIndex < 16) {  // Add bound check
-							ledController.setLed(ledIndex + 1, pattern.red[ledIndex], pattern.green[ledIndex], pattern.blue[ledIndex], pattern.white[ledIndex]);
+						if (ledIndex < LIGHT_COUNT) {  // Add bound check
+							ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
 						}
 					}
 					delay(delayTime);
 					for (int i = 0; i < ls; i++) {
 						int ledIndex = j + i;
-						if (ledIndex < 16) {  // Add bound check
+						if (ledIndex < LIGHT_COUNT) {  // Add bound check
 							ledController.setLed(ledIndex + 1, 0, 0, 0, 0);
 						}
 					}
@@ -989,7 +992,7 @@ public:
 			}
 		}
 		else {
-			for (int j = 0; j <= 15; j++) {
+			for (int j = 0; j < LIGHT_COUNT; j++) {
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
@@ -1006,15 +1009,15 @@ public:
 				for (int k = 0; k < sc1; k++) {
 					for (int i = 0; i < ls; i++) {
 						int li = distance + i;  // Adjust lighting based on distance
-						if (li < 16) {          // Add bound check
-							ledController.setLed(li + 1, pattern.red[li], pattern.green[li], pattern.blue[li], pattern.white[li]);
+						if (li < LIGHT_COUNT) {          // Add bound check
+							ledController.setLed((li + 1), pattern.red[li % COLOR_COUNT], pattern.green[li % COLOR_COUNT], pattern.blue[li % COLOR_COUNT], pattern.white[li % COLOR_COUNT]);
 						}
 					}
 					delay(delayTime);
 
 					for (int i = 0; i < ls; i++) {
 						int ledIndex = distance + i;
-						if (ledIndex < 16) {  // Add bound check
+						if (ledIndex < LIGHT_COUNT) {  // Add bound check
 							ledController.setLed(ledIndex + 1, 0, 0, 0, 0);
 						}
 					}
@@ -1024,15 +1027,15 @@ public:
 				for (int strobe = 0; strobe < sc2; strobe++) {
 					for (int i = 0; i < ls; i++) {
 						int ledIndex = distance + i;
-						if (ledIndex < 16) {  // Add bound check
-							ledController.setLed(ledIndex + 1, pattern.red[ledIndex], pattern.green[ledIndex], pattern.blue[ledIndex], pattern.white[ledIndex]);
+						if (ledIndex < LIGHT_COUNT) {  // Add bound check
+							ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
 						}
 					}
 					delay(delayTime);
 
 					for (int i = 0; i < ls; i++) {
 						int ledIndex = distance + i;
-						if (ledIndex < 16) {  // Add bound check
+						if (ledIndex < LIGHT_COUNT) {  // Add bound check
 							ledController.setLed(ledIndex + 1, 0, 0, 0, 0);
 						}
 					}
@@ -1054,9 +1057,9 @@ public:
 	void run(int focal = -1) override {
 		int strobeCount1 = 2;
 		int strobeCount2 = 2;
-		int ledsPerGroup = 12;
+		int ledsPerGroup = LIGHT_COUNT * 3 / 4;
 		if (focal == -1) {
-			for (int startIdx = 15; startIdx >= 0; startIdx--) {
+			for (int startIdx = LIGHT_COUNT - 1; startIdx >= 0; startIdx--) {
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
@@ -1070,8 +1073,8 @@ public:
 				for (int strobe = 0; strobe < strobeCount1; strobe++) {
 					for (int i = 0; i < ledsPerGroup; i++) {
 						int ledIndex = startIdx + i;
-						for (int ha = 0; ha < 4; ha++) {
-							ledController.setLed(ledIndex + 1, pattern.red[ledIndex], pattern.green[ledIndex], pattern.blue[ledIndex], pattern.white[ledIndex]);
+						for (int ha = 0; ha < LIGHT_COUNT / 4; ha++) {
+							ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
 							ledController.setLed(ledIndex, 0, 0, 0, 0);
 						}
 					}
@@ -1085,7 +1088,7 @@ public:
 					for (int i = 0; i < ledsPerGroup; i++) {
 						int ledIndex = startIdx + i;
 						for (int ha = 0; ha < 4; ha++) {
-							ledController.setLed(ledIndex + 1, pattern.red[ledIndex], pattern.green[ledIndex], pattern.blue[ledIndex], pattern.white[ledIndex]);
+							ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
 							ledController.setLed(ledIndex, 0, 0, 0, 0);
 						}
 					}
@@ -1095,7 +1098,7 @@ public:
 					}
 				}
 			}
-			for (int startIdx = 0; startIdx <= 15; startIdx++) {
+			for (int startIdx = 0; startIdx < LIGHT_COUNT; startIdx++) {
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
@@ -1110,7 +1113,7 @@ public:
 					for (int i = 0; i < ledsPerGroup; i++) {
 						int ledIndex = startIdx + i;
 						for (int ha = 0; ha < 4; ha++) {
-							ledController.setLed(ledIndex + 1, pattern.red[ledIndex], pattern.green[ledIndex], pattern.blue[ledIndex], pattern.white[ledIndex]);
+							ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
 							ledController.setLed(ledIndex, 0, 0, 0, 0);
 						}
 					}
@@ -1124,7 +1127,7 @@ public:
 					for (int i = 0; i < ledsPerGroup; i++) {
 						int ledIndex = startIdx + i;
 						for (int ha = 0; ha < 4; ha++) {
-							ledController.setLed(ledIndex + 1, pattern.red[ledIndex], pattern.green[ledIndex], pattern.blue[ledIndex], pattern.white[ledIndex]);
+							ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex], pattern.white[ledIndex]);
 							ledController.setLed(ledIndex, 0, 0, 0, 0);
 						}
 					}
@@ -1136,7 +1139,7 @@ public:
 			}
 		}
 		else {
-			for (int startIdx = 15; startIdx >= focal; startIdx--) {
+			for (int startIdx = LIGHT_COUNT-1; startIdx >= focal; startIdx--) {
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
@@ -1147,14 +1150,14 @@ public:
 					run(focal);
 					return;
 				}
-				for (int startIdx = focal; startIdx <= 15; startIdx++) {
+				for (int startIdx = focal; startIdx < LIGHT_COUNT; startIdx++) {
 					for (int strobe = 0; strobe < strobeCount1; strobe++) {
 						for (int i = 0; i < ledsPerGroup; i++) {
 							int ledIndex = startIdx + i;
 							int ledIndex2 = startIdx + i - 8;
 							for (int ha = 0; ha < 4; ha++) {
-								ledController.setLed(ledIndex + 1, pattern.red[ledIndex], pattern.green[ledIndex], pattern.blue[ledIndex], pattern.white[ledIndex]);
-								ledController.setLed(ledIndex2 + 1, pattern.red[ledIndex], pattern.green[ledIndex], pattern.blue[ledIndex], pattern.white[ledIndex]);
+								ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+								ledController.setLed(ledIndex2 + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
 								ledController.setLed(ledIndex, 0, 0, 0, 0);
 								ledController.setLed(ledIndex2, 0, 0, 0, 0);
 							}
@@ -1172,8 +1175,8 @@ public:
 							int ledIndex = startIdx + i;
 							int ledIndex2 = startIdx - i;
 							for (int ha = 0; ha < 4; ha++) {
-								ledController.setLed(ledIndex + 1, pattern.red[ledIndex], pattern.green[ledIndex], pattern.blue[ledIndex], pattern.white[ledIndex]);
-								ledController.setLed(ledIndex2 + 1, pattern.red[ledIndex], pattern.green[ledIndex], pattern.blue[ledIndex], pattern.white[ledIndex]);
+								ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+								ledController.setLed(ledIndex2 + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
 								ledController.setLed(ledIndex, 0, 0, 0, 0);
 								ledController.setLed(ledIndex2, 0, 0, 0, 0);
 							}
@@ -1219,14 +1222,14 @@ public:
 					return;
 				}
 				for (int i = 0; i < ledsPerGroup; i++) {
-					int ledIndex = random(0, 16);
+					int ledIndex = random(0, LIGHT_COUNT);
 					delay(delayTime / 12);
-					ledController.setLed(ledIndex + 1, pattern.red[ledIndex], pattern.green[ledIndex], pattern.blue[ledIndex], pattern.white[ledIndex]);
+					ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
 				}
 				delay(delayTime / 12);
 
 				for (int i = 0; i < ledsPerGroup; i++) {
-					int ledIndex = random(0, 16);
+					int ledIndex = random(0, LIGHT_COUNT);
 					delay(delayTime / 8);
 					ledController.setLed(ledIndex + 1, 0, 0, 0, 0);
 				}
@@ -1246,15 +1249,15 @@ public:
 				for (int i = 0; i < ledsPerGroup; i++) {
 					delay(delayTime / 12);
 
-					int ledIndex = random(0, 16);
-					ledController.setLed(ledIndex + 1, pattern.red[ledIndex], pattern.green[ledIndex], pattern.blue[ledIndex], pattern.white[ledIndex]);
+					int ledIndex = random(0, LIGHT_COUNT);
+					ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
 				}
 				delay(delayTime / 12);
 
 				for (int i = 0; i < ledsPerGroup; i++) {
 					delay(delayTime / 12);
 
-					int ledIndex = random(0, 16);
+					int ledIndex = random(0, LIGHT_COUNT);
 					ledController.setLed(ledIndex + 1, 0, 0, 0, 0);
 				}
 			}
@@ -1272,17 +1275,17 @@ public:
 					return;
 				}
 				for (int i = 0; i < ledsPerGroup; i++) {
-					int ledIndex = random(0, 16);
-					int ledIndex2 = random(0, 16);
+					int ledIndex = random(0, LIGHT_COUNT);
+					int ledIndex2 = random(0, LIGHT_COUNT);
 					delay(delayTime / 12);
-					ledController.setLed(ledIndex + 1, pattern.red[ledIndex], pattern.green[ledIndex], pattern.blue[ledIndex], pattern.white[ledIndex]);
-					ledController.setLed(ledIndex2 + 1, pattern.red[ledIndex], pattern.green[ledIndex], pattern.blue[ledIndex], pattern.white[ledIndex]);
+					ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+					ledController.setLed(ledIndex2 + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
 				}
 				delay(delayTime / 12);
 
 				for (int i = focal; i < ledsPerGroup; i++) {
-					int ledIndex = random(0, 16);
-					int ledIndex2 = random(0, 16);
+					int ledIndex = random(0, LIGHT_COUNT);
+					int ledIndex2 = random(0, LIGHT_COUNT);
 					delay(delayTime / 8);
 					ledController.setLed(ledIndex + 1, 0, 0, 0, 0);
 					ledController.setLed(ledIndex2 + 1, 0, 0, 0, 0);
@@ -1303,18 +1306,18 @@ public:
 				for (int i = 0; i < ledsPerGroup; i++) {
 					delay(delayTime / 12);
 
-					int ledIndex = random(0, 16);
-					int ledIndex2 = random(0, 16);
-					ledController.setLed(ledIndex + 1, pattern.red[ledIndex], pattern.green[ledIndex], pattern.blue[ledIndex], pattern.white[ledIndex]);
-					ledController.setLed(ledIndex2 + 1, pattern.red[ledIndex], pattern.green[ledIndex], pattern.blue[ledIndex], pattern.white[ledIndex]);
+					int ledIndex = random(0, LIGHT_COUNT);
+					int ledIndex2 = random(0, LIGHT_COUNT);
+					ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+					ledController.setLed(ledIndex2 + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
 				}
 				delay(delayTime / 12);
 
 				for (int i = focal; i < ledsPerGroup; i++) {
 					delay(delayTime / 12);
 
-					int ledIndex = random(0, 16);
-					int ledIndex2 = random(0, 16);
+					int ledIndex = random(0, LIGHT_COUNT);
+					int ledIndex2 = random(0, LIGHT_COUNT);
 					ledController.setLed(ledIndex + 1, 0, 0, 0, 0);
 					ledController.setLed(ledIndex2 + 1, 0, 0, 0, 0);
 				}
@@ -1350,24 +1353,24 @@ public:
 				delay(delayTime);
 				i++;
 				i = i % 2;
-				for (int xy = 0; xy < 13; xy++) {
+				for (int xy = 0; xy < COLOR_COUNT; xy++) {
 
 					if (i == 0) {
 						for (int j = 0; j < 18; j += 2) {
 							ledController.setLed(j, pattern.red[xy], pattern.green[xy], pattern.blue[xy], pattern.white[xy]);
 							if (j == 8) {
-								ledController.setLed(j, pattern.red[xy + 1], pattern.green[xy + 1], pattern.blue[xy + 1], pattern.white[xy + 1]);
+								ledController.setLed(j, pattern.red[(xy + 1) % COLOR_COUNT], pattern.green[(xy + 1) % COLOR_COUNT], pattern.blue[(xy + 1) % COLOR_COUNT], pattern.white[(xy + 1) % COLOR_COUNT]);
 							}
 							if (j == 12) {
-								ledController.setLed(j, pattern.red[xy + 2], pattern.green[xy + 2], pattern.blue[xy + 2], pattern.white[xy + 2]);
+								ledController.setLed(j, pattern.red[(xy + 2) % COLOR_COUNT], pattern.green[(xy + 2) % COLOR_COUNT], pattern.blue[(xy + 2) % COLOR_COUNT], pattern.white[(xy + 2) % COLOR_COUNT]);
 							}
-							ledController.setLed(j + 1, pattern.red[xy + 3], pattern.green[xy + 3], pattern.blue[xy + 3], pattern.white[xy + 3]);
+							ledController.setLed(j + 1, pattern.red[(xy + 3) % COLOR_COUNT], pattern.green[(xy + 3) % COLOR_COUNT], pattern.blue[(xy + 3) % COLOR_COUNT], pattern.white[(xy + 3) % COLOR_COUNT]);
 						}
 
 
-						for (int j = 1; j < 19; j += 2) {
+						for (int j = 1; j < LIGHT_COUNT + 3; j += 2) {
 							ledController.setLed(j, pattern.red[xy], pattern.green[xy], pattern.blue[xy], pattern.white[xy]);
-							ledController.setLed(j - 1, pattern.red[xy + 3], pattern.green[xy + 3], pattern.blue[xy + 3], pattern.white[xy + 3]);
+							ledController.setLed(j - 1, pattern.red[(xy + 3) % COLOR_COUNT], pattern.green[(xy + 3) % COLOR_COUNT], pattern.blue[(xy + 3) % COLOR_COUNT], pattern.white[(xy + 3) % COLOR_COUNT]);
 						}
 					}
 				}
@@ -1390,38 +1393,38 @@ public:
 
 				i = i % 2;
 
-				for (int xy = 0; xy < 13; xy++) {
+				for (int xy = 0; xy < COLOR_COUNT; xy++) {
 					if (i == 0) {
-						for (int j = focal; j < 18; j += 2) {
+						for (int j = focal; j < LIGHT_COUNT; j += 2) {
 							ledController.setLed(j, pattern.red[xy], pattern.green[xy], pattern.blue[xy], pattern.white[xy]);
 							if (j == 8) {
-								ledController.setLed(j, pattern.red[xy + 1], pattern.green[xy + 1], pattern.blue[xy + 1], pattern.white[xy + 1]);
+								ledController.setLed(j, pattern.red[(xy + 1) % COLOR_COUNT], pattern.green[(xy + 1) % COLOR_COUNT], pattern.blue[(xy + 1) % COLOR_COUNT], pattern.white[(xy + 1) % COLOR_COUNT]);
 							}
 							if (j == 12) {
-								ledController.setLed(j, pattern.red[xy + 2], pattern.green[xy + 2], pattern.blue[xy + 2], pattern.white[xy + 2]);
+								ledController.setLed(j, pattern.red[(xy + 2) % COLOR_COUNT], pattern.green[(xy + 2) % COLOR_COUNT], pattern.blue[(xy + 2) % COLOR_COUNT], pattern.white[(xy + 2) % COLOR_COUNT]);
 							}
-							ledController.setLed(j + 1, pattern.red[xy + 3], pattern.green[xy + 3], pattern.blue[xy + 3], pattern.white[xy + 3]);
+							ledController.setLed((j + 1) % LIGHT_COUNT, pattern.red[(xy + 3) % COLOR_COUNT], pattern.green[(xy + 3) % COLOR_COUNT], pattern.blue[(xy + 3) % COLOR_COUNT], pattern.white[(xy + 3) % COLOR_COUNT]);
 						}
 
 						for (int j = focal; j >= 0; j -= 2) {
 							ledController.setLed(j, pattern.red[xy], pattern.green[xy], pattern.blue[xy], pattern.white[xy]);
 							if (j == 8) {
-								ledController.setLed(j, pattern.red[xy + 1], pattern.green[xy + 1], pattern.blue[xy + 1], pattern.white[xy + 1]);
+								ledController.setLed(j, pattern.red[(xy + 1) % COLOR_COUNT], pattern.green[(xy + 1) % COLOR_COUNT], pattern.blue[(xy + 1) % COLOR_COUNT], pattern.white[(xy + 1) % COLOR_COUNT]);
 							}
 							if (j == 12) {
-								ledController.setLed(j, pattern.red[xy + 2], pattern.green[xy + 2], pattern.blue[xy + 2], pattern.white[xy + 2]);
+								ledController.setLed(j, pattern.red[(xy + 2) % COLOR_COUNT], pattern.green[(xy + 2) % COLOR_COUNT], pattern.blue[(xy + 2) % COLOR_COUNT], pattern.white[(xy + 2) % COLOR_COUNT]);
 							}
-							ledController.setLed(j + 1, pattern.red[xy + 3], pattern.green[xy + 3], pattern.blue[xy + 3], pattern.white[xy + 3]);
+							ledController.setLed((j + 1) % LIGHT_COUNT, pattern.red[(xy + 3) % COLOR_COUNT], pattern.green[(xy + 3) % COLOR_COUNT], pattern.blue[(xy + 3) % COLOR_COUNT], pattern.white[(xy + 3) % COLOR_COUNT]);
 						}
 
 
-						for (int j = focal; j < 18; j += 2) {
+						for (int j = focal; j < LIGHT_COUNT+1; j += 2) {
 							ledController.setLed(j, pattern.red[xy], pattern.green[xy], pattern.blue[xy], pattern.white[xy]);
-							ledController.setLed(j - 1, pattern.red[xy + 3], pattern.green[xy + 3], pattern.blue[xy + 3], pattern.white[xy + 3]);
+							ledController.setLed(j - 1, pattern.red[(xy + 3) % COLOR_COUNT], pattern.green[(xy + 3) % COLOR_COUNT], pattern.blue[(xy + 3) % COLOR_COUNT], pattern.white[(xy + 3) % COLOR_COUNT]);
 						}
 						for (int j = focal; j >= 0; j -= 2) {
 							ledController.setLed(j, pattern.red[xy], pattern.green[xy], pattern.blue[xy], pattern.white[xy]);
-							ledController.setLed(j - 1, pattern.red[xy + 3], pattern.green[xy + 3], pattern.blue[xy + 3], pattern.white[xy + 3]);
+							ledController.setLed(j - 1, pattern.red[(xy + 3) % COLOR_COUNT], pattern.green[(xy + 3) % COLOR_COUNT], pattern.blue[(xy + 3) % COLOR_COUNT], pattern.white[(xy + 3) % COLOR_COUNT]);
 						}
 					}
 				}
@@ -1565,7 +1568,7 @@ void setup() {
 	Serial.begin(9600);
 	while (!Serial) { delay(100); } // Serial needs time to initialize
 	lightApp.setup();  // Understood path
-	lightApp.selectEffect(12); // 5 is good, testing 2
+	lightApp.selectEffect(8); // 5 is good, testing 2
 	// 7 is weirdly unsettling.
 }
 
