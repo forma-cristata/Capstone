@@ -56,9 +56,19 @@ export default function Settings({navigation}: any) {
                     <Pagination.Basic
                         progress={progress}
                         data={data}
-                        dotStyle={{ backgroundColor: "#ffffff", borderRadius: 50 }}
-                        containerStyle={{ gap: 10, marginTop: 20 }}
+                        dotStyle={{ backgroundImage: "../assets/images/icon.png", backgroundSize: "auto", borderColor: "white", borderWidth: 2, borderStyle: "solid", borderRadius: 7, width: 50, height: 50,  }}
+                        containerStyle={{ gap: 10, marginTop: 30, width: width, height: 55,/* borderStyle: "solid", borderColor: "red", borderWidth: 2*/ }}
                         onPress={onPressPagination}
+                        renderItem={( index ) => (
+                            <View
+                                style={{
+                                    flex: 1,
+                                    justifyContent: "center",
+                                }}
+                            >
+                                <Text style={{ textAlign: "center", fontSize: 30, color: "#FFFFFF" }}>{index}</Text>
+                            </View>
+                        )}
                     />
                 </View>
             </View>
