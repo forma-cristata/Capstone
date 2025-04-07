@@ -47,9 +47,11 @@
       "expo-router",
       [
         "expo-font",
-      {
-        "fonts": ["./assets/fonts/DaltonWhite.otf"]
-      }
+        {
+          "fonts": [
+            "./assets/fonts/Thesignature.ttf"
+          ]
+        }
       ]
     ],
     "experiments": {

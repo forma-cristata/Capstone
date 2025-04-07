@@ -4,9 +4,9 @@ import {useEffect, useState} from "react";
 import { useFonts} from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 
-SplashScreen.preventAutoHideAsync();
+//SplashScreen.preventAutoHideAsync();
 export default function Welcome({navigation}: any) {
-    const [loaded, error] = useFonts({
+    /*const [loaded, error] = useFonts({
         'Thesignature': require('../assets/fonts/Thesignature.ttf'),
     });
     useEffect(() => {
@@ -17,7 +17,7 @@ export default function Welcome({navigation}: any) {
 
     if(!loaded && !error) {
         return null;
-    }
+    }*/
 
     function createButtonPressed() {
         navigation.navigate("Settings");
