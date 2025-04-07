@@ -58,6 +58,7 @@ export default function Settings({navigation}: any) {
                         data={data}
                         dotStyle={{ backgroundImage: "../assets/images/icon.png", backgroundSize: "auto", borderColor: "white", borderWidth: 2, borderStyle: "solid", borderRadius: 7, width: 50, height: 50,  }}
                         containerStyle={{ gap: 10, marginTop: 30, width: width, height: 55,/* borderStyle: "solid", borderColor: "red", borderWidth: 2*/ }}
+
                         onPress={onPressPagination}
                         renderItem={( index ) => (
                             <View
