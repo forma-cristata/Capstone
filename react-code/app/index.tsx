@@ -30,7 +30,11 @@ export default function Index() {
     }
 
     return (
-        <Stack.Navigator>
+        <Stack.Navigator
+            screenOptions={{
+                headerShown: false
+            }}
+        >
             <Stack.Screen name="Welcome" component={Welcome} />
             <Stack.Screen name="Settings" component={Settings} />
         </Stack.Navigator>

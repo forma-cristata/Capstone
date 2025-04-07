@@ -1,23 +1,8 @@
 import {Text, StyleSheet, SafeAreaView, Switch, TouchableOpacity} from "react-native";
 import {SafeAreaProvider} from "react-native-safe-area-context";
-import {useEffect, useState} from "react";
-import { useFonts} from 'expo-font';
-import * as SplashScreen from 'expo-splash-screen';
+import { useState} from "react";
 
-//SplashScreen.preventAutoHideAsync();
 export default function Welcome({navigation}: any) {
-    /*const [loaded, error] = useFonts({
-        'Thesignature': require('../assets/fonts/Thesignature.ttf'),
-    });
-    useEffect(() => {
-        if (loaded || error) {
-            SplashScreen.hideAsync();
-        }
-    }, [loaded, error]);
-
-    if(!loaded && !error) {
-        return null;
-    }*/
 
     function createButtonPressed() {
         navigation.navigate("Settings");

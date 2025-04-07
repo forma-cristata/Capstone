@@ -35,7 +35,7 @@ export default function Settings({navigation}: any) {
                     <Carousel
                         ref={ref}
                         width={width}
-                        height={width / 2}
+                        height={width}
                         data={data}
                         onProgressChange={progress}
                         renderItem={({ index }) => (
@@ -43,6 +43,8 @@ export default function Settings({navigation}: any) {
                                 style={{
                                     flex: 1,
                                     borderWidth: 1,
+                                    borderStyle: "solid",
+                                    borderColor: "#ffffff",
                                     justifyContent: "center",
                                 }}
                             >
@@ -54,8 +56,8 @@ export default function Settings({navigation}: any) {
                     <Pagination.Basic
                         progress={progress}
                         data={data}
-                        dotStyle={{ backgroundColor: "rgba(0,0,0,0.2)", borderRadius: 50 }}
-                        containerStyle={{ gap: 5, marginTop: 10 }}
+                        dotStyle={{ backgroundColor: "#ffffff", borderRadius: 50 }}
+                        containerStyle={{ gap: 10, marginTop: 20 }}
                         onPress={onPressPagination}
                     />
                 </View>
