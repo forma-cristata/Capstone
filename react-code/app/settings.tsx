@@ -1,3 +1,39 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { Dimensions, SafeAreaView, Text, StyleSheet, TouchableOpacity, View} from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 import Carousel, {
@@ -6,7 +42,7 @@ import Carousel, {
 } from "react-native-reanimated-carousel";
 import React from "react";
 
-const data = [...new Array(6).keys()];
+const data = [...new Array(15).keys()];
 const width = Dimensions.get("window").width;
 
 export default function Settings({navigation}: any) {
@@ -31,33 +67,30 @@ export default function Settings({navigation}: any) {
             <View style={styles.notBackButton}>
                 <Text style={styles.text}>Settings</Text>
 
-                <View style={{ flex: 1 }}>
+                <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
                     <Carousel
                         ref={ref}
-                        width={width}
-                        height={width}
                         data={data}
-                        onProgressChange={progress}
-                        renderItem={({ index }) => (
-                            <View
-                                style={{
-                                    flex: 1,
-                                    borderWidth: 1,
-                                    borderStyle: "solid",
-                                    borderColor: "#ffffff",
-                                    justifyContent: "center",
-                                }}
-                            >
-                                <Text style={{ textAlign: "center", fontSize: 30, color: "#FFFFFF" }}>{index}</Text>
+                        width={width}
+                        onProgressChange={(offset) => {
+                            progress.value = offset;
+                        }}
+                        renderItem={({ item }: { item: number }) => (
+                            <View style={{backgroundColor: "red", width: width/4*3, height: 200, justifyContent: "center", alignItems: "center"}}>
+                                <Text style={{color: "white"}}>{item}</Text>
+                                <Text style={{color: "white"}}>{item}</Text>
                             </View>
                         )}
+                        mode="parallax"
+                        style={{borderStyle: "solid", borderWidth: 2, borderColor: "white", borderRadius: 7}}
                     />
 
-                    <Pagination.Basic
+
+                    {/*<Pagination.Basic
                         progress={progress}
                         data={data}
                         dotStyle={{ backgroundImage: "../assets/images/icon.png", backgroundSize: "auto", borderColor: "white", borderWidth: 2, borderStyle: "solid", borderRadius: 7, width: 50, height: 50,  }}
-                        containerStyle={{ gap: 10, marginTop: 30, width: width, height: 55,/* borderStyle: "solid", borderColor: "red", borderWidth: 2*/ }}
+                        containerStyle={{ gap: 10, marginTop: 30, width: width, height: 55 }}
 
                         onPress={onPressPagination}
                         renderItem={( index ) => (
@@ -70,7 +103,7 @@ export default function Settings({navigation}: any) {
                                 <Text style={{ textAlign: "center", fontSize: 30, color: "#FFFFFF" }}>{index}</Text>
                             </View>
                         )}
-                    />
+                    />*/}
                 </View>
             </View>
         </SafeAreaView>
