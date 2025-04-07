@@ -16,6 +16,9 @@
 		96905EF65AED1B983A6B3ABC /* libPods-reactcode.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 58EEBF8E8E6FB1BC6CAF49B5 /* libPods-reactcode.a */; };
 		B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
+		0401178DD676410485F5820F /* SpaceMono-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2C8533C956824BE9B7CC2B15 /* SpaceMono-Regular.ttf */; };
+		D791A32344BB48C6BBB7F9FF /* Dalton White.otf in Resources */ = {isa = PBXBuildFile; fileRef = A1738A763C60434A8386DA74 /* Dalton White.otf */; };
+		C51C19C0E11F428685D8185D /* Thesignature.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 020D9A8CA5E9493DA340DB7A /* Thesignature.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +38,9 @@
 		C0AA81CEC4BE41F68A985883 /* reactcode-Bridging-Header.h */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.c.h; name = "reactcode-Bridging-Header.h"; path = "reactcode/reactcode-Bridging-Header.h"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-reactcode/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		2C8533C956824BE9B7CC2B15 /* SpaceMono-Regular.ttf */ = {isa = PBXFileReference; name = "SpaceMono-Regular.ttf"; path = "../assets/fonts/SpaceMono-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		A1738A763C60434A8386DA74 /* Dalton White.otf */ = {isa = PBXFileReference; name = "Dalton White.otf"; path = "../assets/fonts/Dalton White.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		020D9A8CA5E9493DA340DB7A /* Thesignature.ttf */ = {isa = PBXFileReference; name = "Thesignature.ttf"; path = "../assets/fonts/Thesignature.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,6 +97,7 @@
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				D65327D7A22EEC0BE12398D9 /* Pods */,
 				D7E4C46ADA2E9064B798F356 /* ExpoModulesProviders */,
+				1C995FA9C8E344B196649952 /* Resources */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -138,6 +145,17 @@
 			);
 			name = ExpoModulesProviders;
 			sourceTree = "<group>";
+		};
+		1C995FA9C8E344B196649952 /* Resources */ = {
+			isa = "PBXGroup";
+			children = (
+				2C8533C956824BE9B7CC2B15 /* SpaceMono-Regular.ttf */,
+				A1738A763C60434A8386DA74 /* Dalton White.otf */,
+				020D9A8CA5E9493DA340DB7A /* Thesignature.ttf */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+			path = "";
 		};
 /* End PBXGroup section */
 
@@ -204,6 +222,9 @@
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
 				79F4F2533FD2DDDB56678DC5 /* PrivacyInfo.xcprivacy in Resources */,
+				0401178DD676410485F5820F /* SpaceMono-Regular.ttf in Resources */,
+				D791A32344BB48C6BBB7F9FF /* Dalton White.otf in Resources */,
+				C51C19C0E11F428685D8185D /* Thesignature.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
