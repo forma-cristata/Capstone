@@ -52,8 +52,6 @@ export default function Settings({navigation}: any) {
             </TouchableOpacity>
             </View>
 
-
-
             <View style={styles.notBackButton}>
                 {/*Title*/}
                 <View style={styles.title}>
