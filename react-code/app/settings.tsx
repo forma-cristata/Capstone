@@ -1,39 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import { Dimensions, SafeAreaView, Text, StyleSheet, TouchableOpacity, View} from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 import Carousel, {
@@ -44,6 +8,7 @@ import React from "react";
 
 const data = [...new Array(15).keys()];
 const width = Dimensions.get("window").width;
+const height = Dimensions.get("window").height;
 
 export default function Settings({navigation}: any) {
     const ref = React.useRef<ICarouselInstance>(null);
@@ -65,7 +30,14 @@ export default function Settings({navigation}: any) {
             </TouchableOpacity>
             </View>
             <View style={styles.notBackButton}>
-                <Text style={styles.text}>Settings</Text>
+                <View style={{height: height * 2/10, justifyContent: "center", alignItems: "center"}}>
+                    <Text style={styles.text}>Settings</Text>
+                </View>
+
+
+                <View style={{height: height / 2.5, borderStyle: "solid", borderWidth: 2, borderColor: "white", borderRadius: 7, justifyContent: "center", alignItems: "center"}}>
+                    <Text>KACI</Text>
+                </View>
 
                 <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
                     <Carousel
@@ -76,13 +48,14 @@ export default function Settings({navigation}: any) {
                             progress.value = offset;
                         }}
                         renderItem={({ item }: { item: number }) => (
-                            <View style={{backgroundColor: "red", width: width/4*3, height: 200, justifyContent: "center", alignItems: "center"}}>
-                                <Text style={{color: "white"}}>{item}</Text>
-                                <Text style={{color: "white"}}>{item}</Text>
+                            <View style={{borderStyle: "solid", borderWidth: 2, borderColor: "white", borderRadius: 7, width: width*9/10, height: "75%" , justifyContent: "center", alignItems: "center"}}>
+                                <Text style={{color: "white"}}>{item} Your mother</Text>
+                                <Text style={{color: "white"}}>Palette ○○○○○○○○○○○○○○○○</Text>
+                                <Text style={{color: "white"}}>Flashing Pattern: MOLD</Text>
                             </View>
                         )}
                         mode="parallax"
-                        style={{borderStyle: "solid", borderWidth: 2, borderColor: "white", borderRadius: 7}}
+                        style={{height: height * 2 /10, justifyContent: "center", alignItems: "center"}}
                     />
 
 
@@ -123,7 +96,7 @@ const styles = StyleSheet.create({
         color: "#ffffff",
     },
     backButton: {
-        height: "10%",
+        height: height / 10,
         width: "100%",
     },
     notBackButton: {
