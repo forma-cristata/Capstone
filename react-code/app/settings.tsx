@@ -58,7 +58,6 @@ export default function Settings({navigation}: any) {
                     <Text style={styles.text}>Settings</Text>
                 </View>
 
-
                 {/*Setting block issues here*/ /*See: https://reactnative.dev/docs/intro-react*/}
                 {/*Carousel Focus Item*/}
                 <View style={styles.focusedItem}>
