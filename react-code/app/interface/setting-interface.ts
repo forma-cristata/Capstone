@@ -1,5 +1,5 @@
 export default interface Setting {
-    // User preferences
+    name: string;
     colors: string[];
     flashingPattern: string;
     direction: "outward" | "inward";
