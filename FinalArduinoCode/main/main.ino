@@ -1443,8 +1443,8 @@ private:
 	// Color arrays
 	int wr[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-	int r1[16] = { 255,   255,    255,    255,  166,  0,    0,    0,    0,    0,    0,    136,  255,  255,  255,  255 };
-	int g1[16] = { 0,     30,     40,     50,   155,  255,  255,  255,  255,  136,  0,    0,    0,    0,    0,    0 };
+	int r1[16] = { 255,   255,    255,    255,  255,  0,    0,    0,    0,    0,    0,    136,  255,  255,  255,  255 };
+	int g1[16] = { 0,     68,     106,     145,   238,  255,  255,  255,  255,  136,  0,    0,    0,    0,    0,    0 };
 	int b1[16] = { 0,     0,      0,      0,    0,    30,   68,   150,  255,  255,  255,  255,  255,  187,  136,  68 };
 
 	int r2[16] = { 255, 255, 255, 255, 0, 255, 255, 255, 255, 255, 255, 255, 0, 255, 255, 255 };
@@ -1455,9 +1455,9 @@ private:
 	int g4[16] = { 0, 52, 19, 21, 0, 35, 38, 40, 20, 38, 33, 0, 55, 19, 52, 0 };
 	int b4[16] = { 0, 0, 42, 52, 35, 0, 15, 82, 82, 35, 0, 65, 75, 10, 0, 12 };
 
-	int r5[16] = { 255, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30 };
-	int g5[16] = { 0, 75, 25, 27, 75, 45, 50, 27, 75, 27, 36, 5, 75, 27, 75, 50 };
-	int b5[16] = { 0, 20, 155, 55, 120, 155, 55, 55, 10, 155, 55, 155, 55, 25, 155, 20 };
+	int r5[16] = { 255, 	58, 		30, 		80, 		30, 		30, 		83, 		30, 		30, 		30, 		30, 	30, 		30, 	30, 	30, 	30 };
+	int g5[16] = { 0, 		145, 		25, 		73, 		75, 		45, 		139, 		27, 		75, 		27, 		36, 	5, 			75, 	27, 	75, 	50 };
+	int b5[16] = { 0, 		38, 		155, 		145, 		120, 		155, 		153, 		55, 		10, 		155, 		55, 	155, 		55, 	25, 	155, 	20 };
 
 	int r6[16] = { 255, 0, 255, 0, 255, 255, 0, 0, 0, 255, 255, 0, 0, 255, 0, 255 };
 	int g6[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -1513,6 +1513,7 @@ public:
 		ColorPattern pattern4(r4, g4, b4, wr);
 		ColorPattern pattern5(r5, g5, b5, wr);
 		ColorPattern pattern6(r6, g6, b6, wr); // Here is where you need sqlite to save the user's preferences.
+		ColorPattern pattern7(r7, g7, b7, wr);
 
 		switch (effectNumber) {
 		case 0:                                                                                        // stillOne
@@ -1543,7 +1544,7 @@ public:
 			setEffect(new TechnoEffect(ledController, pattern1, (delayTime == -1) ? 1 : delayTime, magnetSensor));
 			break;
 		case 9:  // trance
-			setEffect(new TranceEffect(ledController, pattern1, (delayTime == -1) ? 1 : delayTime, magnetSensor));
+			setEffect(new TranceEffect(ledController, pattern7, (delayTime == -1) ? 1 : delayTime, magnetSensor));
 			break;
 		case 10:  // mold
 			setEffect(new MoldEffect(ledController, pattern4, (delayTime == -1) ? 1 : delayTime, magnetSensor));
@@ -1568,7 +1569,7 @@ void setup() {
 	Serial.begin(9600);
 	while (!Serial) { delay(100); } // Serial needs time to initialize
 	lightApp.setup();  // Understood path
-	lightApp.selectEffect(8); // 5 is good, testing 2
+	lightApp.selectEffect(7); // 5 is good, testing 2
 	// 7 is weirdly unsettling.
 }
 

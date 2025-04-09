@@ -11,7 +11,8 @@
     "test": "jest --watchAll",
     "lint": "expo lint",
     "dev": "expo start --localhost --go",
-    "prebuild": "expo prebuild"
+    "prebuild": "expo prebuild",
+    "devc":  "npx expo start -c"
   },
   "jest": {
     "preset": "jest-expo"

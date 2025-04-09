@@ -5,30 +5,100 @@ import Carousel, {
 } from "react-native-reanimated-carousel";
 import React from "react";
 import Setting from "@/app/interface/setting-interface";
-import settingBlock from "@/app/components/settingBlock";
+import SettingBlock from "@/app/components/settingBlock";
 
 let data: Setting[] = [
     {
-        name: "Rainbow Road",
-        colors: ["#ffffff", "#ff00ff", "#0000ff", "#000000", "#ffffff", "#ff00ff", "#0000ff", "#000000", "#ffffff", "#ff00ff", "#0000ff", "#000000", "#ffffff", "#ff00ff", "#0000ff", "#000000"],
+        name: "Still One",
+        colors: ["#ff0000"],
+        flashingPattern: "STILL ONE",
+        direction: "outward",
+        speed: 3,
+    },
+    {
+        name: "Still Many",
+        colors: ["#ff0000", "#ff4400", "#ff6a00", "#ff9100", "#ffee00", "#00ff1e", "#00ff44", "#00ff95", "#00ffff", "#0088ff", "#0000ff", "#8800ff", "#ff00ff", "#ff00bb", "#ff0088", "#ff0044"],
+        flashingPattern: "STILL MANY",
+        direction: "outward",
+        speed: 3,
+    },
+    {
+        name: "Trace One",
+        colors: ["#ff0000", "#3a9126", "#1d199b", "#504991", "#1e4b78", "#1e2d9b", "#538b99", "#1e1b37", "#1e4b0a", "#1d1b9b", "#1e2437", "#1e059b", "#1e4b37", "#1e1b19", "#1e4b9b", "#1e3214"],
+        flashingPattern: "TRACE ONE",
+        direction: "outward",
+        speed: 3,
+    },
+    {
+        name: "Trace Many",
+        colors: ["#A10000", "#CD3400", "#AC132A", "#131534", "#470023", "#D72300", "#CD260F", "#BE2852", "#BE1452", "#CD2623", "#D72100", "#470041", "#13374B", "#AC130A", "#CD3400", "#A1000C"],
+        flashingPattern: "TRACE MANY",
+        direction: "outward",
+        speed: 3,
+    },
+    {
+        name: "Progressive",
+        colors: ["#FF0000", "#FF5501", "#FF2800", "#FF0F02", "#0000EF", "#FF2D03", "#FF3B00", "#FF0200", "#FF0000", "#FF5501", "#FF2800", "#FF0F02", "#0000EF", "#FF2D03", "#FF3B00", "#FF0200"],
+        flashingPattern: "PROGRESSIVE",
+        direction: "outward",
+        speed: 3,
+    },
+    {
+        name: "Strobe Change",
+        colors: ["#A10000", "#CD3400", "#AC132A", "#131534", "#470023", "#D72300", "#CD260F", "#BE2852", "#BE1452", "#CD2623", "#D72100", "#470041", "#13374B", "#AC130A", "#CD3400", "#A1000C"],
+        flashingPattern: "STROBE CHANGE",
+        direction: "outward",
+        speed: 3,
+    },
+    {
+        name: "Comfort Song",
+        colors: ["#ff0000", "#ff4400", "#ff6a00", "#ff9100", "#ffee00", "#00ff1e", "#00ff44", "#00ff95", "#00ffff", "#0088ff", "#0000ff", "#8800ff", "#ff00ff", "#ff00bb", "#ff0088", "#ff0044"],
+        flashingPattern: "COMFORT SONG",
+        direction: "outward",
+        speed: 3,
+    },
+    {
+        name: "Blender",
+        colors: ["#FF00FF", "#000000", "#FF00FF", "#0000FF", "#FF00FF", "#FF0000", "#0000FF", "#0000FF", "#0000FF", "#FF00FF", "#FF0000", "#0000FF", "#0000FF", "#FF00FF", "#000000", "#FF0000"],
+        flashingPattern: "BLENDER",
+        direction: "outward",
+        speed: 3,
+    },
+    {
+        name: "Techno",
+        colors: ["#ff0000", "#ff4400", "#ff6a00", "#ff9100", "#ffee00", "#00ff1e", "#00ff44", "#00ff95", "#00ffff", "#0088ff", "#0000ff", "#8800ff", "#ff00ff", "#ff00bb", "#ff0088", "#ff0044"],
+        flashingPattern: "TECHNO",
+        direction: "inward",
+        speed: 2,
+    },
+    {
+        name: "Trance",
+        colors: ["#00FF00", "#00C800", "#006400", "#009600", "#003200", "#00FF00", "#00B400", "#00E600", "#005A00", "#003200", "#00B400", "#00D200", "#000000", "#007800", "#006400", "#00FF00"],
+        flashingPattern: "TRANCE",
+        direction: "outward",
+        speed: 3,
+    },
+    {
+        name: "Mold",
+        colors: ["#A10000", "#CD3400", "#AC132A", "#131534", "#470023", "#D72300", "#CD260F", "#BE2852", "#BE1452", "#CD2623", "#D72100", "#470041", "#13374B", "#AC130A", "#CD3400", "#A1000C"],
         flashingPattern: "MOLD",
         direction: "outward",
         speed: 3,
     },
     {
-        name: "Your mother",
-        colors: ["#FF4D2E", "#2E8BFF", "#8A2EFF", "#FF2E8B", "#2EFF4D", "#4D2EFF", "#FF8A2E", "#2EFF8A", "#8B2EFF", "#FF2E4D", "#2E4DFF", "#4DFF2E", "#8AFF2E", "#2EFF4D", "#FF2E8A", "#4D8AFF"],
-        flashingPattern: "TRACE ONE",
-        direction: "inward",
-        speed: 2,
-    },
-    {
-        name: "Your father",
-        colors: ["#7B3F6D", "#1AE5FF", "#FF4C2B", "#28D47C", "#9B42F5", "#E6B800", "#4287F5", "#FF6B9C", "#2BFF8E", "#8E44AD", "#FF5733", "#3498DB", "#27AE60", "#E74C3C", "#9B59B6", "#F1C40F"],
-        flashingPattern: "TECHNO",
+        name: "Funky",
+        colors: ["#ff0000", "#3a9126", "#1d199b", "#504991", "#1e4b78", "#1e2d9b", "#538b99", "#1e1b37", "#1e4b0a", "#1d1b9b", "#1e2437", "#1e059b", "#1e4b37", "#1e1b19", "#1e4b9b", "#1e3214"],
+        flashingPattern: "FUNKY",
         direction: "outward",
         speed: 3,
-    }
+    },
+    {
+        name: "Christmas",
+        colors: ["#ff0000", "#ff4400", "#ff6a00", "#ff9100", "#ffee00", "#00ff1e", "#00ff44", "#00ff95", "#00ffff", "#0088ff", "#0000ff", "#8800ff", "#ff00ff", "#ff00bb", "#ff0088", "#ff0044"],
+        flashingPattern: "CHRISTMAS",
+        direction: "outward",
+        speed: 3,
+    },
 ];
 let primKey: number[] = Array.from({ length: data.length }, (_, i) => i);
 const width = Dimensions.get("window").width;
@@ -58,15 +128,9 @@ export default function Settings({navigation}: any) {
                     <Text style={styles.text}>Settings</Text>
                 </View>
 
-                {/*Setting block issues here*/ /*See: https://reactnative.dev/docs/intro-react*/}
+                {/*See: https://reactnative.dev/docs/intro-react*/}
                 {/*Carousel Focus Item*/}
-                <View style={styles.focusedItem}>
-                    <Text style={styles.whiteText}>{data[currentIndex % data.length].name}</Text>
-                    <Text style={styles.whiteText}>{data[currentIndex % data.length].colors.toString()}</Text>
-                    <Text style={styles.whiteText}>{data[currentIndex % data.length].flashingPattern}</Text>
-                    <Text style={styles.whiteText}>{data[currentIndex % data.length].direction}</Text>
-                    <Text style={styles.whiteText}>{data[currentIndex % data.length].speed.toString()}</Text>
-                </View>
+                <SettingBlock style={styles.focusedItem} setting={data[currentIndex % data.length]} />
 
                 {/*Carousel*/}
                 <View style={styles.carCont}>
@@ -81,8 +145,8 @@ export default function Settings({navigation}: any) {
                             setCurrentIndex(Math.round(absoluteProgress));
                             console.log('Current focused item:', data[currentIndex]);
                         }}
-                        renderItem={({item: item}:{ item: number }) => (
-                            settingBlock({setting: data[item], style: styles.renderItem})
+                        renderItem={({item}: {item: number}) => (
+                            <SettingBlock style={styles.renderItem} setting={data[item]} />
                         )}
                         mode="parallax"
                         style={styles.carousel}
