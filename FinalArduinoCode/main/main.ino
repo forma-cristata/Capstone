@@ -219,6 +219,32 @@ public:
 			break;
 		}
 	}
+
+	void setBrightness(uint8_t brightness) {
+		FastLED.setBrightness(brightness);
+		FastLED.show();
+	}
+
+	// New method to apply brightness to individual RGB values
+	void setLedWithBrightness(int L, int R, int G, int B, int W, uint8_t brightness) {
+		// Scale RGB values by brightness
+		int scaledR = (R * brightness) / 255;
+		int scaledG = (G * brightness) / 255;
+		int scaledB = (B * brightness) / 255;
+		int scaledW = (W * brightness) / 255;
+
+		// Use the existing setLed method with scaled values
+		setLed(L, scaledR, scaledG, scaledB, scaledW);
+	}
+
+	void clearAllLeds() {
+		for (int i = 0; i < numLeds; i++) {
+			leds[i].r = 0;
+			leds[i].g = 0;
+			leds[i].b = 0;
+		}
+		FastLED.show();
+	}
 };
 
 class ColorPattern {
@@ -227,11 +253,13 @@ public:
 	int* green;
 	int* blue;
 	int* white;
+	uint8_t* brightness; // Add brightness array
 
-	ColorPattern(int* r, int* g, int* b, int* w)
-		: red(r), green(g), blue(b), white(w) {
+	ColorPattern(int* r, int* g, int* b, int* w, uint8_t* bright = nullptr)
+		: red(r), green(g), blue(b), white(w), brightness(bright) {
 	}
 };
+
 
 class MagnetSensor {
 private:
@@ -378,9 +406,17 @@ public:
 
 	void run(int focal = -1) override {
 		for (int i = 0; i < LIGHT_COUNT; i++) {
-			ledController.setLed(i, pattern.red[0], pattern.green[0], pattern.blue[0], pattern.white[0]);
+			if (pattern.brightness != nullptr) {
+				// Use brightness-adjusted values
+				ledController.setLedWithBrightness(i, pattern.red[0], pattern.green[0], pattern.blue[0], pattern.white[0], pattern.brightness[0]);
+			}
+			else {
+				// Use normal values (backward compatible)
+				ledController.setLed(i, pattern.red[0], pattern.green[0], pattern.blue[0], pattern.white[0]);
+			}
 		}
 	}
+
 };
 
 class StillManyEffect : public LightEffect {
@@ -391,13 +427,28 @@ public:
 
 	void run(int focal = -1) override {
 		for (int i = 0; i < LIGHT_COUNT; i++) {
-			ledController.setLed(i, pattern.red[i % COLOR_COUNT], pattern.green[i%COLOR_COUNT], pattern.blue[i%COLOR_COUNT], pattern.white[i%COLOR_COUNT]);
+			if (pattern.brightness != nullptr) {
+				// Use brightness-adjusted values
+				ledController.setLedWithBrightness(i,
+					pattern.red[i % COLOR_COUNT],
+					pattern.green[i % COLOR_COUNT],
+					pattern.blue[i % COLOR_COUNT],
+					pattern.white[i % COLOR_COUNT],
+					pattern.brightness[i % COLOR_COUNT]);
+			}
+			else {
+				// Use normal values (backward compatible)
+				ledController.setLed(i,
+					pattern.red[i % COLOR_COUNT],
+					pattern.green[i % COLOR_COUNT],
+					pattern.blue[i % COLOR_COUNT],
+					pattern.white[i % COLOR_COUNT]);
+			}
 		}
 	}
+
 };
 
-
-// Successful magnet focal implementation
 class StrobeChangeEffect : public LightEffect {
 public:
 	StrobeChangeEffect(LEDController& controller, ColorPattern colorPattern, int delay, MagnetSensor& sensor)
@@ -422,15 +473,32 @@ public:
 					return;
 				}
 				for (int j = 0; j < LIGHT_COUNT / 2; j++) {
-
 					int offset = (i + j * 2) % LIGHT_COUNT;
 					for (int k = 0; k < delayTime * 2; k++) {
-						// Check magnets more frequently
-
-
+						// Set LED off
 						ledController.setLed(offset, 0, 0, 0, 0);
 						delay(3); // Shorter delays
-						ledController.setLed(offset, pattern.red[i], pattern.green[i], pattern.blue[i], pattern.white[i]);
+
+						// Set LED on with brightness if provided
+						if (pattern.brightness != nullptr) {
+							ledController.setLedWithBrightness(
+								offset,
+								pattern.red[i],
+								pattern.green[i],
+								pattern.blue[i],
+								pattern.white[i],
+								pattern.brightness[i]
+							);
+						}
+						else {
+							ledController.setLed(
+								offset,
+								pattern.red[i],
+								pattern.green[i],
+								pattern.blue[i],
+								pattern.white[i]
+							);
+						}
 						delay(3); // Shorter delays
 					}
 				}
@@ -452,11 +520,46 @@ public:
 					int position1 = (focal + 1 + (i + j * 2) % LIGHT_COUNT) % LIGHT_COUNT;
 					int position2 = (16 + focal - (i + j * 2) % LIGHT_COUNT) % LIGHT_COUNT;
 					for (int k = 0; k < delayTime * 2; k++) {
+						// Set LEDs off
 						ledController.setLed(position1, 0, 0, 0, 0);
 						ledController.setLed(position2, 0, 0, 0, 0);
 						delay(3); // Shorter delays
-						ledController.setLed(position1, pattern.red[i], pattern.green[i], pattern.blue[i], pattern.white[i]);
-						ledController.setLed(position2, pattern.red[i], pattern.green[i], pattern.blue[i], pattern.white[i]);
+
+						// Set LEDs on with brightness if provided
+						if (pattern.brightness != nullptr) {
+							ledController.setLedWithBrightness(
+								position1,
+								pattern.red[i],
+								pattern.green[i],
+								pattern.blue[i],
+								pattern.white[i],
+								pattern.brightness[i]
+							);
+							ledController.setLedWithBrightness(
+								position2,
+								pattern.red[i],
+								pattern.green[i],
+								pattern.blue[i],
+								pattern.white[i],
+								pattern.brightness[i]
+							);
+						}
+						else {
+							ledController.setLed(
+								position1,
+								pattern.red[i],
+								pattern.green[i],
+								pattern.blue[i],
+								pattern.white[i]
+							);
+							ledController.setLed(
+								position2,
+								pattern.red[i],
+								pattern.green[i],
+								pattern.blue[i],
+								pattern.white[i]
+							);
+						}
 						delay(3); // Shorter delays
 					}
 				}
@@ -465,7 +568,6 @@ public:
 	}
 };
 
-// Successful magnet focal implementation
 class TraceOneEffect : public LightEffect {
 public:
 	TraceOneEffect(LEDController& controller, ColorPattern colorPattern, int delay, MagnetSensor& sensor)
@@ -476,8 +578,27 @@ private:
 	MagnetSensor& magSensor;
 public:
 	void run(int focal = -1) override {
+		// Set all LEDs to first color in array
 		for (int i = 0; i < LIGHT_COUNT; i++) {
-			ledController.setLed(i, pattern.red[0], pattern.green[0], pattern.blue[0], pattern.white[0]);
+			if (pattern.brightness != nullptr) {
+				ledController.setLedWithBrightness(
+					i,
+					pattern.red[0],
+					pattern.green[0],
+					pattern.blue[0],
+					pattern.white[0],
+					pattern.brightness[0]
+				);
+			}
+			else {
+				ledController.setLed(
+					i,
+					pattern.red[0],
+					pattern.green[0],
+					pattern.blue[0],
+					pattern.white[0]
+				);
+			}
 		}
 
 		if (focal != -1) {
@@ -495,11 +616,80 @@ public:
 				for (int j = 0; j < LIGHT_COUNT / 2; j++) {
 					int position1 = (focal + 1 + j) % LIGHT_COUNT;
 					int position2 = (16 + focal - j) % LIGHT_COUNT;
-					ledController.setLed(position1, pattern.red[i], pattern.green[i], pattern.blue[i], pattern.white[i]);
-					ledController.setLed(position2, pattern.red[i], pattern.green[i], pattern.blue[i], pattern.white[i]);
+
+					// Set LEDs to current color in array with brightness if provided
+					if (pattern.brightness != nullptr) {
+						ledController.setLedWithBrightness(
+							position1,
+							pattern.red[i],
+							pattern.green[i],
+							pattern.blue[i],
+							pattern.white[i],
+							pattern.brightness[i]
+						);
+						ledController.setLedWithBrightness(
+							position2,
+							pattern.red[i],
+							pattern.green[i],
+							pattern.blue[i],
+							pattern.white[i],
+							pattern.brightness[i]
+						);
+					}
+					else {
+						ledController.setLed(
+							position1,
+							pattern.red[i],
+							pattern.green[i],
+							pattern.blue[i],
+							pattern.white[i]
+						);
+						ledController.setLed(
+							position2,
+							pattern.red[i],
+							pattern.green[i],
+							pattern.blue[i],
+							pattern.white[i]
+						);
+					}
+
 					delay(delayTime);
-					ledController.setLed(position1, pattern.red[0], pattern.green[0], pattern.blue[0], pattern.white[0]);
-					ledController.setLed(position2, pattern.red[0], pattern.green[0], pattern.blue[0], pattern.white[0]);
+
+					// Reset LEDs to first color in array
+					if (pattern.brightness != nullptr) {
+						ledController.setLedWithBrightness(
+							position1,
+							pattern.red[0],
+							pattern.green[0],
+							pattern.blue[0],
+							pattern.white[0],
+							pattern.brightness[0]
+						);
+						ledController.setLedWithBrightness(
+							position2,
+							pattern.red[0],
+							pattern.green[0],
+							pattern.blue[0],
+							pattern.white[0],
+							pattern.brightness[0]
+						);
+					}
+					else {
+						ledController.setLed(
+							position1,
+							pattern.red[0],
+							pattern.green[0],
+							pattern.blue[0],
+							pattern.white[0]
+						);
+						ledController.setLed(
+							position2,
+							pattern.red[0],
+							pattern.green[0],
+							pattern.blue[0],
+							pattern.white[0]
+						);
+					}
 				}
 			}
 		}
@@ -516,13 +706,52 @@ public:
 					return;
 				}
 				for (int j = 0; j < LIGHT_COUNT; j++) {
-					ledController.setLed(j, pattern.red[i], pattern.green[i], pattern.blue[i], pattern.white[i]);
+					// Set LED to current color in array
+					if (pattern.brightness != nullptr) {
+						ledController.setLedWithBrightness(
+							j,
+							pattern.red[i],
+							pattern.green[i],
+							pattern.blue[i],
+							pattern.white[i],
+							pattern.brightness[i]
+						);
+					}
+					else {
+						ledController.setLed(
+							j,
+							pattern.red[i],
+							pattern.green[i],
+							pattern.blue[i],
+							pattern.white[i]
+						);
+					}
+
 					delay(delayTime * 2);
-					ledController.setLed(j, pattern.red[0], pattern.green[0], pattern.blue[0], pattern.white[0]);
+
+					// Reset LED to first color in array
+					if (pattern.brightness != nullptr) {
+						ledController.setLedWithBrightness(
+							j,
+							pattern.red[0],
+							pattern.green[0],
+							pattern.blue[0],
+							pattern.white[0],
+							pattern.brightness[0]
+						);
+					}
+					else {
+						ledController.setLed(
+							j,
+							pattern.red[0],
+							pattern.green[0],
+							pattern.blue[0],
+							pattern.white[0]
+						);
+					}
 				}
 			}
 		}
-
 	}
 };
 
@@ -535,7 +764,6 @@ private:
 	MagnetSensor& magSensor;
 public:
 	void run(int focal = -1) override {
-
 		if (focal != -1) {
 			for (int j = 0; j < COLOR_COUNT; j++) {
 				int originalFocal = focal;
@@ -551,14 +779,82 @@ public:
 				for (int i = 0; i < LIGHT_COUNT / 2; i++) {
 					int ledIndex = (focal + i) % LIGHT_COUNT;
 					int ledIndex2 = (focal - i + 16) % LIGHT_COUNT;
-					ledController.setLed(ledIndex, pattern.red[j], pattern.green[j], pattern.blue[j], pattern.white[j]);
-					ledController.setLed(ledIndex2, pattern.red[j], pattern.green[j], pattern.blue[j], pattern.white[j]);
+
+					// Set LEDs with brightness if provided
+					if (pattern.brightness != nullptr) {
+						ledController.setLedWithBrightness(
+							ledIndex,
+							pattern.red[j],
+							pattern.green[j],
+							pattern.blue[j],
+							pattern.white[j],
+							pattern.brightness[j]
+						);
+						ledController.setLedWithBrightness(
+							ledIndex2,
+							pattern.red[j],
+							pattern.green[j],
+							pattern.blue[j],
+							pattern.white[j],
+							pattern.brightness[j]
+						);
+					}
+					else {
+						ledController.setLed(
+							ledIndex,
+							pattern.red[j],
+							pattern.green[j],
+							pattern.blue[j],
+							pattern.white[j]
+						);
+						ledController.setLed(
+							ledIndex2,
+							pattern.red[j],
+							pattern.green[j],
+							pattern.blue[j],
+							pattern.white[j]
+						);
+					}
 					delay(delayTime);
 
 					ledIndex = (focal + i + 1) % LIGHT_COUNT;
 					ledIndex2 = (focal - i - 1 + 16) % LIGHT_COUNT;
-					ledController.setLed(ledIndex, pattern.red[j], pattern.green[j], pattern.blue[j], pattern.white[j]);
-					ledController.setLed(ledIndex2, pattern.red[j], pattern.green[j], pattern.blue[j], pattern.white[j]);
+
+					// Set next LEDs with brightness if provided
+					if (pattern.brightness != nullptr) {
+						ledController.setLedWithBrightness(
+							ledIndex,
+							pattern.red[j],
+							pattern.green[j],
+							pattern.blue[j],
+							pattern.white[j],
+							pattern.brightness[j]
+						);
+						ledController.setLedWithBrightness(
+							ledIndex2,
+							pattern.red[j],
+							pattern.green[j],
+							pattern.blue[j],
+							pattern.white[j],
+							pattern.brightness[j]
+						);
+					}
+					else {
+						ledController.setLed(
+							ledIndex,
+							pattern.red[j],
+							pattern.green[j],
+							pattern.blue[j],
+							pattern.white[j]
+						);
+						ledController.setLed(
+							ledIndex2,
+							pattern.red[j],
+							pattern.green[j],
+							pattern.blue[j],
+							pattern.white[j]
+						);
+					}
 					delay(delayTime);
 				}
 			}
@@ -578,14 +874,82 @@ public:
 				for (int i = 0; i < LIGHT_COUNT; i++) {
 					int ledIndex = (j + i) % LIGHT_COUNT;
 					int ledIndex2 = (j + i + 1) % LIGHT_COUNT;
-					ledController.setLed(ledIndex, pattern.red[j], pattern.green[j], pattern.blue[j], pattern.white[j]);
-					ledController.setLed(ledIndex2, pattern.red[j], pattern.green[j], pattern.blue[j], pattern.white[j]);
+
+					// Set LEDs with brightness if provided
+					if (pattern.brightness != nullptr) {
+						ledController.setLedWithBrightness(
+							ledIndex,
+							pattern.red[j],
+							pattern.green[j],
+							pattern.blue[j],
+							pattern.white[j],
+							pattern.brightness[j]
+						);
+						ledController.setLedWithBrightness(
+							ledIndex2,
+							pattern.red[j],
+							pattern.green[j],
+							pattern.blue[j],
+							pattern.white[j],
+							pattern.brightness[j]
+						);
+					}
+					else {
+						ledController.setLed(
+							ledIndex,
+							pattern.red[j],
+							pattern.green[j],
+							pattern.blue[j],
+							pattern.white[j]
+						);
+						ledController.setLed(
+							ledIndex2,
+							pattern.red[j],
+							pattern.green[j],
+							pattern.blue[j],
+							pattern.white[j]
+						);
+					}
 					delay(delayTime * 2);
 
 					ledIndex = (j + i + 1) % LIGHT_COUNT;
 					ledIndex2 = (j + i + 2) % LIGHT_COUNT;
-					ledController.setLed(ledIndex, pattern.red[j], pattern.green[j], pattern.blue[j], pattern.white[j]);
-					ledController.setLed(ledIndex2, pattern.red[j], pattern.green[j], pattern.blue[j], pattern.white[j]);
+
+					// Set next LEDs with brightness if provided
+					if (pattern.brightness != nullptr) {
+						ledController.setLedWithBrightness(
+							ledIndex,
+							pattern.red[j],
+							pattern.green[j],
+							pattern.blue[j],
+							pattern.white[j],
+							pattern.brightness[j]
+						);
+						ledController.setLedWithBrightness(
+							ledIndex2,
+							pattern.red[j],
+							pattern.green[j],
+							pattern.blue[j],
+							pattern.white[j],
+							pattern.brightness[j]
+						);
+					}
+					else {
+						ledController.setLed(
+							ledIndex,
+							pattern.red[j],
+							pattern.green[j],
+							pattern.blue[j],
+							pattern.white[j]
+						);
+						ledController.setLed(
+							ledIndex2,
+							pattern.red[j],
+							pattern.green[j],
+							pattern.blue[j],
+							pattern.white[j]
+						);
+					}
 					delay(delayTime * 2);
 				}
 			}
@@ -603,8 +967,23 @@ private:
 public:
 	void run(int focal = -1) override {
 		for (int i = 0; i < LIGHT_COUNT; i++) {
-			ledController.setLed(i, pattern.red[0], pattern.green[0], pattern.blue[0], pattern.white[0]);
+			if (pattern.brightness != nullptr) {
+				// Use brightness-adjusted values
+				ledController.setLedWithBrightness(
+					i,
+					pattern.red[0],
+					pattern.green[0],
+					pattern.blue[0],
+					pattern.white[0],
+					pattern.brightness[0]
+				);
+			}
+			else {
+				// Use normal values (backward compatible)
+				ledController.setLed(i, pattern.red[0], pattern.green[0], pattern.blue[0], pattern.white[0]);
+			}
 		}
+
 		if (focal == -1) {
 			for (int i = 0; i < LIGHT_COUNT; i++) {
 				int originalFocal = focal;
@@ -619,11 +998,47 @@ public:
 				}
 				for (int j = 0; j < LIGHT_COUNT / 2; j++) {
 					int offset = (i + j * 2) % LIGHT_COUNT;
-					ledController.setLed(offset, pattern.red[(i + 1) % (COLOR_COUNT/2)], pattern.green[(i + 1) % COLOR_COUNT], pattern.blue[(i + 1) % COLOR_COUNT], pattern.white[(i + 1) % COLOR_COUNT]);
+					if (pattern.brightness != nullptr) {
+						ledController.setLedWithBrightness(
+							offset,
+							pattern.red[(i + 1) % (COLOR_COUNT / 2)],
+							pattern.green[(i + 1) % COLOR_COUNT],
+							pattern.blue[(i + 1) % COLOR_COUNT],
+							pattern.white[(i + 1) % COLOR_COUNT],
+							pattern.brightness[(i + 1) % COLOR_COUNT]
+						);
+					}
+					else {
+						ledController.setLed(
+							offset,
+							pattern.red[(i + 1) % (COLOR_COUNT / 2)],
+							pattern.green[(i + 1) % COLOR_COUNT],
+							pattern.blue[(i + 1) % COLOR_COUNT],
+							pattern.white[(i + 1) % COLOR_COUNT]
+						);
+					}
 					delay(delayTime * 2);
 
 					offset = (i + j * 2 + 8) % LIGHT_COUNT;
-					ledController.setLed(offset, pattern.red[(i + 1) % (COLOR_COUNT/2)], pattern.green[(i + 2) % COLOR_COUNT], pattern.blue[(i + 2) % COLOR_COUNT], pattern.white[(i + 2) % COLOR_COUNT]);
+					if (pattern.brightness != nullptr) {
+						ledController.setLedWithBrightness(
+							offset,
+							pattern.red[(i + 1) % (COLOR_COUNT / 2)],
+							pattern.green[(i + 2) % COLOR_COUNT],
+							pattern.blue[(i + 2) % COLOR_COUNT],
+							pattern.white[(i + 2) % COLOR_COUNT],
+							pattern.brightness[(i + 2) % COLOR_COUNT]
+						);
+					}
+					else {
+						ledController.setLed(
+							offset,
+							pattern.red[(i + 1) % (COLOR_COUNT / 2)],
+							pattern.green[(i + 2) % COLOR_COUNT],
+							pattern.blue[(i + 2) % COLOR_COUNT],
+							pattern.white[(i + 2) % COLOR_COUNT]
+						);
+					}
 				}
 			}
 		}
@@ -642,12 +1057,49 @@ public:
 				for (int j = 0; j < LIGHT_COUNT / 2; j++) {
 					int position1 = (focal + 1 + j) % LIGHT_COUNT;
 					int position2 = (LIGHT_COUNT + focal - j) % LIGHT_COUNT;
-					ledController.setLed(position1, pattern.red[(i + 1) % COLOR_COUNT], pattern.green[(i + 1) % COLOR_COUNT], pattern.blue[(i + 1) % COLOR_COUNT], pattern.white[(i + 1) % COLOR_COUNT]);
+
+					if (pattern.brightness != nullptr) {
+						ledController.setLedWithBrightness(
+							position1,
+							pattern.red[(i + 1) % COLOR_COUNT],
+							pattern.green[(i + 1) % COLOR_COUNT],
+							pattern.blue[(i + 1) % COLOR_COUNT],
+							pattern.white[(i + 1) % COLOR_COUNT],
+							pattern.brightness[(i + 1) % COLOR_COUNT]
+						);
+					}
+					else {
+						ledController.setLed(
+							position1,
+							pattern.red[(i + 1) % COLOR_COUNT],
+							pattern.green[(i + 1) % COLOR_COUNT],
+							pattern.blue[(i + 1) % COLOR_COUNT],
+							pattern.white[(i + 1) % COLOR_COUNT]
+						);
+					}
 					delay(delayTime);
-					ledController.setLed(position2, pattern.red[(i + 1) % COLOR_COUNT], pattern.green[(i + 2) % COLOR_COUNT], pattern.blue[(i + 2) % COLOR_COUNT], pattern.white[(i + 2) % COLOR_COUNT]);
+
+					if (pattern.brightness != nullptr) {
+						ledController.setLedWithBrightness(
+							position2,
+							pattern.red[(i + 1) % COLOR_COUNT],
+							pattern.green[(i + 2) % COLOR_COUNT],
+							pattern.blue[(i + 2) % COLOR_COUNT],
+							pattern.white[(i + 2) % COLOR_COUNT],
+							pattern.brightness[(i + 2) % COLOR_COUNT]
+						);
+					}
+					else {
+						ledController.setLed(
+							position2,
+							pattern.red[(i + 1) % COLOR_COUNT],
+							pattern.green[(i + 2) % COLOR_COUNT],
+							pattern.blue[(i + 2) % COLOR_COUNT],
+							pattern.white[(i + 2) % COLOR_COUNT]
+						);
+					}
 				}
 			}
-
 		}
 	}
 };
@@ -678,10 +1130,41 @@ public:
 					return;
 				}
 				for (int i = 0; i < delayTime; i++) {
-					ledController.setLed(patternIndices[x], pattern.red[x], pattern.green[x], pattern.blue[x], pattern.white[x]);
-					ledController.setLed(pattern2Indices[x], pattern.red[x], pattern.green[x], pattern.blue[x], pattern.white[x]);
-					ledController.setLed(pattern3Indices[x], pattern.red[x], pattern.green[x], pattern.blue[x], pattern.white[x]);
+					// Set LEDs on with brightness if provided
+					if (pattern.brightness != nullptr) {
+						ledController.setLedWithBrightness(
+							patternIndices[x],
+							pattern.red[x],
+							pattern.green[x],
+							pattern.blue[x],
+							pattern.white[x],
+							pattern.brightness[x]
+						);
+						ledController.setLedWithBrightness(
+							pattern2Indices[x],
+							pattern.red[x],
+							pattern.green[x],
+							pattern.blue[x],
+							pattern.white[x],
+							pattern.brightness[x]
+						);
+						ledController.setLedWithBrightness(
+							pattern3Indices[x],
+							pattern.red[x],
+							pattern.green[x],
+							pattern.blue[x],
+							pattern.white[x],
+							pattern.brightness[x]
+						);
+					}
+					else {
+						ledController.setLed(patternIndices[x], pattern.red[x], pattern.green[x], pattern.blue[x], pattern.white[x]);
+						ledController.setLed(pattern2Indices[x], pattern.red[x], pattern.green[x], pattern.blue[x], pattern.white[x]);
+						ledController.setLed(pattern3Indices[x], pattern.red[x], pattern.green[x], pattern.blue[x], pattern.white[x]);
+					}
 					delay(5);
+
+					// Turn LEDs off
 					ledController.setLed(patternIndices[x], 0, 0, 0, 0);
 					ledController.setLed(pattern2Indices[x], 0, 0, 0, 0);
 					ledController.setLed(pattern3Indices[x], 0, 0, 0, 0);
@@ -718,9 +1201,33 @@ public:
 					else if (led2 > 15) {
 						led2 = led2 - LIGHT_COUNT;
 					}
-					ledController.setLed(led1, pattern.red[x], pattern.green[x], pattern.blue[x], pattern.white[x]);
-					ledController.setLed(led2, pattern.red[x], pattern.green[x], pattern.blue[x], pattern.white[x]);
+
+					// Set LEDs on with brightness if provided
+					if (pattern.brightness != nullptr) {
+						ledController.setLedWithBrightness(
+							led1,
+							pattern.red[x],
+							pattern.green[x],
+							pattern.blue[x],
+							pattern.white[x],
+							pattern.brightness[x]
+						);
+						ledController.setLedWithBrightness(
+							led2,
+							pattern.red[x],
+							pattern.green[x],
+							pattern.blue[x],
+							pattern.white[x],
+							pattern.brightness[x]
+						);
+					}
+					else {
+						ledController.setLed(led1, pattern.red[x], pattern.green[x], pattern.blue[x], pattern.white[x]);
+						ledController.setLed(led2, pattern.red[x], pattern.green[x], pattern.blue[x], pattern.white[x]);
+					}
 					delay(5);
+
+					// Turn LEDs off
 					ledController.setLed(led1, 0, 0, 0, 0);
 					ledController.setLed(led2, 0, 0, 0, 0);
 					delay(5);
@@ -752,7 +1259,27 @@ public:
 					return;
 				}
 				int colorIndex = (i + millis() / delayTime) % COLOR_COUNT;
-				ledController.setLed(i, pattern.red[colorIndex], pattern.green[colorIndex], pattern.blue[colorIndex], pattern.white[colorIndex]);
+
+				// Use brightness if provided
+				if (pattern.brightness != nullptr) {
+					ledController.setLedWithBrightness(
+						i,
+						pattern.red[colorIndex],
+						pattern.green[colorIndex],
+						pattern.blue[colorIndex],
+						pattern.white[colorIndex],
+						pattern.brightness[colorIndex]
+					);
+				}
+				else {
+					ledController.setLed(
+						i,
+						pattern.red[colorIndex],
+						pattern.green[colorIndex],
+						pattern.blue[colorIndex],
+						pattern.white[colorIndex]
+					);
+				}
 			}
 			delay(delayTime);
 
@@ -768,7 +1295,27 @@ public:
 					return;
 				}
 				int colorIndex = (COLOR_COUNT - (i + millis() / delayTime) % COLOR_COUNT) % COLOR_COUNT;
-				ledController.setLed(i, pattern.red[colorIndex], pattern.green[colorIndex], pattern.blue[colorIndex], pattern.white[colorIndex]);
+
+				// Use brightness if provided
+				if (pattern.brightness != nullptr) {
+					ledController.setLedWithBrightness(
+						i,
+						pattern.red[colorIndex],
+						pattern.green[colorIndex],
+						pattern.blue[colorIndex],
+						pattern.white[colorIndex],
+						pattern.brightness[colorIndex]
+					);
+				}
+				else {
+					ledController.setLed(
+						i,
+						pattern.red[colorIndex],
+						pattern.green[colorIndex],
+						pattern.blue[colorIndex],
+						pattern.white[colorIndex]
+					);
+				}
 			}
 			delay(delayTime);
 		}
@@ -790,12 +1337,46 @@ public:
 				if (led1 < 0) {
 					led1 = LIGHT_COUNT + led1;
 				}
-				if (led2 > (LIGHT_COUNT-1)) {
+				if (led2 > (LIGHT_COUNT - 1)) {
 					led2 = led2 - LIGHT_COUNT;
 				}
 				int colorIndex = (i + millis() / delayTime) % COLOR_COUNT;
-				ledController.setLed(led1, pattern.red[colorIndex], pattern.green[colorIndex], pattern.blue[colorIndex], pattern.white[colorIndex]);
-				ledController.setLed(led2, pattern.red[colorIndex], pattern.green[colorIndex], pattern.blue[colorIndex], pattern.white[colorIndex]);
+
+				// Use brightness if provided
+				if (pattern.brightness != nullptr) {
+					ledController.setLedWithBrightness(
+						led1,
+						pattern.red[colorIndex],
+						pattern.green[colorIndex],
+						pattern.blue[colorIndex],
+						pattern.white[colorIndex],
+						pattern.brightness[colorIndex]
+					);
+					ledController.setLedWithBrightness(
+						led2,
+						pattern.red[colorIndex],
+						pattern.green[colorIndex],
+						pattern.blue[colorIndex],
+						pattern.white[colorIndex],
+						pattern.brightness[colorIndex]
+					);
+				}
+				else {
+					ledController.setLed(
+						led1,
+						pattern.red[colorIndex],
+						pattern.green[colorIndex],
+						pattern.blue[colorIndex],
+						pattern.white[colorIndex]
+					);
+					ledController.setLed(
+						led2,
+						pattern.red[colorIndex],
+						pattern.green[colorIndex],
+						pattern.blue[colorIndex],
+						pattern.white[colorIndex]
+					);
+				}
 			}
 			delay(delayTime);
 
@@ -816,12 +1397,46 @@ public:
 				if (led1 < 0) {
 					led1 = LIGHT_COUNT + led1;
 				}
-				if (led2 > (LIGHT_COUNT-1)) {
+				if (led2 > (LIGHT_COUNT - 1)) {
 					led2 = led2 - LIGHT_COUNT;
 				}
 				int colorIndex = (COLOR_COUNT - (i + millis() / delayTime) % COLOR_COUNT) % COLOR_COUNT;
-				ledController.setLed(led1, pattern.red[colorIndex], pattern.green[colorIndex], pattern.blue[colorIndex], pattern.white[colorIndex]);
-				ledController.setLed(led2, pattern.red[colorIndex], pattern.green[colorIndex], pattern.blue[colorIndex], pattern.white[colorIndex]);
+
+				// Use brightness if provided
+				if (pattern.brightness != nullptr) {
+					ledController.setLedWithBrightness(
+						led1,
+						pattern.red[colorIndex],
+						pattern.green[colorIndex],
+						pattern.blue[colorIndex],
+						pattern.white[colorIndex],
+						pattern.brightness[colorIndex]
+					);
+					ledController.setLedWithBrightness(
+						led2,
+						pattern.red[colorIndex],
+						pattern.green[colorIndex],
+						pattern.blue[colorIndex],
+						pattern.white[colorIndex],
+						pattern.brightness[colorIndex]
+					);
+				}
+				else {
+					ledController.setLed(
+						led1,
+						pattern.red[colorIndex],
+						pattern.green[colorIndex],
+						pattern.blue[colorIndex],
+						pattern.white[colorIndex]
+					);
+					ledController.setLed(
+						led2,
+						pattern.red[colorIndex],
+						pattern.green[colorIndex],
+						pattern.blue[colorIndex],
+						pattern.white[colorIndex]
+					);
+				}
 			}
 			delay(delayTime);
 		}
@@ -860,20 +1475,94 @@ public:
 					int z = (j + 4) % LIGHT_COUNT;
 
 					for (int x = 0; x < 2; x++) {
-						ledController.setLed(j, pattern.red[i], pattern.green[i], pattern.blue[i], pattern.white[i]);
+						// Set LED with brightness if provided
+						if (pattern.brightness != nullptr) {
+							ledController.setLedWithBrightness(
+								j,
+								pattern.red[i],
+								pattern.green[i],
+								pattern.blue[i],
+								pattern.white[i],
+								pattern.brightness[i]
+							);
+						}
+						else {
+							ledController.setLed(j, pattern.red[i], pattern.green[i], pattern.blue[i], pattern.white[i]);
+						}
 						delay(delayTime);
+
 						ledController.setLed(j, 0, 0, 0, 0);
-						ledController.setLed(k, pattern.red[m], pattern.green[m], pattern.blue[m], pattern.white[m]);
+
+						// Set next LED with brightness if provided
+						if (pattern.brightness != nullptr) {
+							ledController.setLedWithBrightness(
+								k,
+								pattern.red[m],
+								pattern.green[m],
+								pattern.blue[m],
+								pattern.white[m],
+								pattern.brightness[m]
+							);
+						}
+						else {
+							ledController.setLed(k, pattern.red[m], pattern.green[m], pattern.blue[m], pattern.white[m]);
+						}
 						delay(delayTime);
+
 						ledController.setLed(k, 0, 0, 0, 0);
-						ledController.setLed(l, pattern.red[n], pattern.green[n], pattern.blue[n], pattern.white[n]);
+
+						// Set next LED with brightness if provided
+						if (pattern.brightness != nullptr) {
+							ledController.setLedWithBrightness(
+								l,
+								pattern.red[n],
+								pattern.green[n],
+								pattern.blue[n],
+								pattern.white[n],
+								pattern.brightness[n]
+							);
+						}
+						else {
+							ledController.setLed(l, pattern.red[n], pattern.green[n], pattern.blue[n], pattern.white[n]);
+						}
 						delay(delayTime);
+
 						ledController.setLed(l, 0, 0, 0, 0);
-						ledController.setLed(y, pattern.red[o], pattern.green[o], pattern.blue[o], pattern.white[o]);
+
+						// Set next LED with brightness if provided
+						if (pattern.brightness != nullptr) {
+							ledController.setLedWithBrightness(
+								y,
+								pattern.red[o],
+								pattern.green[o],
+								pattern.blue[o],
+								pattern.white[o],
+								pattern.brightness[o]
+							);
+						}
+						else {
+							ledController.setLed(y, pattern.red[o], pattern.green[o], pattern.blue[o], pattern.white[o]);
+						}
 						delay(delayTime);
+
 						ledController.setLed(y, 0, 0, 0, 0);
-						ledController.setLed(z, pattern.red[p], pattern.green[p], pattern.blue[p], pattern.white[p]);
+
+						// Set next LED with brightness if provided
+						if (pattern.brightness != nullptr) {
+							ledController.setLedWithBrightness(
+								z,
+								pattern.red[p],
+								pattern.green[p],
+								pattern.blue[p],
+								pattern.white[p],
+								pattern.brightness[p]
+							);
+						}
+						else {
+							ledController.setLed(z, pattern.red[p], pattern.green[p], pattern.blue[p], pattern.white[p]);
+						}
 						delay(delayTime);
+
 						ledController.setLed(z, 0, 0, 0, 0);
 					}
 				}
@@ -909,36 +1598,141 @@ public:
 						int zb = jb + 4;
 
 						for (int x = 0; x < 2; x++) {
-							ledController.setLed(j, pattern.red[i], pattern.green[i], pattern.blue[i], pattern.white[i]);
-							ledController.setLed(jb, pattern.red[i], pattern.green[i], pattern.blue[i], pattern.white[i]);
+							// Set LEDs with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									j,
+									pattern.red[i],
+									pattern.green[i],
+									pattern.blue[i],
+									pattern.white[i],
+									pattern.brightness[i]
+								);
+								ledController.setLedWithBrightness(
+									jb,
+									pattern.red[i],
+									pattern.green[i],
+									pattern.blue[i],
+									pattern.white[i],
+									pattern.brightness[i]
+								);
+							}
+							else {
+								ledController.setLed(j, pattern.red[i], pattern.green[i], pattern.blue[i], pattern.white[i]);
+								ledController.setLed(jb, pattern.red[i], pattern.green[i], pattern.blue[i], pattern.white[i]);
+							}
 
 							delay(delayTime * 2);
 							ledController.setLed(j, 0, 0, 0, 0);
 							ledController.setLed(jb, 0, 0, 0, 0);
 
-							ledController.setLed(k, pattern.red[m], pattern.green[m], pattern.blue[m], pattern.white[m]);
-							ledController.setLed(kb, pattern.red[m], pattern.green[m], pattern.blue[m], pattern.white[m]);
+							// Set next LEDs with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									k,
+									pattern.red[m],
+									pattern.green[m],
+									pattern.blue[m],
+									pattern.white[m],
+									pattern.brightness[m]
+								);
+								ledController.setLedWithBrightness(
+									kb,
+									pattern.red[m],
+									pattern.green[m],
+									pattern.blue[m],
+									pattern.white[m],
+									pattern.brightness[m]
+								);
+							}
+							else {
+								ledController.setLed(k, pattern.red[m], pattern.green[m], pattern.blue[m], pattern.white[m]);
+								ledController.setLed(kb, pattern.red[m], pattern.green[m], pattern.blue[m], pattern.white[m]);
+							}
 
 							delay(delayTime * 2);
 							ledController.setLed(k, 0, 0, 0, 0);
 							ledController.setLed(kb, 0, 0, 0, 0);
 
-							ledController.setLed(l, pattern.red[n], pattern.green[n], pattern.blue[n], pattern.white[n]);
-							ledController.setLed(lb, pattern.red[n], pattern.green[n], pattern.blue[n], pattern.white[n]);
+							// Set next LEDs with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									l,
+									pattern.red[n],
+									pattern.green[n],
+									pattern.blue[n],
+									pattern.white[n],
+									pattern.brightness[n]
+								);
+								ledController.setLedWithBrightness(
+									lb,
+									pattern.red[n],
+									pattern.green[n],
+									pattern.blue[n],
+									pattern.white[n],
+									pattern.brightness[n]
+								);
+							}
+							else {
+								ledController.setLed(l, pattern.red[n], pattern.green[n], pattern.blue[n], pattern.white[n]);
+								ledController.setLed(lb, pattern.red[n], pattern.green[n], pattern.blue[n], pattern.white[n]);
+							}
 
 							delay(delayTime * 2);
 							ledController.setLed(l, 0, 0, 0, 0);
 							ledController.setLed(lb, 0, 0, 0, 0);
 
-							ledController.setLed(y, pattern.red[o], pattern.green[o], pattern.blue[o], pattern.white[o]);
-							ledController.setLed(yb, pattern.red[o], pattern.green[o], pattern.blue[o], pattern.white[o]);
+							// Set next LEDs with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									y,
+									pattern.red[o],
+									pattern.green[o],
+									pattern.blue[o],
+									pattern.white[o],
+									pattern.brightness[o]
+								);
+								ledController.setLedWithBrightness(
+									yb,
+									pattern.red[o],
+									pattern.green[o],
+									pattern.blue[o],
+									pattern.white[o],
+									pattern.brightness[o]
+								);
+							}
+							else {
+								ledController.setLed(y, pattern.red[o], pattern.green[o], pattern.blue[o], pattern.white[o]);
+								ledController.setLed(yb, pattern.red[o], pattern.green[o], pattern.blue[o], pattern.white[o]);
+							}
 
 							delay(delayTime * 2);
 							ledController.setLed(y, 0, 0, 0, 0);
 							ledController.setLed(yb, 0, 0, 0, 0);
 
-							ledController.setLed(z, pattern.red[p], pattern.green[p], pattern.blue[p], pattern.white[p]);
-							ledController.setLed(zb, pattern.red[p], pattern.green[p], pattern.blue[p], pattern.white[p]);
+							// Set next LEDs with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									z,
+									pattern.red[p],
+									pattern.green[p],
+									pattern.blue[p],
+									pattern.white[p],
+									pattern.brightness[p]
+								);
+								ledController.setLedWithBrightness(
+									zb,
+									pattern.red[p],
+									pattern.green[p],
+									pattern.blue[p],
+									pattern.white[p],
+									pattern.brightness[p]
+								);
+							}
+							else {
+								ledController.setLed(z, pattern.red[p], pattern.green[p], pattern.blue[p], pattern.white[p]);
+								ledController.setLed(zb, pattern.red[p], pattern.green[p], pattern.blue[p], pattern.white[p]);
+							}
 
 							delay(delayTime * 2);
 							ledController.setLed(z, 0, 0, 0, 0);
@@ -961,36 +1755,141 @@ public:
 						int zb = jb + 4;
 
 						for (int x = 0; x < 2; x++) {
-							ledController.setLed(j, pattern.red[i], pattern.green[i], pattern.blue[i], pattern.white[i]);
-							ledController.setLed(jb, pattern.red[i], pattern.green[i], pattern.blue[i], pattern.white[i]);
+							// Set LEDs with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									j,
+									pattern.red[i],
+									pattern.green[i],
+									pattern.blue[i],
+									pattern.white[i],
+									pattern.brightness[i]
+								);
+								ledController.setLedWithBrightness(
+									jb,
+									pattern.red[i],
+									pattern.green[i],
+									pattern.blue[i],
+									pattern.white[i],
+									pattern.brightness[i]
+								);
+							}
+							else {
+								ledController.setLed(j, pattern.red[i], pattern.green[i], pattern.blue[i], pattern.white[i]);
+								ledController.setLed(jb, pattern.red[i], pattern.green[i], pattern.blue[i], pattern.white[i]);
+							}
 
 							delay(delayTime * 2);
 							ledController.setLed(j, 0, 0, 0, 0);
 							ledController.setLed(jb, 0, 0, 0, 0);
 
-							ledController.setLed(k, pattern.red[m], pattern.green[m], pattern.blue[m], pattern.white[m]);
-							ledController.setLed(kb, pattern.red[m], pattern.green[m], pattern.blue[m], pattern.white[m]);
+							// Set next LEDs with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									k,
+									pattern.red[m],
+									pattern.green[m],
+									pattern.blue[m],
+									pattern.white[m],
+									pattern.brightness[m]
+								);
+								ledController.setLedWithBrightness(
+									kb,
+									pattern.red[m],
+									pattern.green[m],
+									pattern.blue[m],
+									pattern.white[m],
+									pattern.brightness[m]
+								);
+							}
+							else {
+								ledController.setLed(k, pattern.red[m], pattern.green[m], pattern.blue[m], pattern.white[m]);
+								ledController.setLed(kb, pattern.red[m], pattern.green[m], pattern.blue[m], pattern.white[m]);
+							}
 
 							delay(delayTime * 2);
 							ledController.setLed(k, 0, 0, 0, 0);
 							ledController.setLed(kb, 0, 0, 0, 0);
 
-							ledController.setLed(l, pattern.red[n], pattern.green[n], pattern.blue[n], pattern.white[n]);
-							ledController.setLed(lb, pattern.red[n], pattern.green[n], pattern.blue[n], pattern.white[n]);
+							// Set next LEDs with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									l,
+									pattern.red[n],
+									pattern.green[n],
+									pattern.blue[n],
+									pattern.white[n],
+									pattern.brightness[n]
+								);
+								ledController.setLedWithBrightness(
+									lb,
+									pattern.red[n],
+									pattern.green[n],
+									pattern.blue[n],
+									pattern.white[n],
+									pattern.brightness[n]
+								);
+							}
+							else {
+								ledController.setLed(l, pattern.red[n], pattern.green[n], pattern.blue[n], pattern.white[n]);
+								ledController.setLed(lb, pattern.red[n], pattern.green[n], pattern.blue[n], pattern.white[n]);
+							}
 
 							delay(delayTime * 2);
 							ledController.setLed(l, 0, 0, 0, 0);
 							ledController.setLed(lb, 0, 0, 0, 0);
 
-							ledController.setLed(y, pattern.red[o], pattern.green[o], pattern.blue[o], pattern.white[o]);
-							ledController.setLed(yb, pattern.red[o], pattern.green[o], pattern.blue[o], pattern.white[o]);
+							// Set next LEDs with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									y,
+									pattern.red[o],
+									pattern.green[o],
+									pattern.blue[o],
+									pattern.white[o],
+									pattern.brightness[o]
+								);
+								ledController.setLedWithBrightness(
+									yb,
+									pattern.red[o],
+									pattern.green[o],
+									pattern.blue[o],
+									pattern.white[o],
+									pattern.brightness[o]
+								);
+							}
+							else {
+								ledController.setLed(y, pattern.red[o], pattern.green[o], pattern.blue[o], pattern.white[o]);
+								ledController.setLed(yb, pattern.red[o], pattern.green[o], pattern.blue[o], pattern.white[o]);
+							}
 
 							delay(delayTime * 2);
 							ledController.setLed(y, 0, 0, 0, 0);
 							ledController.setLed(yb, 0, 0, 0, 0);
 
-							ledController.setLed(z, pattern.red[p], pattern.green[p], pattern.blue[p], pattern.white[p]);
-							ledController.setLed(zb, pattern.red[p], pattern.green[p], pattern.blue[p], pattern.white[p]);
+							// Set next LEDs with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									z,
+									pattern.red[p],
+									pattern.green[p],
+									pattern.blue[p],
+									pattern.white[p],
+									pattern.brightness[p]
+								);
+								ledController.setLedWithBrightness(
+									zb,
+									pattern.red[p],
+									pattern.green[p],
+									pattern.blue[p],
+									pattern.white[p],
+									pattern.brightness[p]
+								);
+							}
+							else {
+								ledController.setLed(z, pattern.red[p], pattern.green[p], pattern.blue[p], pattern.white[p]);
+								ledController.setLed(zb, pattern.red[p], pattern.green[p], pattern.blue[p], pattern.white[p]);
+							}
 
 							delay(delayTime * 2);
 							ledController.setLed(z, 0, 0, 0, 0);
@@ -1003,6 +1902,7 @@ public:
 		}
 	}
 };
+
 
 class TranceEffect : public LightEffect {
 public:
@@ -1032,7 +1932,20 @@ public:
 					for (int i = 0; i < ls; i++) {
 						int li = j + i;
 						if (li < LIGHT_COUNT) {  // Add bound check
-							ledController.setLed(li + 1, pattern.red[li % COLOR_COUNT], pattern.green[li % COLOR_COUNT], pattern.blue[li % COLOR_COUNT], pattern.white[li % COLOR_COUNT]);
+							// Set LED with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									li + 1,
+									pattern.red[li % COLOR_COUNT],
+									pattern.green[li % COLOR_COUNT],
+									pattern.blue[li % COLOR_COUNT],
+									pattern.white[li % COLOR_COUNT],
+									pattern.brightness[li % COLOR_COUNT]
+								);
+							}
+							else {
+								ledController.setLed(li + 1, pattern.red[li % COLOR_COUNT], pattern.green[li % COLOR_COUNT], pattern.blue[li % COLOR_COUNT], pattern.white[li % COLOR_COUNT]);
+							}
 						}
 					}
 					delay(delayTime);
@@ -1049,7 +1962,20 @@ public:
 					for (int i = 0; i < ls; i++) {
 						int ledIndex = j + i;
 						if (ledIndex < LIGHT_COUNT) {  // Add bound check
-							ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+							// Set LED with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									ledIndex + 1,
+									pattern.red[ledIndex % COLOR_COUNT],
+									pattern.green[ledIndex % COLOR_COUNT],
+									pattern.blue[ledIndex % COLOR_COUNT],
+									pattern.white[ledIndex % COLOR_COUNT],
+									pattern.brightness[ledIndex % COLOR_COUNT]
+								);
+							}
+							else {
+								ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+							}
 						}
 					}
 					delay(delayTime);
@@ -1082,7 +2008,20 @@ public:
 					for (int i = 0; i < ls; i++) {
 						int li = distance + i;  // Adjust lighting based on distance
 						if (li < LIGHT_COUNT) {          // Add bound check
-							ledController.setLed((li + 1), pattern.red[li % COLOR_COUNT], pattern.green[li % COLOR_COUNT], pattern.blue[li % COLOR_COUNT], pattern.white[li % COLOR_COUNT]);
+							// Set LED with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									(li + 1),
+									pattern.red[li % COLOR_COUNT],
+									pattern.green[li % COLOR_COUNT],
+									pattern.blue[li % COLOR_COUNT],
+									pattern.white[li % COLOR_COUNT],
+									pattern.brightness[li % COLOR_COUNT]
+								);
+							}
+							else {
+								ledController.setLed((li + 1), pattern.red[li % COLOR_COUNT], pattern.green[li % COLOR_COUNT], pattern.blue[li % COLOR_COUNT], pattern.white[li % COLOR_COUNT]);
+							}
 						}
 					}
 					delay(delayTime);
@@ -1100,7 +2039,20 @@ public:
 					for (int i = 0; i < ls; i++) {
 						int ledIndex = distance + i;
 						if (ledIndex < LIGHT_COUNT) {  // Add bound check
-							ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+							// Set LED with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									ledIndex + 1,
+									pattern.red[ledIndex % COLOR_COUNT],
+									pattern.green[ledIndex % COLOR_COUNT],
+									pattern.blue[ledIndex % COLOR_COUNT],
+									pattern.white[ledIndex % COLOR_COUNT],
+									pattern.brightness[ledIndex % COLOR_COUNT]
+								);
+							}
+							else {
+								ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+							}
 						}
 					}
 					delay(delayTime);
@@ -1146,7 +2098,20 @@ public:
 					for (int i = 0; i < ledsPerGroup; i++) {
 						int ledIndex = startIdx + i;
 						for (int ha = 0; ha < LIGHT_COUNT / 4; ha++) {
-							ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+							// Set LED with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									ledIndex + 1,
+									pattern.red[ledIndex % COLOR_COUNT],
+									pattern.green[ledIndex % COLOR_COUNT],
+									pattern.blue[ledIndex % COLOR_COUNT],
+									pattern.white[ledIndex % COLOR_COUNT],
+									pattern.brightness[ledIndex % COLOR_COUNT]
+								);
+							}
+							else {
+								ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+							}
 							ledController.setLed(ledIndex, 0, 0, 0, 0);
 						}
 					}
@@ -1160,7 +2125,20 @@ public:
 					for (int i = 0; i < ledsPerGroup; i++) {
 						int ledIndex = startIdx + i;
 						for (int ha = 0; ha < 4; ha++) {
-							ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+							// Set LED with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									ledIndex + 1,
+									pattern.red[ledIndex % COLOR_COUNT],
+									pattern.green[ledIndex % COLOR_COUNT],
+									pattern.blue[ledIndex % COLOR_COUNT],
+									pattern.white[ledIndex % COLOR_COUNT],
+									pattern.brightness[ledIndex % COLOR_COUNT]
+								);
+							}
+							else {
+								ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+							}
 							ledController.setLed(ledIndex, 0, 0, 0, 0);
 						}
 					}
@@ -1185,7 +2163,20 @@ public:
 					for (int i = 0; i < ledsPerGroup; i++) {
 						int ledIndex = startIdx + i;
 						for (int ha = 0; ha < 4; ha++) {
-							ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+							// Set LED with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									ledIndex + 1,
+									pattern.red[ledIndex % COLOR_COUNT],
+									pattern.green[ledIndex % COLOR_COUNT],
+									pattern.blue[ledIndex % COLOR_COUNT],
+									pattern.white[ledIndex % COLOR_COUNT],
+									pattern.brightness[ledIndex % COLOR_COUNT]
+								);
+							}
+							else {
+								ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+							}
 							ledController.setLed(ledIndex, 0, 0, 0, 0);
 						}
 					}
@@ -1199,7 +2190,20 @@ public:
 					for (int i = 0; i < ledsPerGroup; i++) {
 						int ledIndex = startIdx + i;
 						for (int ha = 0; ha < 4; ha++) {
-							ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex], pattern.white[ledIndex]);
+							// Set LED with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									ledIndex + 1,
+									pattern.red[ledIndex % COLOR_COUNT],
+									pattern.green[ledIndex % COLOR_COUNT],
+									pattern.blue[ledIndex % COLOR_COUNT],
+									pattern.white[ledIndex % COLOR_COUNT],
+									pattern.brightness[ledIndex % COLOR_COUNT]
+								);
+							}
+							else {
+								ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex], pattern.white[ledIndex]);
+							}
 							ledController.setLed(ledIndex, 0, 0, 0, 0);
 						}
 					}
@@ -1211,7 +2215,7 @@ public:
 			}
 		}
 		else {
-			for (int startIdx = LIGHT_COUNT-1; startIdx >= focal; startIdx--) {
+			for (int startIdx = LIGHT_COUNT - 1; startIdx >= focal; startIdx--) {
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
@@ -1228,8 +2232,29 @@ public:
 							int ledIndex = startIdx + i;
 							int ledIndex2 = startIdx + i - 8;
 							for (int ha = 0; ha < 4; ha++) {
-								ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
-								ledController.setLed(ledIndex2 + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+								// Set LEDs with brightness if provided
+								if (pattern.brightness != nullptr) {
+									ledController.setLedWithBrightness(
+										ledIndex + 1,
+										pattern.red[ledIndex % COLOR_COUNT],
+										pattern.green[ledIndex % COLOR_COUNT],
+										pattern.blue[ledIndex % COLOR_COUNT],
+										pattern.white[ledIndex % COLOR_COUNT],
+										pattern.brightness[ledIndex % COLOR_COUNT]
+									);
+									ledController.setLedWithBrightness(
+										ledIndex2 + 1,
+										pattern.red[ledIndex % COLOR_COUNT],
+										pattern.green[ledIndex % COLOR_COUNT],
+										pattern.blue[ledIndex % COLOR_COUNT],
+										pattern.white[ledIndex % COLOR_COUNT],
+										pattern.brightness[ledIndex % COLOR_COUNT]
+									);
+								}
+								else {
+									ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+									ledController.setLed(ledIndex2 + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+								}
 								ledController.setLed(ledIndex, 0, 0, 0, 0);
 								ledController.setLed(ledIndex2, 0, 0, 0, 0);
 							}
@@ -1247,8 +2272,29 @@ public:
 							int ledIndex = startIdx + i;
 							int ledIndex2 = startIdx - i;
 							for (int ha = 0; ha < 4; ha++) {
-								ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
-								ledController.setLed(ledIndex2 + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+								// Set LEDs with brightness if provided
+								if (pattern.brightness != nullptr) {
+									ledController.setLedWithBrightness(
+										ledIndex + 1,
+										pattern.red[ledIndex % COLOR_COUNT],
+										pattern.green[ledIndex % COLOR_COUNT],
+										pattern.blue[ledIndex % COLOR_COUNT],
+										pattern.white[ledIndex % COLOR_COUNT],
+										pattern.brightness[ledIndex % COLOR_COUNT]
+									);
+									ledController.setLedWithBrightness(
+										ledIndex2 + 1,
+										pattern.red[ledIndex % COLOR_COUNT],
+										pattern.green[ledIndex % COLOR_COUNT],
+										pattern.blue[ledIndex % COLOR_COUNT],
+										pattern.white[ledIndex % COLOR_COUNT],
+										pattern.brightness[ledIndex % COLOR_COUNT]
+									);
+								}
+								else {
+									ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+									ledController.setLed(ledIndex2 + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+								}
 								ledController.setLed(ledIndex, 0, 0, 0, 0);
 								ledController.setLed(ledIndex2, 0, 0, 0, 0);
 							}
@@ -1296,7 +2342,21 @@ public:
 				for (int i = 0; i < ledsPerGroup; i++) {
 					int ledIndex = random(0, LIGHT_COUNT);
 					delay(delayTime / 12);
-					ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+
+					// Set LED with brightness if provided
+					if (pattern.brightness != nullptr) {
+						ledController.setLedWithBrightness(
+							ledIndex + 1,
+							pattern.red[ledIndex % COLOR_COUNT],
+							pattern.green[ledIndex % COLOR_COUNT],
+							pattern.blue[ledIndex % COLOR_COUNT],
+							pattern.white[ledIndex % COLOR_COUNT],
+							pattern.brightness[ledIndex % COLOR_COUNT]
+						);
+					}
+					else {
+						ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+					}
 				}
 				delay(delayTime / 12);
 
@@ -1322,7 +2382,21 @@ public:
 					delay(delayTime / 12);
 
 					int ledIndex = random(0, LIGHT_COUNT);
-					ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+
+					// Set LED with brightness if provided
+					if (pattern.brightness != nullptr) {
+						ledController.setLedWithBrightness(
+							ledIndex + 1,
+							pattern.red[ledIndex % COLOR_COUNT],
+							pattern.green[ledIndex % COLOR_COUNT],
+							pattern.blue[ledIndex % COLOR_COUNT],
+							pattern.white[ledIndex % COLOR_COUNT],
+							pattern.brightness[ledIndex % COLOR_COUNT]
+						);
+					}
+					else {
+						ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+					}
 				}
 				delay(delayTime / 12);
 
@@ -1350,8 +2424,30 @@ public:
 					int ledIndex = random(0, LIGHT_COUNT);
 					int ledIndex2 = random(0, LIGHT_COUNT);
 					delay(delayTime / 12);
-					ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
-					ledController.setLed(ledIndex2 + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+
+					// Set LEDs with brightness if provided
+					if (pattern.brightness != nullptr) {
+						ledController.setLedWithBrightness(
+							ledIndex + 1,
+							pattern.red[ledIndex % COLOR_COUNT],
+							pattern.green[ledIndex % COLOR_COUNT],
+							pattern.blue[ledIndex % COLOR_COUNT],
+							pattern.white[ledIndex % COLOR_COUNT],
+							pattern.brightness[ledIndex % COLOR_COUNT]
+						);
+						ledController.setLedWithBrightness(
+							ledIndex2 + 1,
+							pattern.red[ledIndex % COLOR_COUNT],
+							pattern.green[ledIndex % COLOR_COUNT],
+							pattern.blue[ledIndex % COLOR_COUNT],
+							pattern.white[ledIndex % COLOR_COUNT],
+							pattern.brightness[ledIndex % COLOR_COUNT]
+						);
+					}
+					else {
+						ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+						ledController.setLed(ledIndex2 + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+					}
 				}
 				delay(delayTime / 12);
 
@@ -1380,8 +2476,30 @@ public:
 
 					int ledIndex = random(0, LIGHT_COUNT);
 					int ledIndex2 = random(0, LIGHT_COUNT);
-					ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
-					ledController.setLed(ledIndex2 + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+
+					// Set LEDs with brightness if provided
+					if (pattern.brightness != nullptr) {
+						ledController.setLedWithBrightness(
+							ledIndex + 1,
+							pattern.red[ledIndex % COLOR_COUNT],
+							pattern.green[ledIndex % COLOR_COUNT],
+							pattern.blue[ledIndex % COLOR_COUNT],
+							pattern.white[ledIndex % COLOR_COUNT],
+							pattern.brightness[ledIndex % COLOR_COUNT]
+						);
+						ledController.setLedWithBrightness(
+							ledIndex2 + 1,
+							pattern.red[ledIndex % COLOR_COUNT],
+							pattern.green[ledIndex % COLOR_COUNT],
+							pattern.blue[ledIndex % COLOR_COUNT],
+							pattern.white[ledIndex % COLOR_COUNT],
+							pattern.brightness[ledIndex % COLOR_COUNT]
+						);
+					}
+					else {
+						ledController.setLed(ledIndex + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+						ledController.setLed(ledIndex2 + 1, pattern.red[ledIndex % COLOR_COUNT], pattern.green[ledIndex % COLOR_COUNT], pattern.blue[ledIndex % COLOR_COUNT], pattern.white[ledIndex % COLOR_COUNT]);
+					}
 				}
 				delay(delayTime / 12);
 
@@ -1398,7 +2516,8 @@ public:
 	}
 };
 
-class ChristmasEffect : public LightEffect { // This effect is not working.
+
+class ChristmasEffect : public LightEffect {
 public:
 	ChristmasEffect(LEDController& controller, ColorPattern colorPattern, int delay, MagnetSensor& sensor)
 		: LightEffect(controller, colorPattern, delay), magSensor(sensor) {
@@ -1429,20 +2548,95 @@ public:
 
 					if (i == 0) {
 						for (int j = 0; j < 18; j += 2) {
-							ledController.setLed(j, pattern.red[xy], pattern.green[xy], pattern.blue[xy], pattern.white[xy]);
+							// Set LED with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									j,
+									pattern.red[xy],
+									pattern.green[xy],
+									pattern.blue[xy],
+									pattern.white[xy],
+									pattern.brightness[xy]
+								);
+							}
+							else {
+								ledController.setLed(j, pattern.red[xy], pattern.green[xy], pattern.blue[xy], pattern.white[xy]);
+							}
+
 							if (j == 8) {
-								ledController.setLed(j, pattern.red[(xy + 1) % COLOR_COUNT], pattern.green[(xy + 1) % COLOR_COUNT], pattern.blue[(xy + 1) % COLOR_COUNT], pattern.white[(xy + 1) % COLOR_COUNT]);
+								// Set LED with brightness if provided
+								if (pattern.brightness != nullptr) {
+									ledController.setLedWithBrightness(
+										j,
+										pattern.red[(xy + 1) % COLOR_COUNT],
+										pattern.green[(xy + 1) % COLOR_COUNT],
+										pattern.blue[(xy + 1) % COLOR_COUNT],
+										pattern.white[(xy + 1) % COLOR_COUNT],
+										pattern.brightness[(xy + 1) % COLOR_COUNT]
+									);
+								}
+								else {
+									ledController.setLed(j, pattern.red[(xy + 1) % COLOR_COUNT], pattern.green[(xy + 1) % COLOR_COUNT], pattern.blue[(xy + 1) % COLOR_COUNT], pattern.white[(xy + 1) % COLOR_COUNT]);
+								}
 							}
+
 							if (j == 12) {
-								ledController.setLed(j, pattern.red[(xy + 2) % COLOR_COUNT], pattern.green[(xy + 2) % COLOR_COUNT], pattern.blue[(xy + 2) % COLOR_COUNT], pattern.white[(xy + 2) % COLOR_COUNT]);
+								// Set LED with brightness if provided
+								if (pattern.brightness != nullptr) {
+									ledController.setLedWithBrightness(
+										j,
+										pattern.red[(xy + 2) % COLOR_COUNT],
+										pattern.green[(xy + 2) % COLOR_COUNT],
+										pattern.blue[(xy + 2) % COLOR_COUNT],
+										pattern.white[(xy + 2) % COLOR_COUNT],
+										pattern.brightness[(xy + 2) % COLOR_COUNT]
+									);
+								}
+								else {
+									ledController.setLed(j, pattern.red[(xy + 2) % COLOR_COUNT], pattern.green[(xy + 2) % COLOR_COUNT], pattern.blue[(xy + 2) % COLOR_COUNT], pattern.white[(xy + 2) % COLOR_COUNT]);
+								}
 							}
-							ledController.setLed(j + 1, pattern.red[(xy + 3) % COLOR_COUNT], pattern.green[(xy + 3) % COLOR_COUNT], pattern.blue[(xy + 3) % COLOR_COUNT], pattern.white[(xy + 3) % COLOR_COUNT]);
+
+							// Set LED with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									j + 1,
+									pattern.red[(xy + 3) % COLOR_COUNT],
+									pattern.green[(xy + 3) % COLOR_COUNT],
+									pattern.blue[(xy + 3) % COLOR_COUNT],
+									pattern.white[(xy + 3) % COLOR_COUNT],
+									pattern.brightness[(xy + 3) % COLOR_COUNT]
+								);
+							}
+							else {
+								ledController.setLed(j + 1, pattern.red[(xy + 3) % COLOR_COUNT], pattern.green[(xy + 3) % COLOR_COUNT], pattern.blue[(xy + 3) % COLOR_COUNT], pattern.white[(xy + 3) % COLOR_COUNT]);
+							}
 						}
 
-
 						for (int j = 1; j < LIGHT_COUNT + 3; j += 2) {
-							ledController.setLed(j, pattern.red[xy], pattern.green[xy], pattern.blue[xy], pattern.white[xy]);
-							ledController.setLed(j - 1, pattern.red[(xy + 3) % COLOR_COUNT], pattern.green[(xy + 3) % COLOR_COUNT], pattern.blue[(xy + 3) % COLOR_COUNT], pattern.white[(xy + 3) % COLOR_COUNT]);
+							// Set LED with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									j,
+									pattern.red[xy],
+									pattern.green[xy],
+									pattern.blue[xy],
+									pattern.white[xy],
+									pattern.brightness[xy]
+								);
+								ledController.setLedWithBrightness(
+									j - 1,
+									pattern.red[(xy + 3) % COLOR_COUNT],
+									pattern.green[(xy + 3) % COLOR_COUNT],
+									pattern.blue[(xy + 3) % COLOR_COUNT],
+									pattern.white[(xy + 3) % COLOR_COUNT],
+									pattern.brightness[(xy + 3) % COLOR_COUNT]
+								);
+							}
+							else {
+								ledController.setLed(j, pattern.red[xy], pattern.green[xy], pattern.blue[xy], pattern.white[xy]);
+								ledController.setLed(j - 1, pattern.red[(xy + 3) % COLOR_COUNT], pattern.green[(xy + 3) % COLOR_COUNT], pattern.blue[(xy + 3) % COLOR_COUNT], pattern.white[(xy + 3) % COLOR_COUNT]);
+							}
 						}
 					}
 				}
@@ -1468,35 +2662,187 @@ public:
 				for (int xy = 0; xy < COLOR_COUNT; xy++) {
 					if (i == 0) {
 						for (int j = focal; j < LIGHT_COUNT; j += 2) {
-							ledController.setLed(j, pattern.red[xy], pattern.green[xy], pattern.blue[xy], pattern.white[xy]);
+							// Set LED with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									j,
+									pattern.red[xy],
+									pattern.green[xy],
+									pattern.blue[xy],
+									pattern.white[xy],
+									pattern.brightness[xy]
+								);
+							}
+							else {
+								ledController.setLed(j, pattern.red[xy], pattern.green[xy], pattern.blue[xy], pattern.white[xy]);
+							}
+
 							if (j == 8) {
-								ledController.setLed(j, pattern.red[(xy + 1) % COLOR_COUNT], pattern.green[(xy + 1) % COLOR_COUNT], pattern.blue[(xy + 1) % COLOR_COUNT], pattern.white[(xy + 1) % COLOR_COUNT]);
+								// Set LED with brightness if provided
+								if (pattern.brightness != nullptr) {
+									ledController.setLedWithBrightness(
+										j,
+										pattern.red[(xy + 1) % COLOR_COUNT],
+										pattern.green[(xy + 1) % COLOR_COUNT],
+										pattern.blue[(xy + 1) % COLOR_COUNT],
+										pattern.white[(xy + 1) % COLOR_COUNT],
+										pattern.brightness[(xy + 1) % COLOR_COUNT]
+									);
+								}
+								else {
+									ledController.setLed(j, pattern.red[(xy + 1) % COLOR_COUNT], pattern.green[(xy + 1) % COLOR_COUNT], pattern.blue[(xy + 1) % COLOR_COUNT], pattern.white[(xy + 1) % COLOR_COUNT]);
+								}
 							}
+
 							if (j == 12) {
-								ledController.setLed(j, pattern.red[(xy + 2) % COLOR_COUNT], pattern.green[(xy + 2) % COLOR_COUNT], pattern.blue[(xy + 2) % COLOR_COUNT], pattern.white[(xy + 2) % COLOR_COUNT]);
+								// Set LED with brightness if provided
+								if (pattern.brightness != nullptr) {
+									ledController.setLedWithBrightness(
+										j,
+										pattern.red[(xy + 2) % COLOR_COUNT],
+										pattern.green[(xy + 2) % COLOR_COUNT],
+										pattern.blue[(xy + 2) % COLOR_COUNT],
+										pattern.white[(xy + 2) % COLOR_COUNT],
+										pattern.brightness[(xy + 2) % COLOR_COUNT]
+									);
+								}
+								else {
+									ledController.setLed(j, pattern.red[(xy + 2) % COLOR_COUNT], pattern.green[(xy + 2) % COLOR_COUNT], pattern.blue[(xy + 2) % COLOR_COUNT], pattern.white[(xy + 2) % COLOR_COUNT]);
+								}
 							}
-							ledController.setLed((j + 1) % LIGHT_COUNT, pattern.red[(xy + 3) % COLOR_COUNT], pattern.green[(xy + 3) % COLOR_COUNT], pattern.blue[(xy + 3) % COLOR_COUNT], pattern.white[(xy + 3) % COLOR_COUNT]);
+
+							// Set LED with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									(j + 1) % LIGHT_COUNT,
+									pattern.red[(xy + 3) % COLOR_COUNT],
+									pattern.green[(xy + 3) % COLOR_COUNT],
+									pattern.blue[(xy + 3) % COLOR_COUNT],
+									pattern.white[(xy + 3) % COLOR_COUNT],
+									pattern.brightness[(xy + 3) % COLOR_COUNT]
+								);
+							}
+							else {
+								ledController.setLed((j + 1) % LIGHT_COUNT, pattern.red[(xy + 3) % COLOR_COUNT], pattern.green[(xy + 3) % COLOR_COUNT], pattern.blue[(xy + 3) % COLOR_COUNT], pattern.white[(xy + 3) % COLOR_COUNT]);
+							}
 						}
 
 						for (int j = focal; j >= 0; j -= 2) {
-							ledController.setLed(j, pattern.red[xy], pattern.green[xy], pattern.blue[xy], pattern.white[xy]);
+							// Set LED with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									j,
+									pattern.red[xy],
+									pattern.green[xy],
+									pattern.blue[xy],
+									pattern.white[xy],
+									pattern.brightness[xy]
+								);
+							}
+							else {
+								ledController.setLed(j, pattern.red[xy], pattern.green[xy], pattern.blue[xy], pattern.white[xy]);
+							}
+
 							if (j == 8) {
-								ledController.setLed(j, pattern.red[(xy + 1) % COLOR_COUNT], pattern.green[(xy + 1) % COLOR_COUNT], pattern.blue[(xy + 1) % COLOR_COUNT], pattern.white[(xy + 1) % COLOR_COUNT]);
+								// Set LED with brightness if provided
+								if (pattern.brightness != nullptr) {
+									ledController.setLedWithBrightness(
+										j,
+										pattern.red[(xy + 1) % COLOR_COUNT],
+										pattern.green[(xy + 1) % COLOR_COUNT],
+										pattern.blue[(xy + 1) % COLOR_COUNT],
+										pattern.white[(xy + 1) % COLOR_COUNT],
+										pattern.brightness[(xy + 1) % COLOR_COUNT]
+									);
+								}
+								else {
+									ledController.setLed(j, pattern.red[(xy + 1) % COLOR_COUNT], pattern.green[(xy + 1) % COLOR_COUNT], pattern.blue[(xy + 1) % COLOR_COUNT], pattern.white[(xy + 1) % COLOR_COUNT]);
+								}
 							}
+
 							if (j == 12) {
-								ledController.setLed(j, pattern.red[(xy + 2) % COLOR_COUNT], pattern.green[(xy + 2) % COLOR_COUNT], pattern.blue[(xy + 2) % COLOR_COUNT], pattern.white[(xy + 2) % COLOR_COUNT]);
+								// Set LED with brightness if provided
+								if (pattern.brightness != nullptr) {
+									ledController.setLedWithBrightness(
+										j,
+										pattern.red[(xy + 2) % COLOR_COUNT],
+										pattern.green[(xy + 2) % COLOR_COUNT],
+										pattern.blue[(xy + 2) % COLOR_COUNT],
+										pattern.white[(xy + 2) % COLOR_COUNT],
+										pattern.brightness[(xy + 2) % COLOR_COUNT]
+									);
+								}
+								else {
+									ledController.setLed(j, pattern.red[(xy + 2) % COLOR_COUNT], pattern.green[(xy + 2) % COLOR_COUNT], pattern.blue[(xy + 2) % COLOR_COUNT], pattern.white[(xy + 2) % COLOR_COUNT]);
+								}
 							}
-							ledController.setLed((j + 1) % LIGHT_COUNT, pattern.red[(xy + 3) % COLOR_COUNT], pattern.green[(xy + 3) % COLOR_COUNT], pattern.blue[(xy + 3) % COLOR_COUNT], pattern.white[(xy + 3) % COLOR_COUNT]);
+
+							// Set LED with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									(j + 1) % LIGHT_COUNT,
+									pattern.red[(xy + 3) % COLOR_COUNT],
+									pattern.green[(xy + 3) % COLOR_COUNT],
+									pattern.blue[(xy + 3) % COLOR_COUNT],
+									pattern.white[(xy + 3) % COLOR_COUNT],
+									pattern.brightness[(xy + 3) % COLOR_COUNT]
+								);
+							}
+							else {
+								ledController.setLed((j + 1) % LIGHT_COUNT, pattern.red[(xy + 3) % COLOR_COUNT], pattern.green[(xy + 3) % COLOR_COUNT], pattern.blue[(xy + 3) % COLOR_COUNT], pattern.white[(xy + 3) % COLOR_COUNT]);
+							}
 						}
 
-
-						for (int j = focal; j < LIGHT_COUNT+1; j += 2) {
-							ledController.setLed(j, pattern.red[xy], pattern.green[xy], pattern.blue[xy], pattern.white[xy]);
-							ledController.setLed(j - 1, pattern.red[(xy + 3) % COLOR_COUNT], pattern.green[(xy + 3) % COLOR_COUNT], pattern.blue[(xy + 3) % COLOR_COUNT], pattern.white[(xy + 3) % COLOR_COUNT]);
+						for (int j = focal; j < LIGHT_COUNT + 1; j += 2) {
+							// Set LEDs with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									j,
+									pattern.red[xy],
+									pattern.green[xy],
+									pattern.blue[xy],
+									pattern.white[xy],
+									pattern.brightness[xy]
+								);
+								ledController.setLedWithBrightness(
+									j - 1,
+									pattern.red[(xy + 3) % COLOR_COUNT],
+									pattern.green[(xy + 3) % COLOR_COUNT],
+									pattern.blue[(xy + 3) % COLOR_COUNT],
+									pattern.white[(xy + 3) % COLOR_COUNT],
+									pattern.brightness[(xy + 3) % COLOR_COUNT]
+								);
+							}
+							else {
+								ledController.setLed(j, pattern.red[xy], pattern.green[xy], pattern.blue[xy], pattern.white[xy]);
+								ledController.setLed(j - 1, pattern.red[(xy + 3) % COLOR_COUNT], pattern.green[(xy + 3) % COLOR_COUNT], pattern.blue[(xy + 3) % COLOR_COUNT], pattern.white[(xy + 3) % COLOR_COUNT]);
+							}
 						}
+
 						for (int j = focal; j >= 0; j -= 2) {
-							ledController.setLed(j, pattern.red[xy], pattern.green[xy], pattern.blue[xy], pattern.white[xy]);
-							ledController.setLed(j - 1, pattern.red[(xy + 3) % COLOR_COUNT], pattern.green[(xy + 3) % COLOR_COUNT], pattern.blue[(xy + 3) % COLOR_COUNT], pattern.white[(xy + 3) % COLOR_COUNT]);
+							// Set LEDs with brightness if provided
+							if (pattern.brightness != nullptr) {
+								ledController.setLedWithBrightness(
+									j,
+									pattern.red[xy],
+									pattern.green[xy],
+									pattern.blue[xy],
+									pattern.white[xy],
+									pattern.brightness[xy]
+								);
+								ledController.setLedWithBrightness(
+									j - 1,
+									pattern.red[(xy + 3) % COLOR_COUNT],
+									pattern.green[(xy + 3) % COLOR_COUNT],
+									pattern.blue[(xy + 3) % COLOR_COUNT],
+									pattern.white[(xy + 3) % COLOR_COUNT],
+									pattern.brightness[(xy + 3) % COLOR_COUNT]
+								);
+							}
+							else {
+								ledController.setLed(j, pattern.red[xy], pattern.green[xy], pattern.blue[xy], pattern.white[xy]);
+								ledController.setLed(j - 1, pattern.red[(xy + 3) % COLOR_COUNT], pattern.green[(xy + 3) % COLOR_COUNT], pattern.blue[(xy + 3) % COLOR_COUNT], pattern.white[(xy + 3) % COLOR_COUNT]);
+							}
 						}
 					}
 				}
@@ -1504,6 +2850,7 @@ public:
 		}
 	}
 };
+
 
 // Main application class to coordinate everything
 class LightApplication {
@@ -1578,60 +2925,138 @@ public:
 		currentEffect = newEffect;  // Assigns the newEffect to the currentEffect;
 	}
 
-	void selectEffect(int effectNumber, int delayTime = -1) {
-		// Define the different color patterns
-		ColorPattern pattern1(r1, g1, b1, wr);
-		ColorPattern pattern2(r2, g2, b2, wr);
-		ColorPattern pattern4(r4, g4, b4, wr);
-		ColorPattern pattern5(r5, g5, b5, wr);
-		ColorPattern pattern6(r6, g6, b6, wr); // Here is where you need sqlite to save the user's preferences.
-		ColorPattern pattern7(r7, g7, b7, wr);
+	void selectEffect(int effectNumber, int delayTime = -1, int* r = nullptr, int* g = nullptr, int* b = nullptr, int* w = nullptr, uint8_t* bright = nullptr) {
+		// If colors aren't provided, use the default ones
+		int* red = r;
+		int* green = g;
+		int* blue = b;
+		int* white = w;
+		uint8_t* brightness = bright;
+
+		int patternNumber = getDefaultPatternForEffect(effectNumber);
+
+		if (red == nullptr) red = getDefaultRed(patternNumber);
+		if (green == nullptr) green = getDefaultGreen(patternNumber);
+		if (blue == nullptr) blue = getDefaultBlue(patternNumber);
+		if (white == nullptr) white = getDefaultWhite();
+		// No default brightness - will be nullptr if not provided
+
+		// Create the pattern with either provided or default colors, plus brightness
+		ColorPattern pattern(red, green, blue, white, brightness);
+
 
 		switch (effectNumber) {
-		case 0:                                                                                        // stillOne
-			setEffect(new StillOneEffect(ledController, pattern1, (delayTime == -1) ? 10 : delayTime));  // TODO no delay time necessary 
+		case 0:  // stillOne
+			setEffect(new StillOneEffect(ledController, pattern, (delayTime == -1) ? 10 : delayTime));
 			break;
-		case 1:                                                                                         // stillMany
-			setEffect(new StillManyEffect(ledController, pattern1, (delayTime == -1) ? 10 : delayTime));  // TODO no delay time necessary
+		case 1:  // stillMany
+			setEffect(new StillManyEffect(ledController, pattern, (delayTime == -1) ? 10 : delayTime));
 			break;
 		case 2:  // traceOne
-			setEffect(new TraceOneEffect(ledController, pattern5, (delayTime == -1) ? 10 : delayTime, magnetSensor));
+			setEffect(new TraceOneEffect(ledController, pattern, (delayTime == -1) ? 10 : delayTime, magnetSensor));
 			break;
 		case 3:  // progressive
-			setEffect(new ProgressiveEffect(ledController, pattern2, (delayTime == -1) ? 7 : delayTime, magnetSensor));
+			setEffect(new ProgressiveEffect(ledController, pattern, (delayTime == -1) ? 7 : delayTime, magnetSensor));
 			break;
 		case 4:  // traceMany
-			setEffect(new TraceManyEffect(ledController, pattern4, (delayTime == -1) ? 15 : delayTime, magnetSensor));
+			setEffect(new TraceManyEffect(ledController, pattern, (delayTime == -1) ? 15 : delayTime, magnetSensor));
 			break;
 		case 5:  // strobeChange
-			setEffect(new StrobeChangeEffect(ledController, pattern4, (delayTime == -1) ? 2 : delayTime, magnetSensor));
+			setEffect(new StrobeChangeEffect(ledController, pattern, (delayTime == -1) ? 2 : delayTime, magnetSensor));
 			break;
 		case 6:  // comfortSongStrobe
-			setEffect(new ComfortSongStrobeEffect(ledController, pattern1, (delayTime == -1) ? 3 : delayTime, magnetSensor));
+			setEffect(new ComfortSongStrobeEffect(ledController, pattern, (delayTime == -1) ? 3 : delayTime, magnetSensor));
 			break;
 		case 7:  // blender
-			setEffect(new BlenderEffect(ledController, pattern6, (delayTime == -1) ? 2 : delayTime, magnetSensor));
+			setEffect(new BlenderEffect(ledController, pattern, (delayTime == -1) ? 2 : delayTime, magnetSensor));
 			break;
 		case 8:  // techno
-			setEffect(new TechnoEffect(ledController, pattern1, (delayTime == -1) ? 1 : delayTime, magnetSensor));
+			setEffect(new TechnoEffect(ledController, pattern, (delayTime == -1) ? 1 : delayTime, magnetSensor));
 			break;
 		case 9:  // trance
-			setEffect(new TranceEffect(ledController, pattern7, (delayTime == -1) ? 1 : delayTime, magnetSensor));
+			setEffect(new TranceEffect(ledController, pattern, (delayTime == -1) ? 1 : delayTime, magnetSensor));
 			break;
 		case 10:  // mold
-			setEffect(new MoldEffect(ledController, pattern4, (delayTime == -1) ? 1 : delayTime, magnetSensor));
+			setEffect(new MoldEffect(ledController, pattern, (delayTime == -1) ? 1 : delayTime, magnetSensor));
 			break;
 		case 11:  // funky
-			setEffect(new FunkyEffect(ledController, pattern5, (delayTime == -1) ? 8 : delayTime, magnetSensor));
+			setEffect(new FunkyEffect(ledController, pattern, (delayTime == -1) ? 8 : delayTime, magnetSensor));
 			break;
 		case 12:  // christmas
-			setEffect(new ChristmasEffect(ledController, pattern6, (delayTime == -1) ? 10 : delayTime, magnetSensor));
+			setEffect(new ChristmasEffect(ledController, pattern, (delayTime == -1) ? 10 : delayTime, magnetSensor));
 			break;
 		default:
-			setEffect(new StillOneEffect(ledController, pattern1, (delayTime == -1) ? 10 : delayTime));  // No delay time needed TODO
+			setEffect(new StillOneEffect(ledController, pattern, (delayTime == -1) ? 10 : delayTime));
 			break;
 		}
 	}
+
+	LEDController& getLedController() {
+		return ledController;
+	}
+
+	// Add these getter methods to the LightApplication class in the public section:
+	// Getters for default color patterns
+	int* getDefaultRed(int patternNumber) {
+		switch (patternNumber) {
+		case 1: return r1;
+		case 2: return r2;
+		case 4: return r4;
+		case 5: return r5;
+		case 6: return r6;
+		case 7: return r7;
+		default: return r1;
+		}
+	}
+
+	int* getDefaultGreen(int patternNumber) {
+		switch (patternNumber) {
+		case 1: return g1;
+		case 2: return g2;
+		case 4: return g4;
+		case 5: return g5;
+		case 6: return g6;
+		case 7: return g7;
+		default: return g1;
+		}
+	}
+
+	int* getDefaultBlue(int patternNumber) {
+		switch (patternNumber) {
+		case 1: return b1;
+		case 2: return b2;
+		case 4: return b4;
+		case 5: return b5;
+		case 6: return b6;
+		case 7: return b7;
+		default: return b1;
+		}
+	}
+
+	int* getDefaultWhite() {
+		return wr; // All effects use the same white array
+	}
+
+	// Helper method to get the default pattern number for a specific effect
+	int getDefaultPatternForEffect(int effectNumber) {
+		switch (effectNumber) {
+		case 0: return 1;  // stillOne uses pattern1
+		case 1: return 1;  // stillMany uses pattern1
+		case 2: return 5;  // traceOne uses pattern5
+		case 3: return 2;  // progressive uses pattern2
+		case 4: return 4;  // traceMany uses pattern4
+		case 5: return 4;  // strobeChange uses pattern4
+		case 6: return 1;  // comfortSongStrobe uses pattern1
+		case 7: return 6;  // blender uses pattern6
+		case 8: return 1;  // techno uses pattern1
+		case 9: return 7;  // trance uses pattern7
+		case 10: return 4; // mold uses pattern4
+		case 11: return 5; // funky uses pattern5
+		case 12: return 6; // christmas uses pattern6
+		default: return 1;
+		}
+	}
+
 };
 
 // Global application instance
@@ -1647,9 +3072,109 @@ void setup() {
 }
 
 void loop() {
+	bool shelfOn = true; // This will come from the React app
+
+	// If shelf is off, turn off all LEDs and return
+	if (!shelfOn) {
+		lightApp.getLedController().clearAllLeds();
+		delay(100); // Small delay to avoid constant updates
+		return;
+	}
+
+	bool useCustomColors = false; // Set to true when receiving colors from React
+	bool useCustomDelay = false;  // Set to true when a specific delay time is provided
+	bool useCustomWhite = false;  // Set to true when a specific white value is provided
+	bool useCustomBrightness = true; // Set to true when custom brightness values are provided
+
+	int customDelay = 2;          // Custom delay value, only used if useCustomDelay is true
+	int customWhiteValue = 0;     // Custom white value (0-255), used if useCustomWhite is true
+	int effectNumber = 4;         // traceMany
+
+	// Default brightness for all LEDs is 255 (full brightness)
+	uint8_t customBrightness[16] = {
+		125, 125, 125, 125, 125, 125, 125, 125,
+		255, 255, 255, 255, 255, 255, 255, 255
+	};
+
+	if (useCustomColors) {
+		int r[16], g[16], b[16], w[16];
+
+		// Colors received from React if applicable
+		uint32_t hexColors[16] = {
+			0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00, 0xFF00FF, 0x00FFFF, 0xFFFFFF, 0x000000,
+			0x880000, 0x008800, 0x000088, 0x888800, 0x880088, 0x008888, 0x444444, 0x222222
+		};
+
+		// Extract RGB values from hexColors
+		for (int i = 0; i < 16; i++) {
+			r[i] = (hexColors[i] >> 16) & 0xFF;
+			g[i] = (hexColors[i] >> 8) & 0xFF;
+			b[i] = hexColors[i] & 0xFF;
+
+			// Set white values based on custom white value or default to 0
+			w[i] = useCustomWhite ? customWhiteValue : 0;
+		}
+
+		// Call selectEffect with custom colors, delay, and brightness if provided
+		if (useCustomDelay) {
+			if (useCustomBrightness) {
+				lightApp.selectEffect(effectNumber, customDelay, r, g, b, w, customBrightness);
+			} else {
+				lightApp.selectEffect(effectNumber, customDelay, r, g, b, w);
+			}
+		} else {
+			if (useCustomBrightness) {
+				lightApp.selectEffect(effectNumber, -1, r, g, b, w, customBrightness);
+			} else {
+				lightApp.selectEffect(effectNumber, -1, r, g, b, w);
+			}
+		}
+	} 
+	else {
+		// Using default colors
+		if (useCustomDelay || useCustomWhite || useCustomBrightness) {
+			int delayValue = useCustomDelay ? customDelay : -1;
+
+			if (useCustomWhite || useCustomBrightness) {
+				int w[16];
+
+				if (useCustomWhite) {
+					for (int i = 0; i < 16; i++) {
+						w[i] = customWhiteValue;
+					}
+					if (useCustomBrightness) {
+						lightApp.selectEffect(effectNumber, delayValue, nullptr, nullptr, nullptr, w, customBrightness);
+					}
+					else {
+						lightApp.selectEffect(effectNumber, delayValue, nullptr, nullptr, nullptr, w);
+					}
+				}
+				else {
+					if (useCustomBrightness) {
+						lightApp.selectEffect(effectNumber, delayValue, nullptr, nullptr, nullptr, nullptr, customBrightness);
+					}
+					else {
+						lightApp.selectEffect(effectNumber, delayValue, nullptr, nullptr, nullptr, nullptr);
+					}
+				}
+			}
+			else {
+				lightApp.selectEffect(effectNumber, delayValue);
+			}
+		}
+		else {
+			lightApp.selectEffect(effectNumber); // Use all defaults
+		}
+	}
 
 	lightApp.loop();
 }
+
+
+
+
+
+
 
 /// <summary>
 /// This is just notation for the interface of received information from the React application.
@@ -1657,14 +3182,17 @@ void loop() {
 /*
 class CustomSetting {
 public:
-	int effectNumber; // Mode
-	int delayTime;    // Delay
-	int r[16];        // Red Values
-	int g[16];        // Green Values
-	int b[16];        // Blue Values
-	int w[16];        // White Values
-	float bright[16]; // Brightness Values	
-	CustomSetting CustomSetting(int effectNumber, int delayTime, int r[16], int g[16], int b[16], int w[16], float bright[16]) {
+	bool on; // Mode ON
+	int effectNumber; // Mode DONE
+	int delayTime;    // Delay DONE
+	int r[16];        // Red Values DONE
+	int g[16];        // Green Values DONE
+	int b[16];        // Blue Values DONE
+	int w[16];        // White Values DONE
+	float bright[16]; // Brightness Values	DONE
+	bool outwards;
+	CustomSetting CustomSetting(bool on, int effectNumber, int delayTime, int r[16], int g[16], int b[16], int w[16], float bright[16], bool outwards) {
+		this->on = on;
 		this->effectNumber = effectNumber;
 		this->delayTime = delayTime;
 		this->r = r;
@@ -1672,6 +3200,7 @@ public:
 		this->b = b;
 		this->w = w;
 		this->bright = bright;
+		this->outwards = outwards;
 	}
 
 }
