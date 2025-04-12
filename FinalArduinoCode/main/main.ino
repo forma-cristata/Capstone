@@ -11,8 +11,6 @@ class ColorPattern;
 class MagnetSensor;
 class LightEffect;
 
-
-
 class LEDController {
 private:
 	CRGB* leds;
@@ -239,35 +237,113 @@ class MagnetSensor {
 private:
 	const byte* hallPins;
 	int numPins;
-	int offset;
-	float span;
+	int* offsets;       // Individual baseline for each sensor
+	float* sensitivities; // Individual sensitivity multiplier
+	float* thresholds;   // Individual detection threshold
 	int focal;
+
 public:
 	MagnetSensor(const byte* pins, int numPins, int offset, float span)
-		: hallPins(pins), numPins(numPins), offset(offset), span(span), focal(-1) {
+		: hallPins(pins), numPins(numPins), focal(-1) {
+
+		// Allocate memory for calibration values
+		offsets = new int[numPins];
+		sensitivities = new float[numPins];
+		thresholds = new float[numPins];
+
+		// Initialize default values with increased sensitivity
+		for (int i = 0; i < numPins; i++) {
+			offsets[i] = 512;         // Default analog midpoint
+			sensitivities[i] = 0.7234; // Doubled sensitivity (2 * 0.3617)
+			thresholds[i] = 5.0;      // Much lower threshold for weak magnets
+		}
+
+		// Apply specific calibration for each pin based on provided readings
+		for (int i = 0; i < numPins; i++) {
+			switch (hallPins[i]) {
+			case 18: // Pin A0 -> Focal point 2
+				offsets[i] = 512 + (int)(4.7 / 0.3617);  // Baseline from readings
+				sensitivities[i] = 0.8;  // Higher sensitivity
+				thresholds[i] = 3.0;     // Lower threshold for weak magnets
+				break;
+			case 17: // Pin A1 -> Focal point 5
+				offsets[i] = 512 - (int)(6.87 / 0.3617); // Baseline from readings
+				sensitivities[i] = 0.8;  // Higher sensitivity
+				thresholds[i] = 2.5;     // Lower threshold for weak magnets
+				break;
+			case 16: // Pin A2 -> Focal point 8
+				offsets[i] = 512 - (int)(4.34 / 0.3617); // Baseline from readings
+				sensitivities[i] = 0.8;  // Higher sensitivity
+				thresholds[i] = 2.5;     // Lower threshold for weak magnets
+				break;
+			case 15: // Pin A3 -> Focal point 12
+				offsets[i] = 512 + (int)(0.36 / 0.3617); // Baseline from readings
+				sensitivities[i] = 0.8;  // Higher sensitivity
+				thresholds[i] = 2.5;     // Lower threshold for weak magnets
+				break;
+			case 14: // Pin A4 -> Focal point 15 (0:00)
+				offsets[i] = 512 - (int)(5.43 / 0.3617); // Baseline from readings
+				sensitivities[i] = 0.8;  // Higher sensitivity
+				thresholds[i] = 2.5;     // Lower threshold for weak magnets
+				break;
+			}
+		}
 	}
+
+	~MagnetSensor() {
+		delete[] offsets;
+		delete[] sensitivities;
+		delete[] thresholds;
+	}
+
+	// Toggle debug mode on/off
+	
 
 	void check() {
 		float highestVal = 0;
-		for (int i = 0; i < numPins; i++) {
-			float value = abs((analogRead(hallPins[i]) - offset) * span);
-      Serial.println("Pin" + String(hallPins[i]));
-      Serial.println("Value" + String(value));
+		int highestPin = -1;
 
-			highestVal = value > highestVal ? value : highestVal;
-			if (value > 7) {
-				switch (hallPins[i]) {
-				case (18): focal = 2; break;
-				case (17): focal = 5; break;
-				case (16): focal = 8; break;
-				case (15): focal = 12; break;
-				case (14): focal = 15; break;
-				}
+		for (int i = 0; i < numPins; i++) {
+			// Take multiple readings and average them for more stable detection
+			float sum = 0;
+			for (int j = 0; j < 3; j++) {
+				int rawReading = analogRead(hallPins[i]);
+				float value = abs((rawReading - offsets[i]) * sensitivities[i]);
+				sum += value;
+				delay(2); // Small delay between readings
 			}
-			else if (highestVal < 7)
-			{
-				focal = -1;
+			float value = sum / 3.0;
+
+			// Get pin location for debugging
+			int pinval = getPinLocation(hallPins[i]);
+
+			// Track highest reading and pin
+			if (value > highestVal) {
+				highestVal = value;
+				highestPin = i;
 			}
+		}
+
+		// Set focal point based on highest reading above threshold
+		int pin_idx = highestPin >= 0 ? highestPin : -1;
+
+		if (pin_idx >= 0 && highestVal > thresholds[pin_idx]) {
+			focal = getPinLocation(hallPins[pin_idx]);
+		}
+		else {
+			focal = -1;
+		}
+	}
+
+	// Helper to map pin number to focal point
+	int getPinLocation(byte pin) {
+		switch (pin) {
+		case (18): return 2;
+		case (17): return 5;
+		case (16): return 8;
+		case (15): return 12;
+		case (14): return 15;
+		default: return -1;
 		}
 	}
 
@@ -293,9 +369,6 @@ public:
 
 	virtual void run(int focal = -1) = 0;
 };
-
-
-
 
 class StillOneEffect : public LightEffect {
 public:
@@ -402,7 +475,6 @@ public:
 private:
 	MagnetSensor& magSensor;
 public:
-
 	void run(int focal = -1) override {
 		for (int i = 0; i < LIGHT_COUNT; i++) {
 			ledController.setLed(i, pattern.red[0], pattern.green[0], pattern.blue[0], pattern.white[0]);
@@ -1568,8 +1640,9 @@ LightApplication lightApp;
 void setup() {
 	Serial.begin(9600);
 	while (!Serial) { delay(100); } // Serial needs time to initialize
+
 	lightApp.setup();  // Understood path
-	lightApp.selectEffect(7); // 5 is good, testing 2
+	lightApp.selectEffect(4); // 5 is good, testing 2
 	// 7 is weirdly unsettling.
 }
 
