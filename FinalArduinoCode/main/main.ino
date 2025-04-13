@@ -6,6 +6,7 @@
 #define LIGHT_COUNT 16
 #define COLOR_COUNT 16
 
+
 class LEDController;
 class ColorPattern;
 class MagnetSensor;
@@ -1903,7 +1904,6 @@ public:
 	}
 };
 
-
 class TranceEffect : public LightEffect {
 public:
 	TranceEffect(LEDController& controller, ColorPattern colorPattern, int delay, MagnetSensor& sensor)
@@ -2516,7 +2516,6 @@ public:
 	}
 };
 
-
 class ChristmasEffect : public LightEffect {
 public:
 	ChristmasEffect(LEDController& controller, ColorPattern colorPattern, int delay, MagnetSensor& sensor)
@@ -3085,10 +3084,24 @@ void loop() {
 	bool useCustomDelay = false;  // Set to true when a specific delay time is provided
 	bool useCustomWhite = false;  // Set to true when a specific white value is provided
 	bool useCustomBrightness = true; // Set to true when custom brightness values are provided
+	// Scrapping custom direction
 
 	int customDelay = 2;          // Custom delay value, only used if useCustomDelay is true
 	int customWhiteValue = 0;     // Custom white value (0-255), used if useCustomWhite is true
-	int effectNumber = 4;         // traceMany
+	
+	
+	// 2 - traceOne
+	// 3 - progressive
+	// 4 - traceMany
+	// 5 - StrobeChange 
+	// 6 - ComfortSong 
+	// 7 - Blender
+	// 8 - Techno
+	// 9 - Trance
+	// 10 - Mold 
+	// 11 - Funky 
+	// 12 - Christmas 
+	int effectNumber = 12;         // traceMany
 
 	// Default brightness for all LEDs is 255 (full brightness)
 	uint8_t customBrightness[16] = {
@@ -3190,7 +3203,6 @@ public:
 	int b[16];        // Blue Values DONE
 	int w[16];        // White Values DONE
 	float bright[16]; // Brightness Values	DONE
-	bool outwards;
 	CustomSetting CustomSetting(bool on, int effectNumber, int delayTime, int r[16], int g[16], int b[16], int w[16], float bright[16], bool outwards) {
 		this->on = on;
 		this->effectNumber = effectNumber;
