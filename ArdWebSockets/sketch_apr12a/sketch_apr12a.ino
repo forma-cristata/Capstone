@@ -84,6 +84,7 @@ void setup() {
 }
 
 void loop() {
+  // put light loop here. Main loop of main
   wss.listen();
 
   // listen for incoming clients
@@ -99,6 +100,7 @@ void loop() {
 
         Serial.print("<< ");
         Serial.println(HTTP_header);  // print HTTP request to Serial Monitor
+        // THIS IS HOW i HAVE SUCCESSFULLY RELAYED DATA TO THE ARDUINO
       }
     }
 
