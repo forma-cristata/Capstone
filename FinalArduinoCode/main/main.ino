@@ -23,46 +23,152 @@ class LEDController;
 class ColorPattern;
 class MagnetSensor;
 class LightEffect;
+// Add these function declarations at the top of your file
+void parseColorArray(String colorStr, int* r, int* g, int* b);
+void parseIntArray(String arrayStr, int* values);
+void parseUint8Array(String arrayStr, uint8_t* values);
+void loopWSS();
 
-void loopWSS(){
-	wss.listen();
-	Serial.println("wss.listen();");
+// Add these global variables near the top of your file (after your other global declarations)
+// Global variables for LED control
+bool shelfOn = true;                   // Whether shelf lights are on
+bool useCustomColors = false;          // Using custom colors from HTTP request
+bool useCustomDelay = false;           // Using custom delay time
+bool useCustomWhite = false;           // Using custom white value
+bool useCustomBrightness = false;      // Using custom brightness
+int customDelay = 2;                   // Custom delay value (ms)
+int customWhiteValues[16] = {
+  0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0
+}; 
+int effectNumber = 11;                  // Current effect number (blender by default)
 
-  // listen for incoming clients
-  WiFiClient client = server.available();
-  if (client) {
-    // read the HTTP request header line by line
-    while (client.connected()) {
-      if (client.available()) {
-        String HTTP_header = client.readStringUntil('\n');  // read the header line of HTTP request
+// Custom brightness values
+uint8_t customBrightness[16] = {
+  255, 255, 255, 255, 255, 255, 255, 255,
+  255, 255, 255, 255, 255, 255, 255, 255
+};
 
-        if (HTTP_header.equals("\r"))  // the end of HTTP request
-          break;
+// Custom color values for RGB LEDs
+uint32_t hexColors[16] = {
+  0xFF1493, 0x00FFFF, 0xFF4500, 0x32CD32, 0xFFD700, 0xFF00FF, 0x00FF00, 0xFF0000,
+  0x1E90FF, 0xFFFF00, 0x00BFFF, 0xFF69B4, 0x7CFC00, 0xFF8C00, 0x8A2BE2, 0x00FF7F
+};
 
 
-		if (HTTP_header.indexOf("GET ") >= 0 || HTTP_header.indexOf("POST ") >= 0) {
-			Serial.println(HTTP_header);
+
+// Helper function to parse hex color array like ["#RRGGBB", "#RRGGBB", ...]
+// Helper function to parse hex color array like ["#RRGGBB", "#RRGGBB", ...]
+void parseColorArray(String colorStr, int* r, int* g, int* b) {
+	int startPos = colorStr.indexOf('[');
+	int endPos = colorStr.lastIndexOf(']');
+
+	if (startPos == -1 || endPos == -1 || startPos >= endPos) {
+		Serial.println("Invalid color array format");
+		return; // Invalid format
+	}
+
+	// Extract the content between [ and ]
+	String content = colorStr.substring(startPos + 1, endPos);
+
+	// Replace all URL-encoded characters
+	content.replace("%22", "\""); // Replace %22 with "
+	content.replace("%20", " ");  // Replace %20 with space
+	content.replace("%23", "#");  // Replace %23 with # (important for hex colors)
+	content.replace("%2C", ",");  // Replace %2C with , (comma)
+
+	Serial.println("Decoded content: " + content);
+
+	// Parse each color
+	int idx = 0;
+	int startColorPos = content.indexOf('"');
+
+	while (startColorPos != -1 && idx < 16) {
+		int endColorPos = content.indexOf('"', startColorPos + 1);
+		if (endColorPos == -1) break;
+
+		// Extract the color hex string (e.g., "#RRGGBB")
+		String hexColor = content.substring(startColorPos + 1, endColorPos);
+
+		Serial.print("Extracted hex color: ");
+		Serial.println(hexColor);
+
+		// Convert hex to RGB
+		if (hexColor.length() == 7 && hexColor[0] == '#') {
+			long colorValue = strtol(hexColor.substring(1).c_str(), NULL, 16);
+			r[idx] = (colorValue >> 16) & 0xFF;
+			g[idx] = (colorValue >> 8) & 0xFF;
+			b[idx] = colorValue & 0xFF;
+
+			Serial.print("Parsed color [");
+			Serial.print(idx);
+			Serial.print("]: R=");
+			Serial.print(r[idx]);
+			Serial.print(", G=");
+			Serial.print(g[idx]);
+			Serial.print(", B=");
+			Serial.println(b[idx]);
 		}
-      }
-    }
+		else {
+			Serial.print("Invalid hex format for color at index ");
+			Serial.println(idx);
+		}
 
-    // send the HTTP response header
-    client.println("HTTP/1.1 200 OK");
-    client.println("Content-Type: text/html");
-    client.println("Connection: close");  // the connection will be closed after completion of the response
-    client.println();                     // the separator between HTTP header and body
+		// Find the next color
+		idx++;
+		startColorPos = content.indexOf('"', endColorPos + 1);
+	}
 
-    String html = String(HTML_CONTENT);
+	Serial.print("Total colors parsed: ");
+	Serial.println(idx);
+}
 
-    //client.println(html);
-    client.flush();
 
-    // give the web browser time to receive the data
-    delay(50);
+// Helper function to parse integer array like [1, 2, 3, ...]
+void parseIntArray(String arrayStr, int* values) {
+	int startPos = arrayStr.indexOf('[');
+	int endPos = arrayStr.lastIndexOf(']');
 
-    // close the connection:
-    client.stop();
-  }
+	if (startPos == -1 || endPos == -1 || startPos >= endPos) {
+		return; // Invalid format
+	}
+
+	// Extract the content between [ and ]
+	String content = arrayStr.substring(startPos + 1, endPos);
+
+	// Replace URL-encoded characters
+	content.replace("%20", " ");  // Replace %20 with space
+
+	// Parse each value
+	int idx = 0;
+	int valueStart = 0;
+
+	while (valueStart < content.length() && idx < 16) {
+		int valueEnd = content.indexOf(',', valueStart);
+		if (valueEnd == -1) {
+			valueEnd = content.length();
+		}
+
+		// Extract and convert to integer
+		String valueStr = content.substring(valueStart, valueEnd);
+		valueStr.trim();
+		values[idx] = valueStr.toInt();
+
+		// Move to next value
+		idx++;
+		valueStart = valueEnd + 1;
+	}
+}
+
+// Helper function to parse uint8_t array like [255, 128, 64, ...]
+void parseUint8Array(String arrayStr, uint8_t* values) {
+	int tempValues[16];
+	parseIntArray(arrayStr, tempValues);
+
+	// Convert int to uint8_t with bounds checking
+	for (int i = 0; i < 16; i++) {
+		values[i] = constrain(tempValues[i], 0, 255);
+	}
 }
 
 class LEDController {
@@ -360,8 +466,8 @@ public:
 				break;
 			case 15: // Pin A3 -> Focal point 12
 				offsets[i] = 512 + (int)(0.36 / 0.3617); // Baseline from readings
-				sensitivities[i] = 0.8;  // Higher sensitivity
-				thresholds[i] = 2.5;     // Lower threshold for weak magnets
+				sensitivities[i] = 0.5;  // Higher sensitivity
+				thresholds[i] = 7;     // Lower threshold for weak magnets
 				break;
 			case 14: // Pin A4 -> Focal point 15 (0:00)
 				offsets[i] = 512 - (int)(5.43 / 0.3617); // Baseline from readings
@@ -2379,9 +2485,13 @@ public:
 		int ledsPerGroup = 1;
 
 		if (focal == -1) {
+			loopWSS();
+
 			delay(delayTime / 4);
 
 			for (int strobe = 0; strobe < strobeCount1; strobe++) {
+				loopWSS();
+
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
@@ -2421,6 +2531,8 @@ public:
 			}
 
 			for (int strobe = 0; strobe < strobeCount2; strobe++) {
+				loopWSS();
+
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
@@ -2462,7 +2574,11 @@ public:
 			}
 		}
 		else {
+			loopWSS();
+
 			for (int strobe = focal; strobe < strobeCount1; strobe++) {
+				loopWSS();
+
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
@@ -2514,6 +2630,8 @@ public:
 			}
 
 			for (int strobe = focal + 1; strobe >= 0; strobe--) {
+				loopWSS();
+
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
@@ -2598,6 +2716,7 @@ public:
 				i++;
 				i = i % 2;
 				for (int xy = 0; xy < COLOR_COUNT; xy++) {
+					loopWSS();
 
 					if (i == 0) {
 						for (int j = 0; j < 18; j += 2) {
@@ -2714,6 +2833,8 @@ public:
 				i = i % 2;
 
 				for (int xy = 0; xy < COLOR_COUNT; xy++) {
+					loopWSS();
+
 					if (i == 0) {
 						for (int j = focal; j < LIGHT_COUNT; j += 2) {
 							// Set LED with brightness if provided
@@ -3116,11 +3237,187 @@ public:
 // Global application instance
 LightApplication lightApp;
 
+
+void loopWSS() {
+	wss.listen();
+
+	// listen for incoming clients
+	WiFiClient client = server.available();
+	if (client) {
+		// read the HTTP request header line by line
+		while (client.connected()) {
+			if (client.available()) {
+				String HTTP_header = client.readStringUntil('\n');  // read the header line of HTTP request
+
+				if (HTTP_header.equals("\r"))  // the end of HTTP request
+					break;
+
+				if (HTTP_header.indexOf("GET ") >= 0 || HTTP_header.indexOf("POST ") >= 0) {
+					// First, print the header for debugging
+					Serial.println(HTTP_header);
+					Serial.println("\n===== New HTTP Request =====");
+					Serial.print("Timestamp: ");
+					Serial.println(millis());
+
+					// Extract the parameters section from the HTTP header
+					int questionMarkPos = HTTP_header.indexOf('?');
+					int spaceAfterParamsPos = HTTP_header.indexOf(' ', questionMarkPos);
+
+					if (questionMarkPos >= 0 && spaceAfterParamsPos > questionMarkPos) {
+						// Extract the parameters string (everything between ? and the next space)
+						String parametersStr = HTTP_header.substring(questionMarkPos + 1, spaceAfterParamsPos);
+						Serial.println("Parameters: " + parametersStr);
+
+						// Variables for color arrays
+						String colorsStr = "";
+						String whiteValuesStr = "";
+						String brightnessValuesStr = "";
+
+						// Default to not using custom values (will set to true if we find them)
+						useCustomColors = false;
+						useCustomWhite = false;
+						useCustomBrightness = false;
+						useCustomDelay = false;
+
+						// Split the parameters by '&'
+						int paramStartPos = 0;
+						int ampersandPos = parametersStr.indexOf('&');
+
+						while (paramStartPos < parametersStr.length()) {
+							// Extract the parameter
+							String param;
+							if (ampersandPos == -1) {
+								param = parametersStr.substring(paramStartPos);
+								paramStartPos = parametersStr.length(); // End the loop
+							}
+							else {
+								param = parametersStr.substring(paramStartPos, ampersandPos);
+								paramStartPos = ampersandPos + 1;
+								ampersandPos = parametersStr.indexOf('&', paramStartPos);
+							}
+
+							// Parse the parameter into key and value
+							int equalsPos = param.indexOf('=');
+							if (equalsPos != -1) {
+								String key = param.substring(0, equalsPos);
+								String value = param.substring(equalsPos + 1);
+
+								// Handle each parameter type
+								if (key == "on") {
+									shelfOn = (value == "true" || value == "1");
+									Serial.println("Shelf on: " + String(shelfOn));
+								}
+								else if (key == "effectNumber") {
+									effectNumber = value.toInt();
+									Serial.println("Effect number: " + String(effectNumber));
+								}
+								else if (key == "delayTime") {
+									customDelay = value.toInt();
+									useCustomDelay = true;
+									Serial.println("Delay time: " + String(customDelay));
+								}
+								else if (key == "colors") {
+									colorsStr = value;
+									useCustomColors = true;
+									Serial.println("Colors: " + colorsStr);
+								}
+								else if (key == "whiteValues") {
+									whiteValuesStr = value;
+									useCustomWhite = true;
+									Serial.println("White values: " + whiteValuesStr);
+								}
+								else if (key == "brightnessValues") {
+									brightnessValuesStr = value;
+									useCustomBrightness = true;
+									Serial.println("Brightness values: " + brightnessValuesStr);
+								}
+							}
+						}
+
+						// Apply the settings
+						if (!shelfOn) {
+							lightApp.getLedController().clearAllLeds();
+						}
+						else {
+							// Parse the color arrays if present
+							int r[16], g[16], b[16], w[16];
+
+							// Initialize with defaults
+							for (int i = 0; i < 16; i++) {
+								r[i] = 255;  // Default red
+								g[i] = 255;  // Default green
+								b[i] = 255;  // Default blue
+								w[i] = 0;    // Default white
+								customBrightness[i] = 255; // Default brightness
+							}
+
+							// Parse colors and update hexColors array
+							if (useCustomColors) {
+								parseColorArray(colorsStr, r, g, b);
+
+								// Update hexColors for future reference
+								for (int i = 0; i < 16; i++) {
+									hexColors[i] = ((uint32_t)r[i] << 16) | ((uint32_t)g[i] << 8) | (uint32_t)b[i];
+								}
+							}
+
+							// Parse white values
+							if (useCustomWhite) {
+								parseIntArray(whiteValuesStr, w);
+								// Store all white values in the global array
+								for (int i = 0; i < 16; i++) {
+									customWhiteValues[i] = w[i];
+								}
+							}
+
+							// Parse brightness values
+							if (useCustomBrightness) {
+								parseUint8Array(brightnessValuesStr, customBrightness);
+							}
+
+							// Debug output
+							printCurrentStatus();
+
+							// Create effect with the parsed values
+							if (useCustomColors || useCustomWhite || useCustomBrightness) {
+								lightApp.selectEffect(
+									effectNumber,
+									useCustomDelay ? customDelay : -1,
+									useCustomColors ? r : nullptr,
+									useCustomColors ? g : nullptr,
+									useCustomColors ? b : nullptr,
+									useCustomWhite ? w : nullptr,
+									useCustomBrightness ? customBrightness : nullptr
+								);
+							}
+							else {
+								lightApp.selectEffect(effectNumber, useCustomDelay ? customDelay : -1);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// send the HTTP response header
+		client.println("HTTP/1.1 200 OK");
+		client.println("Content-Type: text/html");
+		client.println("Connection: close");
+		client.println();
+
+		String html = String(HTML_CONTENT);
+		client.flush();
+		delay(50);
+		client.stop();
+	}
+}
+
+
+
 void setup() {
 	Serial.begin(9600);
 	while (!Serial) { delay(100); } // Serial needs time to initialize
 
-Serial.begin(9600);
 
   String fv = WiFi.firmwareVersion();
   if (fv < WIFI_FIRMWARE_LATEST_VERSION)
@@ -3134,7 +3431,7 @@ Serial.begin(9600);
     status = WiFi.begin(ssid, pass);
 
     // wait 4 seconds for connection:
-    delay(4000);
+    delay(2000);
   }
 
   // print your board's IP address:
@@ -3181,128 +3478,221 @@ Serial.begin(9600);
   wss.begin();
 
 	lightApp.setup();  // Understood path
-	lightApp.selectEffect(4); // 5 is good, testing 2
+	lightApp.selectEffect(4); 
 	// 7 is weirdly unsettling.
+}
+
+void printCurrentStatus() {
+	Serial.println("\n===== CURRENT STATUS =====");
+	Serial.print("Shelf: ");
+	Serial.println(shelfOn ? "ON" : "OFF");
+	Serial.print("Effect Number: ");
+	Serial.println(effectNumber);
+
+	// Print the effect name based on effect number
+	Serial.print("Effect Name: ");
+	switch (effectNumber) {
+	case 0: Serial.println("StillOne"); break;
+	case 1: Serial.println("StillMany"); break;
+	case 2: Serial.println("TraceOne"); break;
+	case 3: Serial.println("Progressive"); break;
+	case 4: Serial.println("TraceMany"); break;
+	case 5: Serial.println("StrobeChange"); break;
+	case 6: Serial.println("ComfortSongStrobe"); break;
+	case 7: Serial.println("Blender"); break;
+	case 8: Serial.println("Techno"); break;
+	case 9: Serial.println("Trance"); break;
+	case 10: Serial.println("Mold"); break;
+	case 11: Serial.println("Funky"); break;
+	case 12: Serial.println("Christmas"); break;
+	default: Serial.println("Unknown"); break;
+	}
+
+	if (useCustomDelay) {
+		Serial.print("Custom Delay: ");
+		Serial.println(customDelay);
+	}
+	else {
+		Serial.print("Default Delay: ");
+		switch (effectNumber) {
+		case 0: case 1: case 2: Serial.println("10"); break;
+		case 3: Serial.println("7"); break;
+		case 4: Serial.println("15"); break;
+		case 5: case 7: Serial.println("2"); break;
+		case 6: Serial.println("3"); break;
+		case 8: case 9: case 10: Serial.println("1"); break;
+		case 11: Serial.println("8"); break;
+		case 12: Serial.println("10"); break;
+		default: Serial.println("10"); break;
+		}
+	}
+
+	// Get the default pattern number for the current effect
+	int patternNumber = lightApp.getDefaultPatternForEffect(effectNumber);
+
+	if (useCustomWhite) {
+		Serial.println("Using Custom White Values (first 3 shown):");
+		for (int i = 0; i < 3; i++) {
+			Serial.print("  White[");
+			Serial.print(i);
+			Serial.print("]: ");
+			Serial.println(customWhiteValues[i]);
+		}
+	}
+	else {
+		Serial.println("Using Default White Values (all 0)");
+	}
+
+	if (useCustomColors) {
+		Serial.println("Using Custom Colors (first 3 shown):");
+		for (int i = 0; i < 3; i++) {
+			uint32_t color = hexColors[i];
+			Serial.print("  Color[");
+			Serial.print(i);
+			Serial.print("]: #");
+
+			// Print in hex format with leading zeros
+			if ((color >> 16) < 0x10) Serial.print("0");
+			Serial.print((color >> 16) & 0xFF, HEX);
+
+			if (((color >> 8) & 0xFF) < 0x10) Serial.print("0");
+			Serial.print((color >> 8) & 0xFF, HEX);
+
+			if ((color & 0xFF) < 0x10) Serial.print("0");
+			Serial.println(color & 0xFF, HEX);
+		}
+	}
+	else {
+		Serial.print("Using Default Colors (Pattern ");
+		Serial.print(patternNumber);
+		Serial.println("):");
+
+		// Get pointers to the default color arrays
+		int* r = lightApp.getDefaultRed(patternNumber);
+		int* g = lightApp.getDefaultGreen(patternNumber);
+		int* b = lightApp.getDefaultBlue(patternNumber);
+
+		// Print the first 3 default colors
+		for (int i = 0; i < 3; i++) {
+			Serial.print("  Color[");
+			Serial.print(i);
+			Serial.print("]: #");
+
+			// Convert RGB values to hex and print with leading zeros
+			if (r[i] < 0x10) Serial.print("0");
+			Serial.print(r[i], HEX);
+
+			if (g[i] < 0x10) Serial.print("0");
+			Serial.print(g[i], HEX);
+
+			if (b[i] < 0x10) Serial.print("0");
+			Serial.println(b[i], HEX);
+		}
+	}
+
+	if (useCustomBrightness) {
+		Serial.println("Using Custom Brightness (first 3 shown):");
+		for (int i = 0; i < 3; i++) {
+			Serial.print("  Brightness[");
+			Serial.print(i);
+			Serial.print("]: ");
+			Serial.println(customBrightness[i]);
+		}
+	}
+	else {
+		Serial.println("Using Default Brightness: 255");
+	}
+
+	Serial.println("===========================");
 }
 
 
 
 void loop() {
-	Serial.println("Beginning here");
-	bool shelfOn = true; // This will come from the React app
+	// Process WebSocket requests first (moved from inside the effect)
+	loopWSS();
 
-	// If shelf is off, turn off all LEDs and return
+	// If shelf is off, turn off all LEDs but continue processing loop
 	if (!shelfOn) {
 		lightApp.getLedController().clearAllLeds();
 		delay(100); // Small delay to avoid constant updates
-		return;
 	}
-
-	bool useCustomColors = false; // Set to true when receiving colors from React
-	bool useCustomDelay = false;  // Set to true when a specific delay time is provided
-	bool useCustomWhite = false;  // Set to true when a specific white value is provided
-	bool useCustomBrightness = true; // Set to true when custom brightness values are provided
-	// Scrapping custom direction
-
-	int customDelay = 2;          // Custom delay value, only used if useCustomDelay is true
-	int customWhiteValue = 0;     // Custom white value (0-255), used if useCustomWhite is true
-	
-	
-	// 2 - traceOne
-	// 3 - progressive
-	// 4 - traceMany
-	// 5 - StrobeChange 
-	// 6 - ComfortSong 
-	// 7 - Blender
-	// 8 - Techno
-	// 9 - Trance
-	// 10 - Mold 
-	// 11 - Funky 
-	// 12 - Christmas 
-	int effectNumber = 12;         // traceMany
-
-	// Default brightness for all LEDs is 255 (full brightness)
-	uint8_t customBrightness[16] = {
-		125, 125, 125, 125, 125, 125, 125, 125,
-		255, 255, 255, 255, 255, 255, 255, 255
-	};
-
-	if (useCustomColors) {
-		int r[16], g[16], b[16], w[16];
-
-		// Colors received from React if applicable
-		uint32_t hexColors[16] = {
-			0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00, 0xFF00FF, 0x00FFFF, 0xFFFFFF, 0x000000,
-			0x880000, 0x008800, 0x000088, 0x888800, 0x880088, 0x008888, 0x444444, 0x222222
-		};
-
-		// Extract RGB values from hexColors
-		for (int i = 0; i < 16; i++) {
-			r[i] = (hexColors[i] >> 16) & 0xFF;
-			g[i] = (hexColors[i] >> 8) & 0xFF;
-			b[i] = hexColors[i] & 0xFF;
-
-			// Set white values based on custom white value or default to 0
-			w[i] = useCustomWhite ? customWhiteValue : 0;
-		}
-
-		// Call selectEffect with custom colors, delay, and brightness if provided
-		if (useCustomDelay) {
-			if (useCustomBrightness) {
-				lightApp.selectEffect(effectNumber, customDelay, r, g, b, w, customBrightness);
-			} else {
-				lightApp.selectEffect(effectNumber, customDelay, r, g, b, w);
-			}
-		} else {
-			if (useCustomBrightness) {
-				lightApp.selectEffect(effectNumber, -1, r, g, b, w, customBrightness);
-			} else {
-				lightApp.selectEffect(effectNumber, -1, r, g, b, w);
-			}
-		}
-	} 
 	else {
-		// Using default colors
-		if (useCustomDelay || useCustomWhite || useCustomBrightness) {
-			int delayValue = useCustomDelay ? customDelay : -1;
+		// Only run the light effects when shelf is on
+		if (useCustomColors) {
+			int r[16], g[16], b[16], w[16];
 
-			if (useCustomWhite || useCustomBrightness) {
-				int w[16];
+			// Extract RGB values from global hexColors
+			for (int i = 0; i < 16; i++) {
+				r[i] = (hexColors[i] >> 16) & 0xFF;
+				g[i] = (hexColors[i] >> 8) & 0xFF;
+				b[i] = hexColors[i] & 0xFF;
 
-				if (useCustomWhite) {
-					for (int i = 0; i < 16; i++) {
-						w[i] = customWhiteValue;
-					}
-					if (useCustomBrightness) {
-						lightApp.selectEffect(effectNumber, delayValue, nullptr, nullptr, nullptr, w, customBrightness);
-					}
-					else {
-						lightApp.selectEffect(effectNumber, delayValue, nullptr, nullptr, nullptr, w);
-					}
+				// Set white values
+				w[i] = useCustomWhite ? customWhiteValues[i] : 0;
+			}
+
+			// Call selectEffect with custom colors, delay, and brightness if provided
+			if (useCustomDelay) {
+				if (useCustomBrightness) {
+					lightApp.selectEffect(effectNumber, customDelay, r, g, b, w, customBrightness);
 				}
 				else {
-					if (useCustomBrightness) {
-						lightApp.selectEffect(effectNumber, delayValue, nullptr, nullptr, nullptr, nullptr, customBrightness);
-					}
-					else {
-						lightApp.selectEffect(effectNumber, delayValue, nullptr, nullptr, nullptr, nullptr);
-					}
+					lightApp.selectEffect(effectNumber, customDelay, r, g, b, w);
 				}
 			}
 			else {
-				lightApp.selectEffect(effectNumber, delayValue);
+				if (useCustomBrightness) {
+					lightApp.selectEffect(effectNumber, -1, r, g, b, w, customBrightness);
+				}
+				else {
+					lightApp.selectEffect(effectNumber, -1, r, g, b, w);
+				}
 			}
 		}
 		else {
-			lightApp.selectEffect(effectNumber); // Use all defaults
+			// Using default colors
+			if (useCustomDelay || useCustomWhite || useCustomBrightness) {
+				int delayValue = useCustomDelay ? customDelay : -1;
+
+				if (useCustomWhite || useCustomBrightness) {
+					int w[16];
+
+					if (useCustomWhite) {
+						for (int i = 0; i < 16; i++) {
+							w[i] = customWhiteValues[i];
+						}
+						if (useCustomBrightness) {
+							lightApp.selectEffect(effectNumber, delayValue, nullptr, nullptr, nullptr, w, customBrightness);
+						}
+						else {
+							lightApp.selectEffect(effectNumber, delayValue, nullptr, nullptr, nullptr, w);
+						}
+					}
+					else {
+						if (useCustomBrightness) {
+							lightApp.selectEffect(effectNumber, delayValue, nullptr, nullptr, nullptr, nullptr, customBrightness);
+						}
+						else {
+							lightApp.selectEffect(effectNumber, delayValue, nullptr, nullptr, nullptr, nullptr);
+						}
+					}
+				}
+				else {
+					lightApp.selectEffect(effectNumber, delayValue);
+				}
+			}
+			else {
+				lightApp.selectEffect(effectNumber); // Use all defaults
+			}
 		}
+
+		lightApp.loop();
+		printCurrentStatus();
 	}
-
-	lightApp.loop();
-
-	// put light loop here. Main loop of main
-  
 }
+
+
 
 
 
