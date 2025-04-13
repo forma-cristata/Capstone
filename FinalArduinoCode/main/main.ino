@@ -41,7 +41,7 @@ int customWhiteValues[16] = {
   0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0
 }; 
-int effectNumber = 11;                  // Current effect number (blender by default)
+int effectNumber = 14;                  // Current effect number (blender by default)
 
 // Custom brightness values
 uint8_t customBrightness[16] = {
@@ -566,6 +566,7 @@ public:
 
 	void run(int focal = -1) override {
 		for (int i = 0; i < LIGHT_COUNT; i++) {
+			loopWSS();
 			if (pattern.brightness != nullptr) {
 				// Use brightness-adjusted values
 				ledController.setLedWithBrightness(i, pattern.red[0], pattern.green[0], pattern.blue[0], pattern.white[0], pattern.brightness[0]);
@@ -587,6 +588,7 @@ public:
 
 	void run(int focal = -1) override {
 		for (int i = 0; i < LIGHT_COUNT; i++) {
+			loopWSS();
 			if (pattern.brightness != nullptr) {
 				// Use brightness-adjusted values
 				ledController.setLedWithBrightness(i,
@@ -621,11 +623,13 @@ private:
 public:
 	void run(int focal = -1) override {
 		if (focal == -1) {
+			loopWSS();
 			for (int i = 0; i < COLOR_COUNT; i++) {
+				loopWSS();
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+				//Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -665,11 +669,13 @@ public:
 			}
 		}
 		else {
+			loopWSS();
 			for (int i = 0; i < COLOR_COUNT; i++) {
+				loopWSS();
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+				//Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -740,6 +746,7 @@ public:
 	void run(int focal = -1) override {
 		// Set all LEDs to first color in array
 		for (int i = 0; i < LIGHT_COUNT; i++) {
+			loopWSS();
 			if (pattern.brightness != nullptr) {
 				ledController.setLedWithBrightness(
 					i,
@@ -762,11 +769,13 @@ public:
 		}
 
 		if (focal != -1) {
+			loopWSS();
 			for (int i = 1; i < COLOR_COUNT; i++) {
+				loopWSS();
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+				//Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -854,11 +863,13 @@ public:
 			}
 		}
 		else {
+			loopWSS();
 			for (int i = 0; i < COLOR_COUNT; i++) {
+				loopWSS();
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+//				Serial.println("Focal: " + String(focal));				Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -925,11 +936,13 @@ private:
 public:
 	void run(int focal = -1) override {
 		if (focal != -1) {
+			loopWSS();
 			for (int j = 0; j < COLOR_COUNT; j++) {
+				loopWSS();
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+//				Serial.println("Focal: " + String(focal));				Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -1020,11 +1033,13 @@ public:
 			}
 		}
 		else {
+			loopWSS();
 			for (int j = 0; j < COLOR_COUNT; j++) {
+				loopWSS();
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+//				Serial.println("Focal: " + String(focal));				Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -1127,6 +1142,7 @@ private:
 public:
 	void run(int focal = -1) override {
 		for (int i = 0; i < LIGHT_COUNT; i++) {
+			loopWSS();
 			if (pattern.brightness != nullptr) {
 				// Use brightness-adjusted values
 				ledController.setLedWithBrightness(
@@ -1145,11 +1161,13 @@ public:
 		}
 
 		if (focal == -1) {
+			loopWSS();
 			for (int i = 0; i < LIGHT_COUNT; i++) {
+				loopWSS();
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+//				Serial.println("Focal: " + String(focal));				Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -1203,11 +1221,13 @@ public:
 			}
 		}
 		else {
+			loopWSS();
 			for (int i = 0; i < COLOR_COUNT; i++) {
+				loopWSS();
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+//				Serial.println("Focal: " + String(focal));				Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -1278,11 +1298,13 @@ public:
 		int pattern3Indices[] = { 13, 14, 15, 14, 16, 15, 14, 13, 12, 13, 14, 13, 15, 14, 13, 12 };
 
 		if (focal == -1) {
+			loopWSS();
 			for (int x = 0; x < COLOR_COUNT; x++) {
+				loopWSS();
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+//				Serial.println("Focal: " + String(focal));				Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -1333,12 +1355,14 @@ public:
 			}
 		}
 		else {
+			loopWSS();
 			int pattern4Indices[] = { 3, 4, 5, 4, 6, 5, 4, 3, 2, 3, 4, 3, 5, 4, 3, 2 };
 			for (int x = 0; x < COLOR_COUNT; x++) {
+				loopWSS();
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+//				Serial.println("Focal: " + String(focal));				Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -1407,11 +1431,13 @@ private:
 public:
 	void run(int focal = -1) override {
 		if (focal == -1) {
+			loopWSS();
 			for (int i = 0; i < LIGHT_COUNT; i++) {
+				loopWSS();
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+//				Serial.println("Focal: " + String(focal));				Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -1444,10 +1470,11 @@ public:
 			delay(delayTime);
 
 			for (int i = 0; i < LIGHT_COUNT; i++) {
+				loopWSS();
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+//				Serial.println("Focal: " + String(focal));				Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -1480,11 +1507,13 @@ public:
 			delay(delayTime);
 		}
 		else {
+			loopWSS();
 			for (int i = 0; i < LIGHT_COUNT / 2; i++) {
+				loopWSS();
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+//				Serial.println("Focal: " + String(focal));				Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -1541,10 +1570,11 @@ public:
 			delay(delayTime);
 
 			for (int i = 0; i < LIGHT_COUNT / 2; i++) {
+				loopWSS();
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+//				Serial.println("Focal: " + String(focal));				Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -1613,11 +1643,13 @@ private:
 public:
 	void run(int focal = -1) override {
 		if (focal == -1) {
+			loopWSS();
 			for (int i = 0; i < COLOR_COUNT; i++) {
+				loopWSS();
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+//				Serial.println("Focal: " + String(focal));				Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -1729,11 +1761,13 @@ public:
 			}
 		}
 		else {
+			loopWSS();
 			for (int i = 0; i < COLOR_COUNT; i++) {
+				loopWSS();
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+//				Serial.println("Focal: " + String(focal));				Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -2076,11 +2110,13 @@ public:
 		int sc2 = 2;
 		int ls = 3;
 		if (focal == -1) {
+			loopWSS();
 			for (int j = 0; j < LIGHT_COUNT; j++) {
+				loopWSS();
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+//				Serial.println("Focal: " + String(focal));				Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -2149,11 +2185,13 @@ public:
 			}
 		}
 		else {
+			loopWSS();
 			for (int j = 0; j < LIGHT_COUNT; j++) {
+				loopWSS();
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+//				Serial.println("Focal: " + String(focal));				Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -2242,11 +2280,13 @@ public:
 		int strobeCount2 = 2;
 		int ledsPerGroup = LIGHT_COUNT * 3 / 4;
 		if (focal == -1) {
+			loopWSS();
 			for (int startIdx = LIGHT_COUNT - 1; startIdx >= 0; startIdx--) {
+				loopWSS();
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+//				Serial.println("Focal: " + String(focal));				Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -2308,10 +2348,11 @@ public:
 				}
 			}
 			for (int startIdx = 0; startIdx < LIGHT_COUNT; startIdx++) {
+				loopWSS();
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+//				Serial.println("Focal: " + String(focal));				Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -2374,11 +2415,13 @@ public:
 			}
 		}
 		else {
+			loopWSS();
 			for (int startIdx = LIGHT_COUNT - 1; startIdx >= focal; startIdx--) {
+				loopWSS();
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+//				Serial.println("Focal: " + String(focal));				Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -2495,7 +2538,7 @@ public:
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+//				Serial.println("Focal: " + String(focal));				Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -2536,7 +2579,7 @@ public:
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+//				Serial.println("Focal: " + String(focal));				Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -2582,7 +2625,7 @@ public:
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+//				Serial.println("Focal: " + String(focal));				Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -2635,7 +2678,7 @@ public:
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+//				Serial.println("Focal: " + String(focal));				Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -2700,12 +2743,13 @@ public:
 		int i = 0;
 
 		if (focal == -1) {
+			loopWSS();
 			while (i < 16) {
 				loopWSS();
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+//				Serial.println("Focal: " + String(focal));				Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -2815,12 +2859,13 @@ public:
 			}
 		}
 		else {
+			loopWSS();
 			while (i < 16) {
 				loopWSS();
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				Serial.println("Focal: " + String(focal));
+//				Serial.println("Focal: " + String(focal));				Serial.println("Focal: " + String(focal));
 
 				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
@@ -3027,6 +3072,643 @@ public:
 };
 
 
+class CocktailShakerSortEffect : public LightEffect {
+private:
+	MagnetSensor& magSensor;
+	uint32_t colorArrays[4][COLOR_COUNT];  // [0]:original, [1]:sorted, [2]:reverse, [3]:temp
+	int sortState = 0;        // 0:original, 1:sorting, 2:sorted, 3:reverse-sorting, 4:reverse
+	int animationStep = 0;    // Current step in animation
+	int maxAnimSteps = 16;    // Number of steps in animation
+	unsigned long lastChange; // Time of last state change
+
+	// Utility functions for color manipulation
+	uint32_t rgbToHex(int r, int g, int b) {
+		return ((uint32_t)r << 16) | ((uint32_t)g << 8) | (uint32_t)b;
+	}
+
+	void hexToRgb(uint32_t hex, int& r, int& g, int& b) {
+		r = (hex >> 16) & 0xFF;
+		g = (hex >> 8) & 0xFF;
+		b = hex & 0xFF;
+	}
+
+	// Initialize color arrays - original, sorted, and reverse sorted
+	void prepareArrays() {
+		// Store original colors
+		for (int i = 0; i < COLOR_COUNT; i++) {
+			colorArrays[0][i] = rgbToHex(pattern.red[i], pattern.green[i], pattern.blue[i]);
+			colorArrays[3][i] = colorArrays[0][i]; // Initialize temp array
+		}
+
+		// Create sorted array by copying original and sorting it
+		memcpy(colorArrays[1], colorArrays[0], sizeof(uint32_t) * COLOR_COUNT);
+		cocktailSort(colorArrays[1]);
+
+		// Create reverse sorted array
+		for (int i = 0; i < COLOR_COUNT; i++) {
+			colorArrays[2][i] = colorArrays[1][COLOR_COUNT - 1 - i];
+		}
+	}
+
+	// Fast cocktail sort implementation
+	void cocktailSort(uint32_t* arr) {
+		int start = 0;
+		int end = COLOR_COUNT - 1;
+		bool swapped = true;
+
+		while (swapped) {
+			swapped = false;
+
+			// Forward pass
+			for (int i = start; i < end; i++) {
+				if (arr[i] > arr[i + 1]) {
+					uint32_t temp = arr[i];
+					arr[i] = arr[i + 1];
+					arr[i + 1] = temp;
+					swapped = true;
+				}
+			}
+
+			if (!swapped) break;
+
+			end--;
+			swapped = false;
+
+			// Backward pass
+			for (int i = end - 1; i >= start; i--) {
+				if (arr[i] > arr[i + 1]) {
+					uint32_t temp = arr[i];
+					arr[i] = arr[i + 1];
+					arr[i + 1] = temp;
+					swapped = true;
+				}
+			}
+
+			start++;
+		}
+	}
+
+	// Display current colors with visual effects
+	void displayColors(uint32_t* colors, int focal = -1) {
+		// Standard or focal point display
+		if (focal == -1) {
+			// Create a rainbow wave effect across all LEDs
+			for (int i = 0; i < LIGHT_COUNT; i++) {
+				int colorIdx = i % COLOR_COUNT;
+				int r, g, b;
+				hexToRgb(colors[colorIdx], r, g, b);
+
+				if (pattern.brightness != nullptr) {
+					ledController.setLedWithBrightness(
+						i, r, g, b, pattern.white[colorIdx], pattern.brightness[colorIdx]
+					);
+				}
+				else {
+					ledController.setLed(i, r, g, b, pattern.white[colorIdx]);
+				}
+			}
+		}
+		else {
+			// Focal point display - radiate colors from focal point
+			for (int i = 0; i < LIGHT_COUNT / 2; i++) {
+				int pos1 = (focal + i) % LIGHT_COUNT;
+				int pos2 = (LIGHT_COUNT + focal - i) % LIGHT_COUNT;
+
+				int colorIdx = i % COLOR_COUNT;
+				int r, g, b;
+				hexToRgb(colors[colorIdx], r, g, b);
+
+				if (pattern.brightness != nullptr) {
+					ledController.setLedWithBrightness(
+						pos1, r, g, b, pattern.white[colorIdx], pattern.brightness[colorIdx]
+					);
+					ledController.setLedWithBrightness(
+						pos2, r, g, b, pattern.white[colorIdx], pattern.brightness[colorIdx]
+					);
+				}
+				else {
+					ledController.setLed(pos1, r, g, b, pattern.white[colorIdx]);
+					ledController.setLed(pos2, r, g, b, pattern.white[colorIdx]);
+				}
+			}
+		}
+	}
+
+	// Create an interpolated color array for animation
+	void interpolateArrays(uint32_t* source, uint32_t* target, float progress) {
+		for (int i = 0; i < COLOR_COUNT; i++) {
+			int sr, sg, sb, tr, tg, tb;
+			hexToRgb(source[i], sr, sg, sb);
+			hexToRgb(target[i], tr, tg, tb);
+
+			// Linear interpolation
+			int r = sr + (tr - sr) * progress;
+			int g = sg + (tg - sg) * progress;
+			int b = sb + (tb - sb) * progress;
+
+			colorArrays[3][i] = rgbToHex(r, g, b);
+		}
+	}
+
+	// Add visual flash for active swapping pairs
+	void flashActivePair(int pairIndex, int focal) {
+		// Only for regular view, not focal view
+		if (focal == -1 && pairIndex < COLOR_COUNT - 1) {
+			int r1, g1, b1, r2, g2, b2;
+			hexToRgb(colorArrays[3][pairIndex], r1, g1, b1);
+			hexToRgb(colorArrays[3][pairIndex + 1], r2, g2, b2);
+
+			// Flash the pair with increased brightness
+			if (pattern.brightness != nullptr) {
+				ledController.setLedWithBrightness(pairIndex, r1, g1, b1, pattern.white[pairIndex], 255);
+				ledController.setLedWithBrightness(pairIndex + 1, r2, g2, b2, pattern.white[pairIndex + 1], 255);
+			}
+			else {
+				// Increase color values for flash effect
+				ledController.setLed(pairIndex, min(255, r1 * 1.5), min(255, g1 * 1.5), min(255, b1 * 1.5), pattern.white[pairIndex]);
+				ledController.setLed(pairIndex + 1, min(255, r2 * 1.5), min(255, g2 * 1.5), min(255, b2 * 1.5), pattern.white[pairIndex + 1]);
+			}
+		}
+	}
+
+public:
+	CocktailShakerSortEffect(LEDController& controller, ColorPattern colorPattern, int delay, MagnetSensor& sensor)
+		: LightEffect(controller, colorPattern, delay), magSensor(sensor), lastChange(0) {
+		prepareArrays();
+	}
+
+	void run(int focal = -1) override {
+		loopWSS();
+
+		// Check focal point changes
+		int originalFocal = focal;
+		magSensor.check();
+		focal = magSensor.getFocal();
+
+		if (focal != originalFocal) {
+			run(focal);
+			return;
+		}
+
+		unsigned long currentTime = millis();
+
+		// Handle state transitions and animations
+		switch (sortState) {
+		case 0: // Original colors
+			displayColors(colorArrays[0], focal);
+			if (currentTime - lastChange > 2000) { // 2s in original state
+				sortState = 1; // Begin sorting animation
+				animationStep = 0;
+				lastChange = currentTime;
+			}
+			break;
+
+		case 1: // Sorting animation (original to sorted)
+		{
+			float progress = (float)animationStep / maxAnimSteps;
+			interpolateArrays(colorArrays[0], colorArrays[1], progress);
+			displayColors(colorArrays[3], focal);
+
+			// Visual enhancements - flash active comparison pair
+			int activePair = (animationStep * (COLOR_COUNT - 1)) / maxAnimSteps;
+			flashActivePair(activePair, focal);
+
+			animationStep++;
+			if (animationStep > maxAnimSteps) {
+				sortState = 2;
+				lastChange = currentTime;
+			}
+		}
+		break;
+
+		case 2: // Sorted colors
+			displayColors(colorArrays[1], focal);
+			if (currentTime - lastChange > 2000) { // 2s in sorted state
+				sortState = 3; // Begin reverse sorting
+				animationStep = 0;
+				lastChange = currentTime;
+			}
+			break;
+
+		case 3: // Reverse sorting animation (sorted to reverse sorted)
+		{
+			float progress = (float)animationStep / maxAnimSteps;
+			interpolateArrays(colorArrays[1], colorArrays[2], progress);
+			displayColors(colorArrays[3], focal);
+
+			// Visual enhancements - flash active comparison pair
+			int activePair = (animationStep * (COLOR_COUNT - 1)) / maxAnimSteps;
+			flashActivePair(COLOR_COUNT - 2 - activePair, focal);
+
+			animationStep++;
+			if (animationStep > maxAnimSteps) {
+				sortState = 4;
+				lastChange = currentTime;
+			}
+		}
+		break;
+
+		case 4: // Reverse sorted colors
+			displayColors(colorArrays[2], focal);
+			if (currentTime - lastChange > 2000) { // 2s in reverse sorted state
+				sortState = 5; // Begin forward sorting
+				animationStep = 0;
+				lastChange = currentTime;
+			}
+			break;
+
+		case 5: // Forward sorting animation (reverse to sorted)
+		{
+			float progress = (float)animationStep / maxAnimSteps;
+			interpolateArrays(colorArrays[2], colorArrays[1], progress);
+			displayColors(colorArrays[3], focal);
+
+			// Visual enhancements - flash active comparison pair
+			int activePair = (animationStep * (COLOR_COUNT - 1)) / maxAnimSteps;
+			flashActivePair(activePair, focal);
+
+			animationStep++;
+			if (animationStep > maxAnimSteps) {
+				sortState = 6;
+				lastChange = currentTime;
+			}
+		}
+		break;
+
+		case 6: // Back to sorted colors
+			displayColors(colorArrays[1], focal);
+			if (currentTime - lastChange > 2000) { // 2s in sorted state
+				sortState = 7; // Begin returning to original
+				animationStep = 0;
+				lastChange = currentTime;
+			}
+			break;
+
+		case 7: // Return to original animation
+		{
+			float progress = (float)animationStep / maxAnimSteps;
+			interpolateArrays(colorArrays[1], colorArrays[0], progress);
+			displayColors(colorArrays[3], focal);
+
+			animationStep++;
+			if (animationStep > maxAnimSteps) {
+				sortState = 0; // Back to original state
+				lastChange = currentTime;
+			}
+		}
+		break;
+		}
+
+		// Use appropriate delay based on state
+		if (sortState % 2 == 1) { // Animation states
+			delay(delayTime * 3); // Slow down animations
+		}
+		else {
+			delay(delayTime);
+		}
+	}
+};
+
+
+class MergeSortEffect : public LightEffect {
+private:
+	MagnetSensor& magSensor;
+	uint32_t colorArrays[4][COLOR_COUNT];  // [0]:original, [1]:sorted, [2]:reverse sorted, [3]:display
+	int sortState = 0;        // 0:original, 1:sorting, 2:sorted, 3:reverse-sorting, 4:reverse sorted, 5:forward-sorting
+	int animationStep = 0;    // Current step in animation
+	int maxAnimSteps = 16;    // Number of steps in animation
+	unsigned long lastChange; // Time of last state change
+	int* activeSections;      // Tracks active sections during merge sort
+
+	// Utility functions for color manipulation
+	uint32_t rgbToHex(int r, int g, int b) {
+		return ((uint32_t)r << 16) | ((uint32_t)g << 8) | (uint32_t)b;
+	}
+
+	void hexToRgb(uint32_t hex, int& r, int& g, int& b) {
+		r = (hex >> 16) & 0xFF;
+		g = (hex >> 8) & 0xFF;
+		b = hex & 0xFF;
+	}
+
+	// Initialize arrays and prepare for merge sort
+	void prepareArrays() {
+		// Store original colors
+		for (int i = 0; i < COLOR_COUNT; i++) {
+			colorArrays[0][i] = rgbToHex(pattern.red[i], pattern.green[i], pattern.blue[i]);
+			colorArrays[3][i] = colorArrays[0][i]; // Initialize display array
+		}
+
+		// Create sorted array by copying original and sorting it
+		memcpy(colorArrays[1], colorArrays[0], sizeof(uint32_t) * COLOR_COUNT);
+		mergeSort(colorArrays[1], 0, COLOR_COUNT - 1);
+
+		// Create reverse sorted array
+		for (int i = 0; i < COLOR_COUNT; i++) {
+			colorArrays[2][i] = colorArrays[1][COLOR_COUNT - 1 - i];
+		}
+
+		// Initialize active sections array
+		activeSections = new int[COLOR_COUNT];
+		for (int i = 0; i < COLOR_COUNT; i++) {
+			activeSections[i] = 0;
+		}
+	}
+
+	// Standard merge sort algorithm
+	void mergeSort(uint32_t* arr, int left, int right) {
+		if (left < right) {
+			int mid = left + (right - left) / 2;
+
+			mergeSort(arr, left, mid);
+			mergeSort(arr, mid + 1, right);
+
+			merge(arr, left, mid, right);
+		}
+	}
+
+	// Merge function for merge sort
+	void merge(uint32_t* arr, int left, int mid, int right) {
+		int n1 = mid - left + 1;
+		int n2 = right - mid;
+
+		// Create temp arrays
+		uint32_t* L = new uint32_t[n1];
+		uint32_t* R = new uint32_t[n2];
+
+		// Copy data to temp arrays
+		for (int i = 0; i < n1; i++)
+			L[i] = arr[left + i];
+		for (int i = 0; i < n2; i++)
+			R[i] = arr[mid + 1 + i];
+
+		// Merge the temp arrays back
+		int i = 0, j = 0, k = left;
+		while (i < n1 && j < n2) {
+			if (L[i] <= R[j]) {
+				arr[k] = L[i];
+				i++;
+			}
+			else {
+				arr[k] = R[j];
+				j++;
+			}
+			k++;
+		}
+
+		// Copy remaining elements
+		while (i < n1) {
+			arr[k] = L[i];
+			i++;
+			k++;
+		}
+		while (j < n2) {
+			arr[k] = R[j];
+			j++;
+			k++;
+		}
+
+		delete[] L;
+		delete[] R;
+	}
+
+	// Display current state with visual enhancements
+	void displayColors(uint32_t* colors, int focal = -1) {
+		if (focal == -1) {
+			// Display entire array
+			for (int i = 0; i < LIGHT_COUNT; i++) {
+				int colorIdx = i % COLOR_COUNT;
+				int r, g, b;
+				hexToRgb(colors[colorIdx], r, g, b);
+
+				// Highlight active sections with increased brightness during animations
+				if ((sortState == 1 || sortState == 3 || sortState == 5) && activeSections[colorIdx]) {
+					r = min(255, r * 1.5);
+					g = min(255, g * 1.5);
+					b = min(255, b * 1.5);
+				}
+
+				if (pattern.brightness != nullptr) {
+					ledController.setLedWithBrightness(
+						i, r, g, b, pattern.white[colorIdx],
+						activeSections[colorIdx] ? 255 : pattern.brightness[colorIdx]
+					);
+				}
+				else {
+					ledController.setLed(i, r, g, b, pattern.white[colorIdx]);
+				}
+			}
+		}
+		else {
+			// Focal point display - radiate colors from focal point
+			for (int i = 0; i < LIGHT_COUNT / 2; i++) {
+				int pos1 = (focal + i) % LIGHT_COUNT;
+				int pos2 = (LIGHT_COUNT + focal - i) % LIGHT_COUNT;
+
+				int colorIdx = i % COLOR_COUNT;
+				int r, g, b;
+				hexToRgb(colors[colorIdx], r, g, b);
+
+				// Highlight active sections
+				if ((sortState == 1 || sortState == 3 || sortState == 5) && activeSections[colorIdx]) {
+					r = min(255, r * 1.5);
+					g = min(255, g * 1.5);
+					b = min(255, b * 1.5);
+				}
+
+				if (pattern.brightness != nullptr) {
+					ledController.setLedWithBrightness(
+						pos1, r, g, b, pattern.white[colorIdx],
+						activeSections[colorIdx] ? 255 : pattern.brightness[colorIdx]
+					);
+					ledController.setLedWithBrightness(
+						pos2, r, g, b, pattern.white[colorIdx],
+						activeSections[colorIdx] ? 255 : pattern.brightness[colorIdx]
+					);
+				}
+				else {
+					ledController.setLed(pos1, r, g, b, pattern.white[colorIdx]);
+					ledController.setLed(pos2, r, g, b, pattern.white[colorIdx]);
+				}
+			}
+		}
+	}
+
+	// Animate transition between states
+	void animateTransition(uint32_t* source, uint32_t* target, float progress) {
+		for (int i = 0; i < COLOR_COUNT; i++) {
+			int sr, sg, sb, tr, tg, tb;
+			hexToRgb(source[i], sr, sg, sb);
+			hexToRgb(target[i], tr, tg, tb);
+
+			// Linear interpolation
+			int r = sr + (tr - sr) * progress;
+			int g = sg + (tg - sg) * progress;
+			int b = sb + (tb - sb) * progress;
+
+			colorArrays[3][i] = rgbToHex(r, g, b);
+		}
+	}
+
+	// Highlight active elements during sort animations
+	void highlightActiveElements(int activeIndex) {
+		for (int i = 0; i < COLOR_COUNT; i++) {
+			activeSections[i] = (i == activeIndex || i == COLOR_COUNT - 1 - activeIndex) ? 1 : 0;
+		}
+	}
+
+public:
+	MergeSortEffect(LEDController& controller, ColorPattern colorPattern, int delay, MagnetSensor& sensor)
+		: LightEffect(controller, colorPattern, delay), magSensor(sensor), lastChange(0),
+		activeSections(nullptr) {
+		prepareArrays();
+	}
+
+	~MergeSortEffect() {
+		if (activeSections) {
+			delete[] activeSections;
+		}
+	}
+
+	void run(int focal = -1) override {
+		loopWSS();
+
+		// Check focal point changes
+		int originalFocal = focal;
+		magSensor.check();
+		focal = magSensor.getFocal();
+
+		if (focal != originalFocal) {
+			run(focal);
+			return;
+		}
+
+		unsigned long currentTime = millis();
+
+		// State machine for the merge sort effect
+		switch (sortState) {
+		case 0: // Original colors
+			displayColors(colorArrays[0], focal);
+			if (currentTime - lastChange > 2000) { // 2s in original state
+				sortState = 1; // Begin sorting animation
+				animationStep = 0;
+				lastChange = currentTime;
+			}
+			break;
+
+		case 1: // Sorting animation (original to sorted)
+		{
+			float progress = (float)animationStep / maxAnimSteps;
+			animateTransition(colorArrays[0], colorArrays[1], progress);
+
+			// Visual enhancements - highlight active elements
+			int activeIndex = (animationStep * (COLOR_COUNT - 1)) / maxAnimSteps;
+			highlightActiveElements(activeIndex);
+
+			displayColors(colorArrays[3], focal);
+
+			animationStep++;
+			if (animationStep > maxAnimSteps) {
+				sortState = 2; // Move to sorted state
+				lastChange = currentTime;
+			}
+		}
+		break;
+
+		case 2: // Show sorted colors
+			displayColors(colorArrays[1], focal);
+			if (currentTime - lastChange > 2000) { // 2s in sorted state
+				sortState = 3; // Begin reverse sorting animation
+				animationStep = 0;
+				lastChange = currentTime;
+			}
+			break;
+
+		case 3: // Reverse sorting animation (sorted to reverse sorted)
+		{
+			float progress = (float)animationStep / maxAnimSteps;
+			animateTransition(colorArrays[1], colorArrays[2], progress);
+
+			// Visual enhancements - highlight active elements
+			int activeIndex = (animationStep * (COLOR_COUNT - 1)) / maxAnimSteps;
+			highlightActiveElements(COLOR_COUNT - 1 - activeIndex);
+
+			displayColors(colorArrays[3], focal);
+
+			animationStep++;
+			if (animationStep > maxAnimSteps) {
+				sortState = 4; // Move to reverse sorted state
+				lastChange = currentTime;
+			}
+		}
+		break;
+
+		case 4: // Show reverse sorted colors
+			displayColors(colorArrays[2], focal);
+			if (currentTime - lastChange > 2000) { // 2s in reverse sorted state
+				sortState = 5; // Begin forward sorting again
+				animationStep = 0;
+				lastChange = currentTime;
+			}
+			break;
+
+		case 5: // Forward sorting animation (reverse sorted to sorted)
+		{
+			float progress = (float)animationStep / maxAnimSteps;
+			animateTransition(colorArrays[2], colorArrays[1], progress);
+
+			// Visual enhancements - highlight active elements
+			int activeIndex = (animationStep * (COLOR_COUNT - 1)) / maxAnimSteps;
+			highlightActiveElements(activeIndex);
+
+			displayColors(colorArrays[3], focal);
+
+			animationStep++;
+			if (animationStep > maxAnimSteps) {
+				sortState = 6; // Back to sorted state
+				lastChange = currentTime;
+			}
+		}
+		break;
+
+		case 6: // Back to sorted colors
+			displayColors(colorArrays[1], focal);
+			if (currentTime - lastChange > 2000) { // 2s in sorted state
+				sortState = 7; // Begin returning to original
+				animationStep = 0;
+				lastChange = currentTime;
+			}
+			break;
+
+		case 7: // Return to original animation
+		{
+			float progress = (float)animationStep / maxAnimSteps;
+			animateTransition(colorArrays[1], colorArrays[0], progress);
+
+			displayColors(colorArrays[3], focal);
+
+			animationStep++;
+			if (animationStep > maxAnimSteps) {
+				sortState = 0; // Back to original state
+				lastChange = currentTime;
+			}
+		}
+		break;
+		}
+
+		// Dynamic delay based on state
+		if (sortState % 2 == 1) { // Animation states
+			delay(delayTime * 2);
+		}
+		else {
+			delay(delayTime);
+		}
+	}
+};
+
+
+
+
 // Main application class to coordinate everything
 class LightApplication {
 private:
@@ -3085,7 +3767,7 @@ public:
 		magnetSensor.check();                 // Configures magnet to focal index
 
 		int focal = magnetSensor.getFocal();  // Getter
-		Serial.println("Focal: " + String(focal));
+		//Serial.println("Focal: " + String(focal));
 
 		// Run the current effect with the current focal point
 		if (currentEffect) {
@@ -3160,8 +3842,14 @@ public:
 		case 12:  // christmas
 			setEffect(new ChristmasEffect(ledController, pattern, (delayTime == -1) ? 10 : delayTime, magnetSensor));
 			break;
+		case 13:  // cocktailShakerSort
+			setEffect(new CocktailShakerSortEffect(ledController, pattern, (delayTime == -1) ? 1 : delayTime, magnetSensor));
+			break;
+		case 14:  // mergeSort
+			setEffect(new MergeSortEffect(ledController, pattern, (delayTime == -1) ? 1 : delayTime, magnetSensor));
+			break;
 		default:
-			setEffect(new StillOneEffect(ledController, pattern, (delayTime == -1) ? 10 : delayTime));
+			setEffect(new StillOneEffect(ledController, pattern, (delayTime == -1) ? 1 : delayTime));
 			break;
 		}
 	}
@@ -3228,6 +3916,8 @@ public:
 		case 10: return 4; // mold uses pattern4
 		case 11: return 5; // funky uses pattern5
 		case 12: return 6; // christmas uses pattern6
+		case 13: return 6; // cocktailShakerSort uses pattern6 (or any other pattern you prefer)
+		case 14: return 6; // mergeSort uses pattern6 (or any pattern you prefer)
 		default: return 1;
 		}
 	}
@@ -3376,7 +4066,7 @@ void loopWSS() {
 							}
 
 							// Debug output
-							printCurrentStatus();
+							//printCurrentStatus();
 
 							// Create effect with the parsed values
 							if (useCustomColors || useCustomWhite || useCustomBrightness) {
@@ -3688,7 +4378,7 @@ void loop() {
 		}
 
 		lightApp.loop();
-		printCurrentStatus();
+		//printCurrentStatus();
 	}
 }
 
