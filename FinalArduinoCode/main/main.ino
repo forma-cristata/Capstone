@@ -14,8 +14,8 @@ using namespace net;
 WebSocketServer wss(81);
 WiFiServer server(80);
 
-const char ssid[] = "friskyfishes";  // change your network SSID
-const char pass[] = "allthatjazz";   // change your network password
+const char ssid[] = "SHGuest";  // change your network SSID
+const char pass[] = "southhills";   // change your network password
 
 int status = WL_IDLE_STATUS;
 
@@ -41,7 +41,7 @@ int customWhiteValues[16] = {
   0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0
 }; 
-int effectNumber = 14;                  // Current effect number (blender by default)
+int effectNumber = 1;                  // Current effect number (blender by default)
 
 // Custom brightness values
 uint8_t customBrightness[16] = {
@@ -450,9 +450,9 @@ public:
 		for (int i = 0; i < numPins; i++) {
 			switch (hallPins[i]) {
 			case 18: // Pin A0 -> Focal point 2
-				offsets[i] = 512 + (int)(4.7 / 0.3617);  // Baseline from readings
+				offsets[i] = 512;  // Baseline from readings
 				sensitivities[i] = 0.8;  // Higher sensitivity
-				thresholds[i] = 3.0;     // Lower threshold for weak magnets
+				thresholds[i] = 4.0;     // Lower threshold for weak magnets
 				break;
 			case 17: // Pin A1 -> Focal point 5
 				offsets[i] = 512 - (int)(6.87 / 0.3617); // Baseline from readings
@@ -491,37 +491,72 @@ public:
 		float highestVal = 0;
 		int highestPin = -1;
 
+		// Header for debug output
+		//Serial.println("\n=== Magnet Sensor Readings ===");
+		//Serial.println("Pin\tRaw\tValue\tThreshold\tOffset\tSensitivity");
+
 		for (int i = 0; i < numPins; i++) {
-			// Take multiple readings and average them for more stable detection
 			float sum = 0;
+			float avgRaw = 0;
+
 			for (int j = 0; j < 3; j++) {
 				int rawReading = analogRead(hallPins[i]);
+				avgRaw += rawReading;
 				float value = abs((rawReading - offsets[i]) * sensitivities[i]);
 				sum += value;
-				delay(2); // Small delay between readings
+				delay(2);
 			}
+
+			avgRaw /= 3.0;
 			float value = sum / 3.0;
 
-			// Get pin location for debugging
-			int pinval = getPinLocation(hallPins[i]);
+			// Print debug info for each sensor
+			//Serial.print(hallPins[i]);
+			//Serial.print("\t");
+			//Serial.print(avgRaw, 1);
+			//Serial.print("\t");
+			//Serial.print(value, 1);
+			//Serial.print("\t");
+			//Serial.print(thresholds[i], 1);
+			//Serial.print("\t\t");
+			//Serial.print(offsets[i]);
+			//Serial.print("\t");
+			//Serial.println(sensitivities[i], 3);
 
-			// Track highest reading and pin
-			if (value > highestVal) {
-				highestVal = value;
-				highestPin = i;
+			// Check if this sensor exceeds its threshold
+			if (value > thresholds[i]) {
+				// If we haven't found a sensor above threshold yet, or if this value is higher
+				if (highestPin == -1 || value > highestVal) {
+					//Serial.print("Found value above threshold: ");
+					//Serial.print(value);
+					//Serial.print(" > ");
+					//Serial.print(thresholds[i]);
+					//Serial.print(" on pin ");
+					//Serial.println(hallPins[i]);
+					highestVal = value;
+					highestPin = i;
+				}
 			}
 		}
 
-		// Set focal point based on highest reading above threshold
-		int pin_idx = highestPin >= 0 ? highestPin : -1;
-
-		if (pin_idx >= 0 && highestVal > thresholds[pin_idx]) {
-			focal = getPinLocation(hallPins[pin_idx]);
+		// Set focal point if we found a sensor above its threshold
+		if (highestPin >= 0) {
+			int newFocal = getPinLocation(hallPins[highestPin]);
+			//Serial.print("Setting focal point to: ");
+			//Serial.println(newFocal);
+			focal = newFocal;
 		}
 		else {
+			//Serial.println("No sensor above threshold - focal point set to -1");
 			focal = -1;
 		}
+
+		Serial.print("Final focal point: ");
+		Serial.println(focal);
+		//Serial.println("===========================\n");
 	}
+
+
 
 	// Helper to map pin number to focal point
 	int getPinLocation(byte pin) {
