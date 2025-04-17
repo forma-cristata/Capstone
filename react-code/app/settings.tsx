@@ -130,7 +130,9 @@ export default function Settings({navigation}: any) {
 
                 {/*See: https://reactnative.dev/docs/intro-react*/}
                 {/*Carousel Focus Item*/}
+                <TouchableOpacity onPress={() => navigation.navigate("ChooseModification")}>
                 <SettingBlock style={styles.focusedItem} setting={data[currentIndex % data.length]} />
+                </TouchableOpacity>
 
                 {/*Carousel*/}
                 <View style={styles.carCont}>
