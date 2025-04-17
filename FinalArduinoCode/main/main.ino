@@ -126,10 +126,17 @@ void parseColorArray(String colorStr, int* r, int* g, int* b) {
 
 // Helper function to parse integer array like [1, 2, 3, ...]
 void parseIntArray(String arrayStr, int* values) {
+	if (!values) {
+		Serial.println("Error: Invalid array pointer");
+		return;
+	}
+
 	int startPos = arrayStr.indexOf('[');
 	int endPos = arrayStr.lastIndexOf(']');
 
 	if (startPos == -1 || endPos == -1 || startPos >= endPos) {
+		Serial.println("Error: Invalid array format");
+
 		return; // Invalid format
 	}
 
@@ -152,11 +159,16 @@ void parseIntArray(String arrayStr, int* values) {
 		// Extract and convert to integer
 		String valueStr = content.substring(valueStart, valueEnd);
 		valueStr.trim();
-		values[idx] = valueStr.toInt();
+		int value = valueStr.toInt();
+
+		values[idx] = constrain(value, 0, 255);
 
 		// Move to next value
 		idx++;
 		valueStart = valueEnd + 1;
+	}
+	while (idx < 16) {
+		values[idx++] = 0;
 	}
 }
 
@@ -466,8 +478,8 @@ public:
 				break;
 			case 15: // Pin A3 -> Focal point 12
 				offsets[i] = 512 + (int)(0.36 / 0.3617); // Baseline from readings
-				sensitivities[i] = 0.5;  // Higher sensitivity
-				thresholds[i] = 7;     // Lower threshold for weak magnets
+				sensitivities[i] = 0.6;  // Higher sensitivity
+				thresholds[i] = 6;     // Lower threshold for weak magnets
 				break;
 			case 14: // Pin A4 -> Focal point 15 (0:00)
 				offsets[i] = 512 - (int)(5.43 / 0.3617); // Baseline from readings
@@ -1175,14 +1187,37 @@ public:
 	TraceManyEffect(LEDController& controller, ColorPattern colorPattern, int delay, MagnetSensor& sensor)
 		: LightEffect(controller, colorPattern, delay), magSensor(sensor) {
 	}
+
 private:
 	MagnetSensor& magSensor;
+
+	// Helper method to safely access pattern arrays with bounds checking
+	bool safeColorAccess(int index) const {
+		if (!pattern.red || !pattern.green || !pattern.blue || !pattern.white) {
+			return false;
+		}
+		return index >= 0 && index < COLOR_COUNT;
+	}
+
 public:
 	void run(int focal = -1) override {
+		// Validate pattern arrays first
+		if (!pattern.red || !pattern.green || !pattern.blue || !pattern.white) {
+			Serial.println("Error: Invalid color pattern arrays");
+			return;
+		}
+
+		// Clear LEDs and set initial state
+		ledController.clearAllLeds();
+
+		// Set initial colors with bounds checking
 		for (int i = 0; i < LIGHT_COUNT; i++) {
-			loopWSS();
-			if (pattern.brightness != nullptr) {
-				// Use brightness-adjusted values
+			if (!safeColorAccess(0)) {
+				Serial.println("Error: Color array access out of bounds");
+				return;
+			}
+
+			if (pattern.brightness != nullptr && i < COLOR_COUNT) {
 				ledController.setLedWithBrightness(
 					i,
 					pattern.red[0],
@@ -1193,134 +1228,158 @@ public:
 				);
 			}
 			else {
-				// Use normal values (backward compatible)
-				ledController.setLed(i, pattern.red[0], pattern.green[0], pattern.blue[0], pattern.white[0]);
+				ledController.setLed(
+					i,
+					pattern.red[0],
+					pattern.green[0],
+					pattern.blue[0],
+					pattern.white[0]
+				);
 			}
 		}
 
 		if (focal == -1) {
-			loopWSS();
+			// Non-focal point effect
 			for (int i = 0; i < LIGHT_COUNT; i++) {
 				loopWSS();
 				int originalFocal = focal;
 				magSensor.check();
 				focal = magSensor.getFocal();
-				//				Serial.println("Focal: " + String(focal));				Serial.println("Focal: " + String(focal));
 
-				// If focal point changed, restart effect with new value
 				if (focal != originalFocal) {
 					run(focal);
 					return;
 				}
+
 				for (int j = 0; j < LIGHT_COUNT / 2; j++) {
 					int offset = (i + j * 2) % LIGHT_COUNT;
+					int colorIndex1 = ((i + 1) % (COLOR_COUNT / 2));
+					int colorIndex2 = ((i + 2) % COLOR_COUNT);
+
+					if (!safeColorAccess(colorIndex1) || !safeColorAccess(colorIndex2)) {
+						continue;
+					}
+
+					// First LED update
 					if (pattern.brightness != nullptr) {
 						ledController.setLedWithBrightness(
 							offset,
-							pattern.red[(i + 1) % (COLOR_COUNT / 2)],
-							pattern.green[(i + 1) % COLOR_COUNT],
-							pattern.blue[(i + 1) % COLOR_COUNT],
-							pattern.white[(i + 1) % COLOR_COUNT],
-							pattern.brightness[(i + 1) % COLOR_COUNT]
+							pattern.red[colorIndex1],
+							pattern.green[colorIndex1],
+							pattern.blue[colorIndex1],
+							pattern.white[colorIndex1],
+							pattern.brightness[colorIndex1]
 						);
 					}
 					else {
 						ledController.setLed(
 							offset,
-							pattern.red[(i + 1) % (COLOR_COUNT / 2)],
-							pattern.green[(i + 1) % COLOR_COUNT],
-							pattern.blue[(i + 1) % COLOR_COUNT],
-							pattern.white[(i + 1) % COLOR_COUNT]
-						);
-					}
-					delay(delayTime * 2);
-
-					offset = (i + j * 2 + 8) % LIGHT_COUNT;
-					if (pattern.brightness != nullptr) {
-						ledController.setLedWithBrightness(
-							offset,
-							pattern.red[(i + 1) % (COLOR_COUNT / 2)],
-							pattern.green[(i + 2) % COLOR_COUNT],
-							pattern.blue[(i + 2) % COLOR_COUNT],
-							pattern.white[(i + 2) % COLOR_COUNT],
-							pattern.brightness[(i + 2) % COLOR_COUNT]
-						);
-					}
-					else {
-						ledController.setLed(
-							offset,
-							pattern.red[(i + 1) % (COLOR_COUNT / 2)],
-							pattern.green[(i + 2) % COLOR_COUNT],
-							pattern.blue[(i + 2) % COLOR_COUNT],
-							pattern.white[(i + 2) % COLOR_COUNT]
-						);
-					}
-				}
-			}
-		}
-		else {
-			loopWSS();
-			for (int i = 0; i < COLOR_COUNT; i++) {
-				loopWSS();
-				int originalFocal = focal;
-				magSensor.check();
-				focal = magSensor.getFocal();
-		//				Serial.println("Focal: " + String(focal));				Serial.println("Focal: " + String(focal));
-
-				// If focal point changed, restart effect with new value
-				if (focal != originalFocal) {
-					run(focal);
-					return;
-				}
-				for (int j = 0; j < LIGHT_COUNT / 2; j++) {
-					int position1 = (focal + 1 + j) % LIGHT_COUNT;
-					int position2 = (LIGHT_COUNT + focal - j) % LIGHT_COUNT;
-
-					if (pattern.brightness != nullptr) {
-						ledController.setLedWithBrightness(
-							position1,
-							pattern.red[(i + 1) % COLOR_COUNT],
-							pattern.green[(i + 1) % COLOR_COUNT],
-							pattern.blue[(i + 1) % COLOR_COUNT],
-							pattern.white[(i + 1) % COLOR_COUNT],
-							pattern.brightness[(i + 1) % COLOR_COUNT]
-						);
-					}
-					else {
-						ledController.setLed(
-							position1,
-							pattern.red[(i + 1) % COLOR_COUNT],
-							pattern.green[(i + 1) % COLOR_COUNT],
-							pattern.blue[(i + 1) % COLOR_COUNT],
-							pattern.white[(i + 1) % COLOR_COUNT]
+							pattern.red[colorIndex1],
+							pattern.green[colorIndex1],
+							pattern.blue[colorIndex1],
+							pattern.white[colorIndex1]
 						);
 					}
 					delay(delayTime);
 
+					// Second LED update
+					offset = (i + j * 2 + 8) % LIGHT_COUNT;
 					if (pattern.brightness != nullptr) {
 						ledController.setLedWithBrightness(
-							position2,
-							pattern.red[(i + 1) % COLOR_COUNT],
-							pattern.green[(i + 2) % COLOR_COUNT],
-							pattern.blue[(i + 2) % COLOR_COUNT],
-							pattern.white[(i + 2) % COLOR_COUNT],
-							pattern.brightness[(i + 2) % COLOR_COUNT]
+							offset,
+							pattern.red[colorIndex1],
+							pattern.green[colorIndex2],
+							pattern.blue[colorIndex2],
+							pattern.white[colorIndex2],
+							pattern.brightness[colorIndex2]
 						);
 					}
 					else {
 						ledController.setLed(
-							position2,
-							pattern.red[(i + 1) % COLOR_COUNT],
-							pattern.green[(i + 2) % COLOR_COUNT],
-							pattern.blue[(i + 2) % COLOR_COUNT],
-							pattern.white[(i + 2) % COLOR_COUNT]
+							offset,
+							pattern.red[colorIndex1],
+							pattern.green[colorIndex2],
+							pattern.blue[colorIndex2],
+							pattern.white[colorIndex2]
 						);
 					}
+					delay(delayTime);
 				}
 			}
 		}
+		else {
+			// Focal point effect implementation
+			handleFocalEffect(focal);
+		}
+	}
+
+private:
+	void handleFocalEffect(int focal) {
+		for (int i = 0; i < COLOR_COUNT; i++) {
+			loopWSS();
+			int originalFocal = focal;
+			magSensor.check();
+			focal = magSensor.getFocal();
+
+			if (focal != originalFocal) {
+				run(focal);
+				return;
+			}
+
+			for (int j = 0; j < LIGHT_COUNT / 2; j++) {
+				int position1 = (focal + 1 + j) % LIGHT_COUNT;
+				int position2 = (LIGHT_COUNT + focal - j) % LIGHT_COUNT;
+				int colorIndex1 = (i + 1) % COLOR_COUNT;
+				int colorIndex2 = (i + 2) % COLOR_COUNT;
+
+				if (!safeColorAccess(colorIndex1) || !safeColorAccess(colorIndex2)) {
+					continue;
+				}
+
+				updateLEDPair(position1, position2, colorIndex1, colorIndex2);
+				delay(delayTime);
+			}
+		}
+	}
+
+	void updateLEDPair(int pos1, int pos2, int colorIndex1, int colorIndex2) {
+		if (pattern.brightness != nullptr) {
+			ledController.setLedWithBrightness(
+				pos1,
+				pattern.red[colorIndex1],
+				pattern.green[colorIndex1],
+				pattern.blue[colorIndex1],
+				pattern.white[colorIndex1],
+				pattern.brightness[colorIndex1]
+			);
+			ledController.setLedWithBrightness(
+				pos2,
+				pattern.red[colorIndex1],
+				pattern.green[colorIndex2],
+				pattern.blue[colorIndex2],
+				pattern.white[colorIndex2],
+				pattern.brightness[colorIndex2]
+			);
+		}
+		else {
+			ledController.setLed(
+				pos1,
+				pattern.red[colorIndex1],
+				pattern.green[colorIndex1],
+				pattern.blue[colorIndex1],
+				pattern.white[colorIndex1]
+			);
+			ledController.setLed(
+				pos2,
+				pattern.red[colorIndex1],
+				pattern.green[colorIndex2],
+				pattern.blue[colorIndex2],
+				pattern.white[colorIndex2]
+			);
+		}
 	}
 };
+
 
 class ComfortSongStrobeEffect : public LightEffect {
 public:
